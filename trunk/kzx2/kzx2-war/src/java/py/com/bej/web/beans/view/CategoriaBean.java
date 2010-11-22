@@ -24,43 +24,49 @@ public class CategoriaBean {
     private CategoriaFacade facade;
     private Categoria c;
     private List lista;
-    private Integer id;
-    private String descripcion;
     private Integer desde;
     private Integer max;
     private Integer total;
+    private String nav = "listacategoria";
 
     /** Creates a new instance of CategoriaBean */
     public CategoriaBean() {
     }
 
     public String listar() {
-        this.setId(null);
-        this.setDescripcion("");
+        c= new Categoria();
         this.setDesde(new Integer(0));
         this.setMax(new Integer(10));
         this.filtrar();
-        return "listacategoria";
+        return nav;
     }
 
     public List<Categoria> filtrar() {
         setLista(new ArrayList<Categoria>());
         int[] range = {this.getDesde(), this.getMax()};
-        lista = facade.findRange(range);
+        lista = facade.findRange(range, c);
         return getLista();
+    }
+
+    public String buscar() {
+        desde = 0;
+        max = 10;
+        this.filtrar();
+        return nav;
     }
 
     public String todos() {
         desde = 0;
         max = 0;
+        c  = null;
         this.filtrar();
-        return "listacategoria";
+        return nav;
     }
 
     public String anterior() {
         int[] range = {desde, max};
-        this.lista = getFacade().anterior(range, c);
-        return "listacategoria";
+        this.lista = getFacade().anterior(range, getC());
+        return nav;
     }
 
     public Integer getUltimoItem() {
@@ -80,34 +86,6 @@ public class CategoriaBean {
      */
     public void setLista(List lista) {
         this.lista = lista;
-    }
-
-    /**
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * @return the descripcion
-     */
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    /**
-     * @param descripcion the descripcion to set
-     */
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
     }
 
     /**
@@ -161,4 +139,18 @@ public class CategoriaBean {
     public CategoriaFacade getFacade() {
         return facade;
     }
-}
+
+    /**
+     * @return the c
+     */
+    public Categoria getC() {
+        return c;
+    }
+
+    /**
+     * @param c the c to set
+     */
+    public void setC(Categoria c) {
+        this.c = c;
+    }
+    }
