@@ -21,7 +21,7 @@ import py.com.bej.orm.entities.Categoria;
  * @author diego
  */
 @Stateless
-public class CategoriaFacade extends AbstractFacade<Categoria>{
+public class CategoriaFacade extends AbstractFacade<Categoria> {
 
     @PersistenceContext(unitName = "kzx2-ejbPU")
     private EntityManager em;
@@ -44,15 +44,17 @@ public class CategoriaFacade extends AbstractFacade<Categoria>{
     }
 
     @Override
-    public List<Categoria> findRange(int[] range) {
+    public List<Categoria> findRange(int[] range, Categoria c) {
         inicio();
-        if (id != null) {
-            cq.where(cb.equal(r.get("id"), id));
-        }
-        if (descripcion != null && !descripcion.trim().equals("")) {
-            cq.where(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("descripcion", String.class))), "%"
-                    + descripcion.toLowerCase() + "%"));
+        if (c != null) {
+            if (c.getId() != null) {
+                cq.where(cb.equal(r.get("id"), c.getId()));
+            }
+            if (c.getDescripcion() != null && !c.getDescripcion().trim().equals("")) {
+                cq.where(cb.like(cb.lower(
+                        r.get(et.getSingularAttribute("descripcion", String.class))), "%"
+                        + c.getDescripcion().toLowerCase() + "%"));
+            }
         }
         if (col != null && asc != null) {
             if (col.equals("id")) {
@@ -85,23 +87,20 @@ public class CategoriaFacade extends AbstractFacade<Categoria>{
     }
 
     public void inicio() {
-        if(et == null){
         cb = getEm().getCriteriaBuilder();
         cq = (CriteriaQuery<Categoria>) cb.createQuery(c.getClass());
         r = (Root<Categoria>) cq.from(c.getClass());
         et = r.getModel();
-        }
         this.orden = null;
     }
 
     @Override
     public List<Categoria> anterior(int[] range, Categoria entity) {
-        c = entity;
         range[0] = -range[1];
         if (range[0] < 0) {
             range[0] = 0;
         }
-        return this.findRange(range);
+        return this.findRange(range, entity);
     }
 
     @Override
@@ -119,7 +118,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria>{
             range[0] = range[0] + range[1];
         }
 
-        return this.findRange(range);
+        return this.findRange(range, entity);
     }
 
     @Override
@@ -206,5 +205,4 @@ public class CategoriaFacade extends AbstractFacade<Categoria>{
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-
 }
