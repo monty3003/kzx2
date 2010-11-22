@@ -25,15 +25,15 @@ and open the template in the editor.
                                 <div class="tablaForm">
                                     <div class="fila">
                                         <div class="etiq"><label for="codigo">Código: </label></div>
-                                        <div class="cont"><input type="text" id="codigo" name="codigo" 
-                                                                 size="20px" value="#{categoriaBean.id}"/></div>
+                                        <div class="cont"><input type="text" id="codigo" name="codigo" jsfc="h:inputText"
+                                                                 value="#{categoriaBean.c.id}"/></div>
                                         <div class="etiq"><label for="descripcion">Descripción: </label></div>
-                                        <div class="cont"><input type="text" id="descripcion" name="descripcion"
-                                                                 size="50px" value="#{categoriaBean.descripcion}"/></div>
+                                        <div class="cont"><input type="text" id="descripcion" name="descripcion" jsfc="h:inputText"
+                                                                 value="#{categoriaBean.c.descripcion}"/></div>
                                     </div>
                                 </div>
                                 <div class="botonera">
-                                    <input class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{categoriaBean.listar}"/>
+                                    <input class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{categoriaBean.buscar}"/>
                                     <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{categoriaBean.todos}"/>
                                 </div>
                             </h:form>
