@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    <body>
+        <ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                        template="./../../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="top">
+                logo
+            </ui:define>
+
+            <ui:define name="left">
+                Menu de la izquierda
+            </ui:define>
+            <ui:define name="content">
+                <h2>Edición de Categoria</h2>
+                <div class="tablaForm">
+                    <form action="POST">
+                        <div class="fila">
+                            <div class="etiq"><label for="codigo">Código: </label></div>
+                            <div class="cont"><input type="text" id="codigo" name="codigo" size="20px"/></div>
+                        </div>
+                        <div class="fila">
+                            <div class="etiq"><label for="descripcion">Descripción: </label></div>
+                            <div class="cont"><input type="text" id="descripcion" name="descripcion" size="80px"/></div>
+                        </div>
+                        <div class="botonera">
+                            <input class="submit" type="submit" value="Aceptar"/>
+                            <input class="submit" type="submit" value="Cancelar"/>
+                        </div>
+                    </form>
+                </div>
+            </ui:define>
+            <ui:define name="bottom">
+                Barra inferior
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

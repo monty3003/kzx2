@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    </head>
+    <body>
+        <h:form>
+            <div>
+                <ul class="menu">
+                    <li class="top"><a href="inicio.bej" class="top_link"><span>Clientes</span></a>
+                        <ul class="sub">
+                            <li><a href="#">Nuevo</a></li>
+                            <li><a href="./../../secure/app/lista/clientes.jsf">Buscar</a></li>
+                            <li><a href="#">Importar</a></li>
+                            <li><a href="#">Imprimir</a></li>
+                        </ul>
+                    </li>
+                    <li class="top"><a href="#" class="top_link"><span>Ventas</span></a>
+                        <ul class="sub">
+                            <li><a href="#">Nuevo</a></li>
+                            <li><a href="#">Buscar</a></li>
+                            <li><a href="#">Imprimir</a></li>
+                        </ul>
+                    </li>
+                    <li class="top"><a href="#" class="top_link"><span>Motos</span></a>
+                        <ul class="sub">
+                            <li><a href="#">Nuevo</a></li>
+                            <li><a href="#">Buscar</a></li>
+                            <li><a href="#">Importar</a></li>
+                            <li><a href="#">Imprimir</a></li>
+                        </ul>
+                    </li>
+                    <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
+                        <ul class="sub">
+                            <li><a href="#">Nuevo</a></li>
+                            <li><a href="#">Buscar</a></li>
+                            <li><a href="#">Importar</a></li>
+                            <li><a href="#">Imprimir</a></li>
+                        </ul>
+                    </li>
+                    <li class="top"><a href="#" class="top_link"><span>Taller</span></a></li>
+                    <li class="top"><a href="#" class="top_link"><span>Datos Básicos</span></a>
+                        <ul class="sub">
+                            <li><h:commandLink action="#{categoriaBean.listar}" value="Categorias"/></li>
+                            <li><a href="./../../secure/app/abm/editarCategoria.jsf">Nueva</a></li>
+                            <li><a href="#">Buscar</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </h:form>
+    </body>
+</html>

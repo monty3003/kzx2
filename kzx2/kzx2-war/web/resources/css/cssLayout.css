@@ -1,0 +1,59 @@
+
+#top {
+    position: relative;
+    background:url(../images/fondo_top.gif) repeat-x;
+    color: white;
+    padding: 5px;
+    margin: 0px 0px 10px 0px;
+}
+
+#bottom {
+    position: relative;
+    background-color: #c2dfef;
+    padding: 5px;
+    margin: 10px 0px 0px 0px;
+}
+
+#right {
+    float: right;
+    background-color:#fff;
+    padding: 5px;
+    width: 150px;
+}
+
+#menu {
+    position: relative;
+    background-color: #c2dfef;
+}
+.center_content {
+    position: relative;
+    background-color: #dddddd;
+    padding: 5px;
+}
+
+.menu_content {
+    background-color: #dddddd;
+}
+
+.right_content {
+    background-color: #dddddd;
+    padding: 5px;
+    margin: 0px 170px 0px 170px;
+}
+
+#top a:link, #top a:visited {
+    color: white;
+    font-weight : bold;
+    text-decoration: none;
+}
+
+#top a:link:hover, #top a:visited:hover  {
+    color: black;
+    font-weight : bold;
+    text-decoration : underline;
+}
+
+#bottom, #right{
+    border: 1px solid #CCC;
+}
+
