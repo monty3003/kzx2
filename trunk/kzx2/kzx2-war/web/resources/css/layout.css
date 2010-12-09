@@ -43,8 +43,31 @@ div {
 }
 
 fieldset{
-    border:3px solid #9999ff;
+    border:1px solid #9999ff;
     margin-bottom: 20px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 5px #07072e;
+    -moz-box-shadow: 4px 4px 5px #07072e;
+    box-shadow: 4px 4px 5px #07072e;
+}
+
+.mensajes{
+    text-align: center;
+    margin-bottom: 0.4em;
+    margin-left: 0px;
+    margin-right: 0.8em;
+    margin-top: 0.4em;
+}
+
+.mensajes ul{
+    list-style-position: inside;
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+.mensajes li{
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
@@ -58,7 +81,7 @@ fieldset{
     padding: 5px;
 }
 input:focus {
-    border: 2px solid #0F0;
+    border: 2px solid blue;
 }
 
 #cabecera {
@@ -80,6 +103,43 @@ input:focus {
 
 .buscar{
     margin: 0px 0px 10px 0px;
+}
+
+/*---------------------------MENSAJES---------------------------*/
+
+.messageError {
+    border: 1px solid #ff0000;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: red;
+    font-size: 12px;
+    width:100%;
+}
+
+.messageWarn {
+    border: 1px solid;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: black;
+    background-color: #FFFFCC;
+    font-size: 12px;
+    width:100%;
+}
+
+.messageInfo {
+    border: 1px solid blue;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: blue;
+    background-color: #EAF0FB;
+    font-size: 12px;
+    width:100%;
 }
 
 /*--------------FORMULARIOS------------------------*/
@@ -115,6 +175,12 @@ input:focus {
     padding: 2px;
 }
 
+.filaTabla{
+    width: 100%;
+    display:table-row;
+    padding: 2px;
+}
+
 
 .etiq{
     padding:5px;
@@ -138,7 +204,7 @@ input:focus {
     border:solid #f9f9f9;
 }
 
-.fila:hover {
+.filaTabla:hover {
     background-color: #c2dfef;
 }
 

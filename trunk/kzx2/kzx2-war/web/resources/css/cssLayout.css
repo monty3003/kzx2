@@ -27,8 +27,8 @@
 }
 .center_content {
     position: relative;
-    background-color: #dddddd;
     padding: 5px;
+    margin: 10px 0px 20px 0px;
 }
 
 .menu_content {
