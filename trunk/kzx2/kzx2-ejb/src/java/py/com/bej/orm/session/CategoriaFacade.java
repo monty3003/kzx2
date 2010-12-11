@@ -4,6 +4,7 @@
  */
 package py.com.bej.orm.session;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -13,6 +14,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import py.com.bej.orm.entities.Categoria;
 
@@ -27,8 +30,6 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     private EntityManager em;
     public static Categoria c = new Categoria();
     private Integer contador;
-    private Integer id;
-    private String descripcion;
 
     @Override
     protected EntityManager getEm() {
@@ -46,14 +47,24 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     @Override
     public List<Categoria> findRange(int[] range, Categoria c) {
         inicio();
-        if (c != null) {
-            if (c.getId() != null) {
-                cq.where(cb.equal(r.get("id"), c.getId()));
-            }
-            if (c.getDescripcion() != null && !c.getDescripcion().trim().equals("")) {
-                cq.where(cb.like(cb.lower(
-                        r.get(et.getSingularAttribute("descripcion", String.class))), "%"
-                        + c.getDescripcion().toLowerCase() + "%"));
+        List<Predicate> criteria = new ArrayList<Predicate>();
+        if (c.getId() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "id");
+            criteria.add(cb.equal(r.get("id"), p));
+        }
+        if (c.getDescripcion() != null) {
+            ParameterExpression<String> p =
+                    cb.parameter(String.class, "descripcion");
+            criteria.add(cb.like(cb.lower(
+                    r.get(et.getSingularAttribute("descripcion", String.class))), "%"
+                    + c.getDescripcion().toLowerCase() + "%"));
+        }
+        if (!criteria.isEmpty()) {
+            if (criteria.size() == 1) {
+                cq.where(criteria.get(0));
+            } else {
+                cq.where(cb.and(criteria.toArray(new Predicate[0])));
             }
         }
         if (col != null && asc != null) {
@@ -71,10 +82,19 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
                 }
             }
         }
+
         TypedQuery<Categoria> q = getEm().createQuery(cq);
-        q.setMaxResults(range[1] - range[0]);
+        if (c.getId() != null) {
+            q.setParameter("id", c.getId());
+        }
+        if (c.getDescripcion() != null) {
+            q.setParameter("descripcion", c.getDescripcion());
+        }
+
+        q.setMaxResults(range[1]);
         q.setFirstResult(range[0]);
         return q.getResultList();
+
     }
 
     @Override
@@ -105,9 +125,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
 
     @Override
     public Integer getContador(Categoria entity) {
-        if (this.contador == null) {
-            this.contador = this.totalFiltrado(entity);
-        }
+        this.contador = this.totalFiltrado(entity);
         return this.contador;
     }
 
@@ -124,15 +142,33 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     @Override
     public Integer totalFiltrado(Categoria entity) {
         inicio();
-        if (c.getId() != null) {
-            cq.where(cb.equal(r.get("id"), c.getId()));
+        List<Predicate> criteria = new ArrayList<Predicate>();
+        if (entity.getId() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "id");
+            criteria.add(cb.equal(r.get("id"), p));
         }
-        if (c.getDescripcion() != null && !c.getDescripcion().trim().equals("")) {
-            cq.where(cb.like(cb.lower(
+        if (entity.getDescripcion() != null) {
+            ParameterExpression<String> p =
+                    cb.parameter(String.class, "descripcion");
+            criteria.add(cb.like(cb.lower(
                     r.get(et.getSingularAttribute("descripcion", String.class))), "%"
-                    + c.getDescripcion().toLowerCase() + "%"));
+                    + entity.getDescripcion().toLowerCase() + "%"));
+        }
+        if (!criteria.isEmpty()) {
+            if (criteria.size() == 1) {
+                cq.where(criteria.get(0));
+            } else {
+                cq.where(cb.and(criteria.toArray(new Predicate[0])));
+            }
         }
         TypedQuery<Categoria> q = getEm().createQuery(cq);
+        if (entity.getId() != null) {
+            q.setParameter("id", entity.getId());
+        }
+        if (entity.getDescripcion() != null) {
+            q.setParameter("descripcion", entity.getDescripcion());
+        }
         return q.getResultList().size();
     }
 
@@ -140,6 +176,32 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     public Integer getUltimoItem(int[] range) {
         this.contador = getContador(c);
         return range[0] + range[1] > this.contador ? this.contador : range[0] + range[1];
+    }
+
+    @Override
+    public boolean create(Categoria c) {
+        Categoria aux = null;
+        try {
+            aux = em.find(Categoria.class, c.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (aux != null) {
+                return false;
+            } else {
+                em.persist(c);
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public void guardar(Categoria c) {
+        try {
+            em.merge(c);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -176,33 +238,5 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
         } else {
             this.asc = asc;
         }
-    }
-
-    /**
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * @return the descripcion
-     */
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    /**
-     * @param descripcion the descripcion to set
-     */
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
     }
 }

@@ -4,7 +4,6 @@
  */
 package py.com.bej.orm.session;
 
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -17,7 +16,7 @@ import py.com.bej.orm.utils.Orden;
  *
  * @author diego
  */
-public abstract class AbstractFacade<T>{
+public abstract class AbstractFacade<T> {
 
     private Class<T> entityClass;
     public CriteriaBuilder cb;
@@ -27,6 +26,12 @@ public abstract class AbstractFacade<T>{
     public Orden orden;
     public String col;
     public Boolean asc;
+    public String c0 = "No se encontraron coincidencias";
+    public String r0 = "No se encontraron coincidencias";
+    public String ex1 = "El registro se ha guardado con éxito";
+    public String ex2 = "El registro se ha modificado con éxito";
+    public String ex3 = "El registro se ha eliminado con éxito";
+    public String sel = "Seleccione un registro para modificar";
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -34,9 +39,7 @@ public abstract class AbstractFacade<T>{
 
     protected abstract EntityManager getEm();
 
-    public void create(T entity) {
-        getEm().persist(entity);
-    }
+    public abstract boolean create(T entity);
 
     public void edit(T entity) {
         getEm().merge(entity);
@@ -90,6 +93,8 @@ public abstract class AbstractFacade<T>{
     public abstract void setAsc(Boolean asc);
 
     public abstract Boolean getAsc();
+
+    public abstract void guardar(T entity);
 
     /**
      * @return the entityClass

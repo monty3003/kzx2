@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
@@ -25,6 +24,7 @@ import javax.persistence.Table;
     @NamedQuery(name = "Categoria.findByDescripcion", query = "SELECT c FROM Categoria c WHERE c.descripcion = :descripcion"),
     @NamedQuery(name = "Categoria.findById", query = "SELECT c FROM Categoria c WHERE c.id = :id")})
 public class Categoria implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Column(name = "descripcion")
     private String descripcion;
@@ -34,6 +34,11 @@ public class Categoria implements Serializable {
     private Integer id;
 
     public Categoria() {
+    }
+
+    public Categoria(Integer id, String descripcion) {
+        this.id = id;
+        this.descripcion = descripcion;
     }
 
     public Categoria(Integer id) {
@@ -80,5 +85,4 @@ public class Categoria implements Serializable {
     public String toString() {
         return "py.com.bej.orm.entities.Categoria[id=" + id + "]";
     }
-
 }
