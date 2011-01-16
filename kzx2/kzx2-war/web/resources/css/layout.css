@@ -44,6 +44,8 @@ div {
 
 fieldset{
     border:1px solid #9999ff;
+    /*background: url(../images/degradado.gif) repeat-x;*/
+    position:relative;
     margin-bottom: 20px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -51,6 +53,16 @@ fieldset{
     -webkit-box-shadow: 4px 4px 5px #07072e;
     -moz-box-shadow: 4px 4px 5px #07072e;
     box-shadow: 4px 4px 5px #07072e;
+    background-color: white;
+    background-position:center;
+/* Mozilla ignores crazy MS image filters, so it will skip the following */
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src="../images/degradado.gif");
+}
+/* IE ignores styles with [attributes], so it will skip the following. */
+.degradado[class] {
+background-image:url(../images/degradado.gif);
+
+    background-color: #ffffff;
 }
 
 .mensajes{
@@ -141,6 +153,14 @@ input:focus {
     font-size: 12px;
     width:100%;
 }
+    .msgError {
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: red;
+    font-size: 12px;
+    width:100%;
+}
 
 /*--------------FORMULARIOS------------------------*/
 
@@ -202,6 +222,21 @@ input:focus {
     text-align:left;
     font-size: small;
     border:solid #f9f9f9;
+}
+
+.d_num{
+    display:table-cell;
+    border:none;
+    background-color: #e9e2e2;
+    text-align:right;
+    font-size: medium;
+}
+
+.d_out{
+    display:table-cell;
+    border:none;
+    text-align:right;
+    font-size: medium;
 }
 
 .filaTabla:hover {

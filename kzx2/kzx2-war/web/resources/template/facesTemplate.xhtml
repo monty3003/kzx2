@@ -10,61 +10,68 @@
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/layout.css" rel="stylesheet" type="text/css" />
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/cssLayout.css" rel="stylesheet" type="text/css" />
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/menu_style.css" rel="stylesheet" type="text/css" />
-        <title>Facelets Template</title>
+        <title>BEJ - MOTOS</title>
     </h:head>
 
     <h:body>
 
         <div id="top" style="height: 20px;">
-            <ui:insert name="top">Titulo de la pagina</ui:insert>
+            <ui:insert name="top">Bej Motos</ui:insert>
         </div>
         <div id="menu" class="menu_content" style="height:auto;">
             <ui:insert name="menu">
                 <h:form>
-            <div>
-                <ul class="menu">
-                    <li class="top"><a href="inicio.bej" class="top_link"><span>Clientes</span></a>
-                        <ul class="sub">
-                            <li><a href="#">Nuevo</a></li>
-                            <li><a href="./../../secure/app/lista/clientes.jsf">Buscar</a></li>
-                            <li><a href="#">Importar</a></li>
-                            <li><a href="#">Imprimir</a></li>
+                    <div>
+                        <ul class="menu">
+                            <li class="top"><h:commandLink action="#{personaBean.listar}" styleClass="top_link"><span>Personas</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{personaBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{personaBean.listar}" value="Buscar"/></li>
+                                    <li><a href="#">Importar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><h:commandLink action="#{compraMotosBean.listar}" styleClass="top_link"><span>Compras</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{compraMotosBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{compraMotosBean.listar}" value="Buscar"/></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><a href="#" class="top_link"><span>Ventas</span></a>
+                                <ul class="sub">
+                                    <li><a href="#">Nuevo</a></li>
+                                    <li><a href="#">Buscar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><h:commandLink action="#{motoBean.listar}" styleClass="top_link"><span>Motos</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{motoBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{motoBean.listar}" value="Buscar"/></li>
+                                    <li><a href="#">Importar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
+                                <ul class="sub">
+                                    <li><a href="#">Nuevo</a></li>
+                                    <li><a href="#">Buscar</a></li>
+                                    <li><a href="#">Importar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><a href="#" class="top_link"><span>Taller</span></a></li>
+                            <li class="top"><a href="#" class="top_link"><span>Datos Básicos</span></a>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{categoriaBean.listar}" value="Categorias"/></li>
+                                    <li><a href="./../../secure/app/abm/editarCategoria.jsf">Nueva</a></li>
+                                    <li><a href="#">Buscar</a></li>
+                                </ul>
+                            </li>
                         </ul>
-                    </li>
-                    <li class="top"><a href="#" class="top_link"><span>Ventas</span></a>
-                        <ul class="sub">
-                            <li><a href="#">Nuevo</a></li>
-                            <li><a href="#">Buscar</a></li>
-                            <li><a href="#">Imprimir</a></li>
-                        </ul>
-                    </li>
-                    <li class="top"><a href="#" class="top_link"><span>Motos</span></a>
-                        <ul class="sub">
-                            <li><a href="#">Nuevo</a></li>
-                            <li><a href="#">Buscar</a></li>
-                            <li><a href="#">Importar</a></li>
-                            <li><a href="#">Imprimir</a></li>
-                        </ul>
-                    </li>
-                    <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
-                        <ul class="sub">
-                            <li><a href="#">Nuevo</a></li>
-                            <li><a href="#">Buscar</a></li>
-                            <li><a href="#">Importar</a></li>
-                            <li><a href="#">Imprimir</a></li>
-                        </ul>
-                    </li>
-                    <li class="top"><a href="#" class="top_link"><span>Taller</span></a></li>
-                    <li class="top"><a href="#" class="top_link"><span>Datos Básicos</span></a>
-                        <ul class="sub">
-                            <li><h:commandLink action="#{categoriaBean.listar}" value="Categorias"/></li>
-                            <li><a href="./../../secure/app/abm/editarCategoria.jsf">Nueva</a></li>
-                            <li><a href="#">Buscar</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </h:form>
+                    </div>
+                </h:form>
             </ui:insert>
         </div>
         <div id="content" class="center_content" style="height: 650px;">
