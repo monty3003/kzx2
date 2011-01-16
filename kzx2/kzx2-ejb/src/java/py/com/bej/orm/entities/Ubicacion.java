@@ -9,6 +9,8 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -19,34 +21,32 @@ import javax.persistence.Table;
  * @author diego
  */
 @Entity
-@Table(name = "PersonaJuridica")
+@Table(name = "Ubicacion")
 @NamedQueries({
-    @NamedQuery(name = "PersonaJuridica.findAll", query = "SELECT p FROM PersonaJuridica p"),
-    @NamedQuery(name = "PersonaJuridica.findById", query = "SELECT p FROM PersonaJuridica p WHERE p.id = :id"),
-    @NamedQuery(name = "PersonaJuridica.findByContacto", query = "SELECT p FROM PersonaJuridica p WHERE p.contacto = :contacto"),
-    @NamedQuery(name = "PersonaJuridica.findByCategoria", query = "SELECT p FROM PersonaJuridica p WHERE p.categoria = :categoria")})
-public class PersonaJuridica implements Serializable {
+    @NamedQuery(name = "Ubicacion.findAll", query = "SELECT u FROM Ubicacion u"),
+    @NamedQuery(name = "Ubicacion.findById", query = "SELECT u FROM Ubicacion u WHERE u.id = :id"),
+    @NamedQuery(name = "Ubicacion.findByDescripcion", query = "SELECT u FROM Ubicacion u WHERE u.descripcion = :descripcion")})
+public class Ubicacion implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "contacto")
-    private String contacto;
     @Basic(optional = false)
-    @Column(name = "categoria")
-    private int categoria;
+    @Column(name = "descripcion")
+    private String descripcion;
 
-    public PersonaJuridica() {
+    public Ubicacion() {
     }
 
-    public PersonaJuridica(Integer id) {
+    public Ubicacion(Integer id) {
         this.id = id;
     }
 
-    public PersonaJuridica(Integer id, int categoria) {
+    public Ubicacion(Integer id, String descripcion) {
         this.id = id;
-        this.categoria = categoria;
+        this.descripcion = descripcion;
     }
 
     public Integer getId() {
@@ -57,20 +57,12 @@ public class PersonaJuridica implements Serializable {
         this.id = id;
     }
 
-    public String getContacto() {
-        return contacto;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setContacto(String contacto) {
-        this.contacto = contacto;
-    }
-
-    public int getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(int categoria) {
-        this.categoria = categoria;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     @Override
@@ -83,10 +75,10 @@ public class PersonaJuridica implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof PersonaJuridica)) {
+        if (!(object instanceof Ubicacion)) {
             return false;
         }
-        PersonaJuridica other = (PersonaJuridica) object;
+        Ubicacion other = (Ubicacion) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -95,7 +87,7 @@ public class PersonaJuridica implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.PersonaJuridica[id=" + id + "]";
+        return "py.com.bej.orm.entities.Ubicacion[id=" + id + "]";
     }
 
 }
