@@ -6,8 +6,10 @@ package py.com.bej.orm.session;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
 import py.com.bej.orm.utils.Orden;
@@ -95,6 +97,10 @@ public abstract class AbstractFacade<T> {
     public abstract Boolean getAsc();
 
     public abstract void guardar(T entity);
+
+    public abstract List<Predicate> predicarCriteria(T entity);
+
+    public abstract TypedQuery<T> setearConsulta(T entity);
 
     /**
      * @return the entityClass

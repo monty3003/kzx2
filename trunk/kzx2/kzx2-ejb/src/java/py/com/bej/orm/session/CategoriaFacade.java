@@ -47,19 +47,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     @Override
     public List<Categoria> findRange(int[] range, Categoria c) {
         inicio();
-        List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getId() != null) {
-            ParameterExpression<Integer> p =
-                    cb.parameter(Integer.class, "id");
-            criteria.add(cb.equal(r.get("id"), p));
-        }
-        if (c.getDescripcion() != null) {
-            ParameterExpression<String> p =
-                    cb.parameter(String.class, "descripcion");
-            criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("descripcion", String.class))), "%"
-                    + c.getDescripcion().toLowerCase() + "%"));
-        }
+        List<Predicate> criteria = predicarCriteria(c);
         if (!criteria.isEmpty()) {
             if (criteria.size() == 1) {
                 cq.where(criteria.get(0));
@@ -82,19 +70,20 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
                 }
             }
         }
-
-        TypedQuery<Categoria> q = getEm().createQuery(cq);
-        if (c.getId() != null) {
-            q.setParameter("id", c.getId());
-        }
-        if (c.getDescripcion() != null) {
-            q.setParameter("descripcion", c.getDescripcion());
-        }
-
+        TypedQuery<Categoria> q = setearConsulta(c);
         q.setMaxResults(range[1]);
         q.setFirstResult(range[0]);
         return q.getResultList();
 
+    }
+
+    public List<Categoria> findBetween(Integer inicio, Integer fin) {
+        List<Categoria> res = new ArrayList<Categoria>();
+        inicio();
+        cq.where(cb.between(r.get("id"), inicio, fin));
+        TypedQuery<Categoria> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
     }
 
     @Override
@@ -238,5 +227,33 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
         } else {
             this.asc = asc;
         }
+    }
+
+    @Override
+    public List<Predicate> predicarCriteria(Categoria c) {
+        List<Predicate> criteria = new ArrayList<Predicate>();
+        if (c.getId() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "id");
+            criteria.add(cb.equal(r.get("id"), p));
+        }
+        if (c.getDescripcion() != null) {
+            criteria.add(cb.like(cb.lower(
+                    r.get(et.getSingularAttribute("descripcion", String.class))), "%"
+                    + c.getDescripcion().toLowerCase() + "%"));
+        }
+        return criteria;
+    }
+
+    @Override
+    public TypedQuery<Categoria> setearConsulta(Categoria c) {
+        TypedQuery<Categoria> q = getEm().createQuery(cq);
+        if (c.getId() != null) {
+            q.setParameter("id", c.getId());
+        }
+        if (c.getDescripcion() != null) {
+            q.setParameter("descripcion", c.getDescripcion());
+        }
+        return q;
     }
 }
