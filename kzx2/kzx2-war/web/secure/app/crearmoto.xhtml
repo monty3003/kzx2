@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Registro nuevo</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <legend>Nueva Moto</legend>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigo">Código: </label></div>
+                                    <div class="cont"><input type="text" id="codigo" name="codigo" jsfc="h:inputText" size="20" maxlength="14"
+                                                             value="#{motoBean.c.codigo}"/><h:message errorClass="msgError" for="frm:codigo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
+                                    <div class="cont"><input type="text" id="codigoFabrica" name="codigoFabrica" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{motoBean.c.codigoFabrica}"/><h:message errorClass="msgError" for="frm:codigoFabrica"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="marca">Marca: </label></div>
+                                    <div class="cont"><input type="text" id="marca" name="marca" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{motoBean.c.marca}"/><h:message errorClass="msgError" for="frm:marca"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="modelo">Modelo: </label></div>
+                                    <div class="cont"><input type="text" id="modelo" name="modelo" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{motoBean.c.modelo}"/><h:message errorClass="msgError" for="frm:modelo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="color">Color: </label></div>
+                                    <div class="cont"><input type="text" id="color" name="color" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{motoBean.c.color}"/><h:message errorClass="msgError" for="frm:color"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fabricante">Fabricante: </label></div>
+                                    <div class="cont"><select id="fabricante" name="fabricante" jsfc="h:selectOneMenu" value="#{motoBean.c.fabricante}">
+                                            <f:selectItems value="#{motoBean.listaPersona}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:fabricante"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="categoria">Categoria: </label></div>
+                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{motoBean.c.categoria}">
+                                            <f:selectItems value="#{motoBean.listaCategoria}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
+                                </div>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{motoBean.guardarNuevo}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{motoBean.cancelar}"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>

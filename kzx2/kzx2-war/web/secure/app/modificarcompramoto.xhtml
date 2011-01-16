@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Modificar Compra</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <legend>Modificar Compra</legend>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="comprobante">Nº de Factura: </label></div>
+                                    <div class="cont"><input type="text" id="comprobante" name="comprobante" jsfc="h:inputText" size="20" maxlength="45"
+                                                             value="#{compraMotosBean.c.comprobante}"/><h:message errorClass="msgError" for="frm:comprobante"/></div>
+                                    <div class="etiq"><label for="fechaOperacion">Fecha: </label></div>
+                                    <div class="cont"><input type="text" id="fechaOperacion" name="fechaOperacion" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{compraMotosBean.fechaOperacion}"/><h:message errorClass="msgError" for="frm:fechaOperacion"/></div>
+
+                                    <div class="etiq"><label for="fechaEntrega">Fecha de Entrega: </label></div>
+                                    <div class="cont"><input type="text" id="fechaEntrega" name="fechaEntrega" jsfc="h:inputText" size="20" maxlength="20"
+                                                             value="#{compraMotosBean.fechaEntrega}"/><h:message errorClass="msgError" for="frm:fechaEntrega"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="categoria">Categoria: </label></div>
+                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{compraMotosBean.c.codigo.id}">
+                                            <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
+                                    <div class="etiq"><label for="vendedor">Proveedor: </label></div>
+                                    <div class="cont"><select id="vendedor" name="vendedor" jsfc="h:selectOneMenu" value="#{compraMotosBean.vendedor}">
+                                            <f:selectItems value="#{compraMotosBean.listaProveedor}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:vendedor"/></div>
+
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="t_head" style="width: 70%;"></div>
+                                    <div class="t_head" style="width: 10%;">Exentas</div>
+                                    <div class="t_head" style="width: 10%;">Gravadas 5%</div>
+                                    <div class="t_head" style="width: 10%;">Gravadas 10%</div>
+                                </div>
+                                <div class="filaTabla">
+                                    <div class="d" style="width: 70%;">Sub Total
+                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalExentas"/>
+                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas5"/>
+                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas10"/></div>
+                                    <div class="d" style="width: 10%;"><input class="d_num" type="text" id="subTotalExentas" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalExentas}"/></div>
+                                    <div class="d" style="width: 10%;"><input class="d_num" type="text" id="subTotalGravadas5" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalGravadas5}"/></div>
+                                    <div class="d" style="width: 10%;"><input class="d_num" type="text" id="subTotalGravadas10" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalGravadas10}"/></div>
+                                </div>
+                                <div class="filaTabla">
+                                    <div class="d" style="width: 70%;">Total&#160;&#160;<h:message errorClass="msgError" for="frm:toTal"/></div>
+                                    <div class="d" style="width: 10%;"/>
+                                    <div class="d" style="width: 10%;"/>
+                                    <div class="d" style="width: 10%; text-align: right;"><input class="d_num" type="text" id="toTal" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.toTal}"/></div>
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="comprobante">Entrega Inicial: </label></div>
+                                    <div class="cont"><input type="text" id="entregaInicial" name="entregaInicial" jsfc="h:inputText" size="20" maxlength="13"
+                                                             value="#{compraMotosBean.entregaInicial}"/><h:message errorClass="msgError" for="frm:entregaInicial"/></div>
+                                    <div class="etiq"><label for="cuotas">Cuotas: </label></div>
+                                    <div class="cont"><input type="text" id="cuotas" name="cuotas" jsfc="h:inputText" size="5" maxlength="2"
+                                                             value="#{compraMotosBean.cuotas}"/><h:message errorClass="msgError" for="frm:cuotas"/></div>
+                                    <div class="etiq"><label for="montoCuotaIgual">Monto Cuota: </label></div>
+                                    <div class="cont"><input type="text" id="montoCuotaIgual" name="montoCuotaIgual" jsfc="h:inputText" size="20" maxlength="13"
+                                                             value="#{compraMotosBean.montoCuotaIgual}"/><h:message errorClass="msgError" for="frm:montoCuotaIgual"/></div>
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{compraMotosBean.guardarModificar}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{compraMotosBean.cancelar}"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
