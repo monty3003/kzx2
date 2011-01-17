@@ -2,14 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -17,43 +21,38 @@ import javax.persistence.Table;
  * @author diego
  */
 @Entity
-@Table(name = "motostock")
+@Table(name = "Motostock")
 public class Motostock implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @Column(name = "codigo")
-    private String codigo;
+    @JoinColumn(name = "moto", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
+    private Moto moto;
     @Column(name = "motor")
     private String motor;
     @Basic(optional = false)
     @Column(name = "chasis")
     private String chasis;
+    @JoinColumn(name = "compra", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
+    private Transaccion compra;
+    @JoinColumn(name = "venta", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
+    private Transaccion venta;
     @Basic(optional = false)
-    @Column(name = "compra")
-    private Integer compra;
-    @Column(name = "venta")
-    private Integer venta;
+    @Column(name = "costo")
+    private BigDecimal costo;
     @Basic(optional = false)
-    @Column(name = "costoGuarani")
-    private float costoGuarani;
-    @Column(name = "ventaGuarani")
-    private Float ventaGuarani;
-    @Column(name = "cambioMoneda")
-    private Float cambioMoneda;
-    @Column(name = "costoDolar")
-    private Float costoDolar;
-    @Column(name = "ventaDolar")
-    private Float ventaDolar;
-    @Basic(optional = false)
-    @Column(name = "vendido")
-    private char vendido;
-    @Basic(optional = false)
-    @Column(name = "ubicacion")
-    private Integer ubicacion;
+    @Column(name = "precio_venta")
+    private BigDecimal precioVenta;
+    @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
+    private Ubicacion ubicacion;
 
     public Motostock() {
     }
@@ -62,13 +61,15 @@ public class Motostock implements Serializable {
         this.id = id;
     }
 
-    public Motostock(Integer id, String codigo, String chasis, Integer compra, float costoGuarani, char vendido, Integer ubicacion) {
+    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, Ubicacion ubicacion) {
         this.id = id;
-        this.codigo = codigo;
+        this.moto = moto;
+        this.motor = motor;
         this.chasis = chasis;
         this.compra = compra;
-        this.costoGuarani = costoGuarani;
-        this.vendido = vendido;
+        this.venta = venta;
+        this.costo = costo;
+        this.precioVenta = precioVenta;
         this.ubicacion = ubicacion;
     }
 
@@ -80,12 +81,12 @@ public class Motostock implements Serializable {
         this.id = id;
     }
 
-    public String getCodigo() {
-        return codigo;
+    public Moto getMoto() {
+        return moto;
     }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
+    public void setMoto(Moto moto) {
+        this.moto = moto;
     }
 
     public String getMotor() {
@@ -104,75 +105,43 @@ public class Motostock implements Serializable {
         this.chasis = chasis;
     }
 
-    public Integer getCompra() {
+    public Transaccion getCompra() {
         return compra;
     }
 
-    public void setCompra(Integer compra) {
+    public void setCompra(Transaccion compra) {
         this.compra = compra;
     }
 
-    public Integer getVenta() {
+    public Transaccion getVenta() {
         return venta;
     }
 
-    public void setVenta(Integer venta) {
+    public void setVenta(Transaccion venta) {
         this.venta = venta;
     }
 
-    public float getCostoGuarani() {
-        return costoGuarani;
+    public BigDecimal getCosto() {
+        return costo;
     }
 
-    public void setCostoGuarani(float costoGuarani) {
-        this.costoGuarani = costoGuarani;
+    public void setCosto(BigDecimal costo) {
+        this.costo = costo;
     }
 
-    public Float getVentaGuarani() {
-        return ventaGuarani;
+    public BigDecimal getPrecioVenta() {
+        return precioVenta;
     }
 
-    public void setVentaGuarani(Float ventaGuarani) {
-        this.ventaGuarani = ventaGuarani;
+    public void setPrecioVenta(BigDecimal precioVenta) {
+        this.precioVenta = precioVenta;
     }
 
-    public Float getCambioMoneda() {
-        return cambioMoneda;
-    }
-
-    public void setCambioMoneda(Float cambioMoneda) {
-        this.cambioMoneda = cambioMoneda;
-    }
-
-    public Float getCostoDolar() {
-        return costoDolar;
-    }
-
-    public void setCostoDolar(Float costoDolar) {
-        this.costoDolar = costoDolar;
-    }
-
-    public Float getVentaDolar() {
-        return ventaDolar;
-    }
-
-    public void setVentaDolar(Float ventaDolar) {
-        this.ventaDolar = ventaDolar;
-    }
-
-    public char getVendido() {
-        return vendido;
-    }
-
-    public void setVendido(char vendido) {
-        this.vendido = vendido;
-    }
-
-    public Integer getUbicacion() {
+    public Ubicacion getUbicacion() {
         return ubicacion;
     }
 
-    public void setUbicacion(Integer ubicacion) {
+    public void setUbicacion(Ubicacion ubicacion) {
         this.ubicacion = ubicacion;
     }
 
@@ -200,5 +169,4 @@ public class Motostock implements Serializable {
     public String toString() {
         return "py.com.bej.orm.entities.Motostock[id=" + id + "]";
     }
-
 }
