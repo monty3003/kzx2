@@ -239,13 +239,14 @@ public class PersonaBean {
         deCampos();
         setLista(new ArrayList<Persona>());
         int[] range = {this.getDesde(), this.getMax()};
-        setLista(facade.findRange(range, getC()));
+        setLista(facade.findRange());
         return getLista();
     }
 
     public String buscar() {
         setDesde((Integer) 0);
         setMax((Integer) 10);
+        getFacade().setContador(null);
         this.filtrar();
         if (this.getLista().isEmpty()) {
             setErrorMessage(null, facade.c0);
@@ -309,17 +310,19 @@ public class PersonaBean {
         if (validado) {
             this.c.setHabilitado('S');
             this.c.setFechaIngreso(new Date());
-            boolean exito = facade.create(getC());
-            if (exito) {
-                setInfoMessage(null, facade.ex1);
-                return this.listar();
-            } else {
-                FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
-                return null;
-            }
-        } else {
-            return null;
+            //boolean exito = facade.create();
+//            if (exito) {
+//                setInfoMessage(null, facade.ex1);
+//                return this.listar();
+//            } else {
+//                FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
+//                return null;
+//            }
+//        } else {
+//            return null;
+//        }
         }
+        return null;
     }
 
     public boolean validarNuevo() {
@@ -505,7 +508,7 @@ public class PersonaBean {
     public String guardarModificar() {
         boolean validado = validarModificar();
         if (validado) {
-            facade.guardar(getC());
+            //facade.guardar(getC());
             setInfoMessage(null, facade.ex2);
             return this.listar();
         } else {
@@ -519,7 +522,7 @@ public class PersonaBean {
 
     public String todos() {
         limpiarCampos();
-        facade.setCol(null);
+        //facade.setCol(null);
         this.setValido((Boolean) true);
         deCampos();
         setDesde((Integer) 0);
@@ -529,24 +532,32 @@ public class PersonaBean {
     }
 
     public String anterior() {
-        setDesde((Integer) (getDesde() - getMax()));
-        int[] range = {getDesde(), getMax()};
-        this.setLista(getFacade().anterior(range, getC()));
+        desde -= max;
+        if (desde < 10) {
+            desde = 0;
+        }
+        int[] range = {desde, max};
+        //this.lista = getFacade().anterior(range, getC());
+
         return nav;
     }
 
     public String siguiente() {
-        setDesde((Integer) (getDesde() + getMax()));
-        int[] range = {getDesde(), getMax()};
-        this.setLista(getFacade().siguiente(range, getC()));
+        desde += max;
+        if (desde > this.total) {
+            desde = this.total - 1;
+        } else {
+            int[] range = {desde, max};
+            //this.lista = getFacade().siguiente(range, getC());
+        }
         return nav;
     }
 
     public Integer getUltimoItem() {
         deCampos();
-        PersonaFacade.c = getC();
+        // PersonaFacade.c = getC();
         int[] range = {getDesde(), getMax()};
-        return getFacade().getUltimoItem(range);
+        return null;//getFacade().getUltimoItem(range);
     }
 
     /**
@@ -595,7 +606,7 @@ public class PersonaBean {
      * @return the total
      */
     public Integer getTotal() {
-        this.total = getFacade().count();
+        //this.total = getFacade().count();
         return total;
     }
 
