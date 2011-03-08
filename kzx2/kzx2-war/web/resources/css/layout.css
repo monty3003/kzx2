@@ -80,6 +80,7 @@ background-image:url(../images/degradado.gif);
 }
 
 .mensajes li{
+    list-style-position: inside;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
@@ -130,6 +131,13 @@ input:focus {
     width:100%;
 }
 
+.messageError1 {
+    font-weight: bold;
+    color: red;
+    font-size: 12px;
+    width:100%;
+}
+
 .messageWarn {
     border: 1px solid;
     padding: 5px;
@@ -168,6 +176,12 @@ input:focus {
     display:table;
     width:100%;
     height: 100%;
+}
+
+.tablaFormEntradaDatos{
+    display:table;
+    margin: 20px auto;
+    max-width: 70%;
 }
 
 .t_head{
@@ -224,6 +238,15 @@ input:focus {
     border:solid #f9f9f9;
 }
 
+.d_in{
+    padding:0px;
+    display:table-cell;
+    border:1px;
+    text-align:left;
+    font-size: small;
+    border:solid #f9f9f9;
+}
+
 .d_num{
     display:table-cell;
     border:none;
@@ -232,11 +255,8 @@ input:focus {
     font-size: medium;
 }
 
-.d_out{
-    display:table-cell;
-    border:none;
+.num_out{
     text-align:right;
-    font-size: medium;
 }
 
 .filaTabla:hover {
