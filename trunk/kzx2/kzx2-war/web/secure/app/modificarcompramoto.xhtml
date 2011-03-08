@@ -21,7 +21,7 @@
                                 <div class="fila">
                                     <div class="etiq"><label for="comprobante">Nº de Factura: </label></div>
                                     <div class="cont"><input type="text" id="comprobante" name="comprobante" jsfc="h:inputText" size="20" maxlength="45"
-                                                             value="#{compraMotosBean.c.comprobante}"/><h:message errorClass="msgError" for="frm:comprobante"/></div>
+                                                             value="#{compraMotosBean.facade.entity.comprobante}"/><h:message errorClass="msgError" for="frm:comprobante"/></div>
                                     <div class="etiq"><label for="fechaOperacion">Fecha: </label></div>
                                     <div class="cont"><input type="text" id="fechaOperacion" name="fechaOperacion" jsfc="h:inputText" size="20" maxlength="20"
                                                              value="#{compraMotosBean.fechaOperacion}"/><h:message errorClass="msgError" for="frm:fechaOperacion"/></div>
@@ -32,7 +32,7 @@
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="categoria">Categoria: </label></div>
-                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{compraMotosBean.c.codigo.id}">
+                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{compraMotosBean.facade.entity.codigo.id}">
                                             <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
                                         </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
                                     <div class="etiq"><label for="vendedor">Proveedor: </label></div>

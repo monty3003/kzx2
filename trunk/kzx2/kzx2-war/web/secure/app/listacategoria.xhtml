@@ -23,7 +23,6 @@ and open the template in the editor.
                             <div class="fila">
                                 <div class="etiq"><label for="codigo">Código: </label></div>
                                 <div class="cont"><h:inputText id="id" value="#{categoriaBean.id}">
-                                        <f:ajax event="keyup" render="mensajeId btnBuscar" />
                                     </h:inputText>&#160;<h:message for="id" id="mensajeId" styleClass="color:red;"/>
 
                                 </div>
@@ -34,7 +33,7 @@ and open the template in the editor.
                         </div>
                         <div class="botonera">
                             <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{categoriaBean.buscar}"
-                                   disabled="#{(categoriaBean.valido)?false:true}"/>
+                                   />
                             <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{categoriaBean.todos}"/>
                         </div>
                     </fieldset>
@@ -43,24 +42,25 @@ and open the template in the editor.
                     <div class="mensajes">
                         <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
                     </div>
-                        <fieldset>
+                    <fieldset>
+                        <h:panelGroup rendered="#{not empty categoriaBean.lista }">
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="t_head" style="width: 2%;"></div>
                                     <div class="t_head" style="width: 18%;"><p>
                                             <a id="lnkCodigo"  jsfc="h:commandLink" action="#{categoriaBean.listar}">Codigo
-                                                <f:setPropertyActionListener value="id" target="#{categoriaBean.facade.col}"/>
-                                                <f:setPropertyActionListener value="x" target="#{categoriaBean.facade.asc}"/>
+                                                <f:setPropertyActionListener value="id" target="#{categoriaBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{categoriaBean.facade.orden.asc}"/>
                                             </a>
-                                            <h:outputText value="#{(categoriaBean.facade.asc) ? '▲' : '▼'}"
-                                                          rendered="#{categoriaBean.facade.col eq 'id'}"/></p></div>
+                                            <h:outputText value="#{(categoriaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{categoriaBean.facade.orden.columna eq 'id'}"/></p></div>
                                     <div class="t_head" style="width: 80%;"><p>
                                             <a id="lnkDescripcion"  jsfc="h:commandLink" action="#{categoriaBean.listar}">Descripcion
-                                                <f:setPropertyActionListener value="descripcion" target="#{categoriaBean.facade.col}"/>
-                                                <f:setPropertyActionListener value="x" target="#{categoriaBean.facade.asc}"/>
+                                                <f:setPropertyActionListener value="descripcion" target="#{categoriaBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{categoriaBean.facade.orden.asc}"/>
                                             </a>
-                                            <h:outputText value="#{(categoriaBean.facade.asc) ? '▲' : '▼'}"
-                                                          rendered="#{categoriaBean.facade.col eq 'descripcion'}"/></p></div>
+                                            <h:outputText value="#{(categoriaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{categoriaBean.facade.orden.columna eq 'descripcion'}"/></p></div>
                                 </div>
                                 <ui:repeat var="row" value="#{categoriaBean.lista}">
                                     <div class="filaTabla">
@@ -72,14 +72,15 @@ and open the template in the editor.
                             </div>
                             <div class="t_footer">
                                 <h:commandLink action="#{categoriaBean.anterior}">Anterior</h:commandLink>
-                                &#160;|&#160;#{categoriaBean.desde + 1}..#{categoriaBean.ultimoItem} de #{categoriaBean.total}&#160;|&#160;
+                                &#160;|&#160;#{categoriaBean.facade.desde + 1}..#{categoriaBean.facade.ultimo} de #{categoriaBean.facade.contador}&#160;|&#160;
                                 <h:commandLink action="#{categoriaBean.siguiente}">Siguiente</h:commandLink>
                             </div>
-                            <div class="botonera">
-                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{categoriaBean.nuevo}"/>
-                                <h:commandButton id="btnModificar" value="Modificar" action="#{categoriaBean.modificar}"/>
-                            </div>
-                        </fieldset>
+                        </h:panelGroup>
+                        <div class="botonera">
+                            <h:commandButton id="btnNuevo" value="Nuevo" action="#{categoriaBean.nuevo}" styleClass="submit"/>
+                            <h:commandButton id="btnModificar" value="Modificar" action="#{categoriaBean.modificar}" rendered="#{not empty categoriaBean.lista }" styleClass="submit"/>
+                        </div>
+                    </fieldset>
                 </h:form>
             </ui:define>
         </ui:composition>

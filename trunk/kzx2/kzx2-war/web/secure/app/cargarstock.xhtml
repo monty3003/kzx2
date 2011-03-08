@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Registro nuevo</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <legend>Nueva Moto en Stock</legend>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="moto">Moto: </label></div>
+                                    <div class="cont"><select id="moto" name="moto" jsfc="h:selectOneMenu" value="#{motostockBean.moto}">
+                                            <f:selectItems value="#{motostockBean.listaMoto}"/>
+                                            <f:ajax event="change" listener="#{motostockBean.buscarModelo}" render="codigoFabrica marca modelo color fabricante categoria"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:moto"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
+                                    <div class="cont"><h:outputText id="codigoFabrica" value="#{motostockBean.facade.entity.moto.codigoFabrica}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="marca">Marca: </label></div>
+                                    <div class="cont"><h:outputText id="marca" value="#{motostockBean.facade.entity.moto.marca}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="modelo">Modelo: </label></div>
+                                    <div class="cont"><h:outputText id="modelo" value="#{motostockBean.facade.entity.moto.modelo}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="color">Color: </label></div>
+                                    <div class="cont"><h:outputText id="color" value="#{motostockBean.facade.entity.moto.color}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fabricante">Fabricante: </label></div>
+                                    <div class="cont"><h:outputText id="fabricante" value="#{motostockBean.facade.entity.moto.fabricante.nombre}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="categoria">Categoria: </label></div>
+                                    <div class="cont"><h:outputText id="categoria" value="#{motostockBean.facade.entity.moto.categoria.descripcion}"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="chasis">Chasis: </label></div>
+                                    <div class="cont"><input type="text" id="chasis" name="chasis" jsfc="h:inputText" size="25" maxlength="25"
+                                                             value="#{motostockBean.chasis}">
+                                            <f:ajax event="blur" render="chasis"/>
+                                        </input><h:message errorClass="msgError" for="frm:chasis"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="motor">Motor: </label></div>
+                                    <div class="cont"><input type="text" id="motor" name="motor" jsfc="h:inputText" size="25" maxlength="25"
+                                                             value="#{motostockBean.motor}">
+                                            <f:ajax event="blur" render="motor"/>
+                                        </input><h:message errorClass="msgError" for="frm:motor"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="compra">Compra: </label></div>
+                                    <div class="cont"><select id="compra" name="compra" jsfc="h:selectOneMenu" value="#{motostockBean.compra}">
+                                            <f:selectItems value="#{motostockBean.listaCompra}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:compra"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="costo">Precio de Costo: </label></div>
+                                    <div class="cont"><input type="text" id="costo" name="costo" jsfc="h:inputText" size="13" maxlength="13"
+                                                             value="#{motostockBean.costo}"><f:ajax event="blur" render="costo"/>
+                                        </input><h:message errorClass="msgError" for="frm:costo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="venta">Precio de Venta: </label></div>
+                                    <div class="cont"><input type="text" id="venta" name="venta" jsfc="h:inputText" size="13" maxlength="13"
+                                                             value="#{motostockBean.precioVenta}"><f:ajax event="blur" render="venta"/>
+                                        </input><h:message errorClass="msgError" for="frm:venta"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="ubicacion">Ubicación: </label></div>
+                                    <div class="cont"><select id="ubicacion" name="ubicacion" jsfc="h:selectOneMenu" value="#{motostockBean.ubicacion}">
+                                            <f:selectItems value="#{motostockBean.listaUbicacion}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:ubicacion"/></div>
+                                </div>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{motostockBean.guardarNuevo}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{motostockBean.cancelar}"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>

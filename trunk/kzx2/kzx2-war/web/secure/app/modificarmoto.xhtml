@@ -20,38 +20,38 @@
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="codigo">Código: </label></div>
-                                    <div class="cont"><input type="text" id="codigo" name="codigo" jsfc="h:inputText" size="20" maxlength="14"
-                                                             value="#{motoBean.c.codigo}"/><h:message errorClass="msgError" for="frm:codigo"/></div>
+                                    <div class="cont"><input type="text" id="codigo" name="codigo" jsfc="h:outputText" size="20" maxlength="14"
+                                                             value="#{motoBean.codigo}"/><h:message errorClass="msgError" for="frm:codigo"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
                                     <div class="cont"><input type="text" id="codigoFabrica" name="codigo" jsfc="h:inputText" size="20" maxlength="20"
-                                                             value="#{motoBean.c.codigoFabrica}"/><h:message errorClass="msgError" for="frm:codigoFabrica"/></div>
+                                                             value="#{motoBean.codigoFabrica}"/><h:message errorClass="msgError" for="frm:codigoFabrica"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="marca">Marca: </label></div>
                                     <div class="cont"><input type="text" id="marca" name="marca" jsfc="h:inputText" size="20" maxlength="20"
-                                                             value="#{motoBean.c.marca}"/><h:message errorClass="msgError" for="frm:marca"/></div>
+                                                             value="#{motoBean.marca}"/><h:message errorClass="msgError" for="frm:marca"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="modelo">Modelo: </label></div>
                                     <div class="cont"><input type="text" id="modelo" name="modelo" jsfc="h:inputText" size="20" maxlength="20"
-                                                             value="#{motoBean.c.modelo}"/><h:message errorClass="msgError" for="frm:modelo"/></div>
+                                                             value="#{motoBean.modelo}"/><h:message errorClass="msgError" for="frm:modelo"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="color">Color: </label></div>
                                     <div class="cont"><input type="text" id="color" name="color" jsfc="h:inputText" size="20" maxlength="20"
-                                                             value="#{motoBean.c.color}"/><h:message errorClass="msgError" for="frm:color"/></div>
+                                                             value="#{motoBean.color}"/><h:message errorClass="msgError" for="frm:color"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="fabricante">Fabricante: </label></div>
-                                    <div class="cont"><select id="fabricante" name="fabricante" jsfc="h:selectOneMenu" value="#{motoBean.c.fabricante}">
+                                    <div class="cont"><select id="fabricante" name="fabricante" jsfc="h:selectOneMenu" value="#{motoBean.fabricante}">
                                             <f:selectItems value="#{motoBean.listaPersona}"/>
                                         </select>&#160;<h:message errorClass="msgError" for="frm:fabricante"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="categoria">Categoria: </label></div>
-                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{motoBean.c.categoria}">
+                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{motoBean.categoria}">
                                             <f:selectItems value="#{motoBean.listaCategoria}"/>
                                         </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
                                 </div>
