@@ -18,7 +18,7 @@
         <div id="top" style="height: 20px;">
             <ui:insert name="top">Bej Motos</ui:insert>
         </div>
-        <div id="menu" class="menu_content" style="height:auto;">
+        <div id="menu" class="menu_content" style="height:auto; margin: 0px 20px 0px 20px;">
             <ui:insert name="menu">
                 <h:form>
                     <div>
@@ -53,6 +53,14 @@
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
+                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Stock</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
+                                    <li><a href="#">Importar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
                             <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
                                 <ul class="sub">
                                     <li><a href="#">Nuevo</a></li>
@@ -74,11 +82,12 @@
                 </h:form>
             </ui:insert>
         </div>
-        <div id="content" class="center_content" style="height: 650px;">
-
-            <ui:insert name="content"></ui:insert>
+        <div id="content" class="center_content">
+            <ui:insert name="content">
+            </ui:insert>
         </div>
         <div id="bottom" style="height: 20px;">
+            Version 0.1.2 Fecha 30/01/2011
             <ui:insert name="bottom"></ui:insert>
         </div>
 

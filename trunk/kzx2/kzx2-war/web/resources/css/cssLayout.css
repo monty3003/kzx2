@@ -4,14 +4,15 @@
     background:url(../images/fondo_top.gif) repeat-x;
     color: white;
     padding: 5px;
-    margin: 0px 0px 10px 0px;
+    margin: 0px 20px 0px 20px;
 }
 
 #bottom {
     position: relative;
+    clear: both;
     background-color: #c2dfef;
     padding: 5px;
-    margin: 10px 0px 0px 0px;
+    margin: 10px 20px 20px 20px;
 }
 
 #right {
@@ -26,9 +27,11 @@
     background-color: #c2dfef;
 }
 .center_content {
+    min-height: 650px;
     position: relative;
     padding: 5px;
-    margin: 10px 0px 20px 0px;
+    margin: 10px 20px 20px 20px;
+    overflow: hidden;
 }
 
 .menu_content {
