@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Stock</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+            <ui:define name="content">
+                <h:form id="frmBuscar">
+                    <fieldset>
+                        <div class="tablaForm">
+                            <div class="fila">
+                                <div class="etiq"><label for="moto">Moto: </label></div>
+                                <div class="cont"><select id="moto" name="moto" jsfc="h:selectOneMenu" value="#{motostockBean.moto}">
+                                        <f:selectItems value="#{motostockBean.listaMoto}"/>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tablaForm">
+                            <div class="fila">
+                                <div class="etiq"><label for="id">Nº: </label></div>
+                                <div class="cont"><input id="id" jsfc="h:inputText" value="#{motostockBean.id}" maxlength="11"/>
+                                </div>
+                                <div class="etiq"><label for="motor">Motor: </label></div>
+                                <div class="cont"><input id="motor" jsfc="h:inputText" value="#{motostockBean.motor}" maxlength="25"/>
+                                </div>
+                                <div class="etiq"><label for="chasis">Chasis: </label></div>
+                                <div class="cont"><input id="chasis" jsfc="h:inputText" name="chasis" value="#{motostockBean.chasis}" maxlength="25"/>
+                                </div>
+                            </div>
+                            <div class="fila">
+                                <div class="etiq"><label for="compra">Compra: </label></div>
+                                <div class="cont"><select id="compra" name="compra" jsfc="h:selectOneMenu" value="#{motostockBean.compra}">
+                                        <f:selectItems value="#{motostockBean.listaCompra}"/>
+                                    </select>
+                                </div>
+                                <div class="etiq"><label for="venta">Venta: </label></div>
+                                <div class="cont"><select id="venta" name="venta" jsfc="h:selectOneMenu" value="#{motostockBean.venta}">
+                                        <f:selectItems value="#{motostockBean.listaVenta}"/>
+                                    </select>
+                                </div>
+                                <div class="etiq"><label for="ubicacion">Ubicación: </label></div>
+                                <div class="cont"><select id="ubicacion" name="ubicacion" jsfc="h:selectOneMenu" value="#{motostockBean.ubicacion}">
+                                        <f:selectItems value="#{motostockBean.listaUbicacion}"/>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="botonera">
+                            <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{motostockBean.buscar}"/>
+                            <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{motostockBean.todos}"/>
+                        </div>
+                    </fieldset>
+                </h:form>
+                <h:form id="frm">
+                    <div class="mensajes">
+                        <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                    </div>
+                    <fieldset>
+                        <h:panelGroup rendered="#{not empty motostockBean.lista }">
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="t_head" style="width: 2%;"></div>
+                                    <div class="t_head" style="width: 5%;"><p>
+                                            <a id="InkId"  jsfc="h:commandLink" action="#{motostockBean.listar}">Nº
+                                                <f:setPropertyActionListener value="id" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'id'}"/></p></div>
+                                    <div class="t_head" style="width: 8%;"><p>
+                                            <a id="InkMoto"  jsfc="h:commandLink" action="#{motostockBean.listar}">Moto
+                                                <f:setPropertyActionListener value="moto" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'moto'}"/></p></div>
+                                    <div class="t_head" style="width: 15%;"><p>
+                                            <a id="InkChasis"  jsfc="h:commandLink" action="#{motostockBean.listar}">Chasis
+                                                <f:setPropertyActionListener value="chasis" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'chasis'}"/></p></div>
+                                    <div class="t_head" style="width: 15%;"><p>
+                                            <a id="InkMotor"  jsfc="h:commandLink" action="#{motostockBean.listar}">Motor
+                                                <f:setPropertyActionListener value="motor" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'motor'}"/></p></div>
+                                    <div class="t_head" style="width: 15%;"><p>
+                                            <a id="InkCompra"  jsfc="h:commandLink" action="#{motostockBean.listar}">Compra
+                                                <f:setPropertyActionListener value="compra" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'compra'}"/></p></div>
+                                    <div class="t_head" style="width: 15%;"><p>
+                                            <a id="InkVenta"  jsfc="h:commandLink" action="#{motostockBean.listar}">Venta
+                                                <f:setPropertyActionListener value="venta" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'venta'}"/></p></div>
+                                    <div class="t_head" style="width: 10%;"><p>
+                                            <a id="InkPrecio"  jsfc="h:commandLink" action="#{motostockBean.listar}">Precio
+                                                <f:setPropertyActionListener value="precioVenta" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'precioVenta'}"/></p></div>
+                                    <div class="t_head" style="width: 10%;"><p>
+                                            <a id="InkUbicacion"  jsfc="h:commandLink" action="#{motostockBean.listar}">Ubicación
+                                                <f:setPropertyActionListener value="ubicacion" target="#{motostockBean.facade.orden.columna}"/>
+                                                <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                            </a>
+                                            <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                          rendered="#{motostockBean.facade.orden.columna eq 'ubicacion'}"/></p></div>
+                                </div>
+                                <ui:repeat var="row" value="#{motostockBean.lista}">
+                                    <div class="filaTabla">
+                                        <div class="d" style="width: 2%;"><input type="radio" id="radio" name="radio"
+                                                                                 value="#{row.id}"/></div>
+                                        <div class="d" style="width: 2%;"><h:outputText value="#{row.id}"/></div>
+                                        <div class="d" style="width: 8%;"><h:outputText value="#{row.moto.codigo}"/></div>
+                                        <div class="d" style="width: 15%;"><h:outputText value="#{row.chasis}"/></div>
+                                        <div class="d" style="width: 15%;"><h:outputText value="#{row.motor}"/></div>
+                                        <div class="d" style="width: 15%;"><h:outputText value="#{row.compra.id}"/>&#160;&#45;&#160;
+                                            <h:outputText value="#{row.compra.fechaOperacion}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy - HH:mm" timeZone="GMT-3"/>
+                                            </h:outputText></div>
+                                        <div class="d" style="width: 15%;"><h:panelGroup rendered="#{row.venta ne null}"><h:outputText value="#{row.venta.id}"/>
+                                                &#160;&#45;&#160;<h:outputText value="#{row.venta.fechaOperacion}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy - HH:mm" timeZone="GMT-3"/>
+                                                </h:outputText></h:panelGroup></div>
+                                        <div class="d" style="width: 10%; text-align: right;"><h:panelGroup rendered="#{row.precioVenta lt 1}">
+                                                <font color="red"><h:outputText value="#{row.precioVenta}"/></font></h:panelGroup>
+                                            <h:panelGroup rendered="#{row.precioVenta gt 0}">
+                                                <h:outputText value="#{row.precioVenta}">
+                                                    <f:convertNumber locale="US" /> </h:outputText></h:panelGroup></div>
+                                        <div class="d" style="width: 25%;"><h:outputText value="#{row.ubicacion.descripcion}"/></div>
+                                    </div>
+                                </ui:repeat>
+                            </div>
+                            <div class="t_footer">
+                                <h:commandLink action="#{motostockBean.anterior}">Anterior</h:commandLink>
+                                &#160;|&#160;#{motostockBean.facade.desde + 1}..#{motostockBean.facade.ultimo} de #{motostockBean.facade.contador}&#160;|&#160;
+                                <h:commandLink action="#{motostockBean.siguiente}">Siguiente</h:commandLink>
+                            </div>
+                        </h:panelGroup>
+                        <div class="botonera">
+                            <h:commandButton id="btnNuevo" value="Nuevo" action="#{motostockBean.nuevo}" styleClass="submit"/>
+                            <h:commandButton id="btnModificar" value="Modificar" action="#{motostockBean.modificar}" styleClass="submit" rendered="#{not empty motostockBean.lista }"/>
+                        </div>
+                    </fieldset>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
