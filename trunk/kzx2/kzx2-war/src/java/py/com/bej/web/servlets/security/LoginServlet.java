@@ -73,16 +73,16 @@ public class LoginServlet extends HttpServlet {
         String password = "rebemar";
         String formNombre = request.getParameter("txtUsuario");
         String formPassword = request.getParameter("txtPassword");
-        response.sendRedirect("./secure/app/main.bej");
-//        if (formNombre.equals(nombre)) {
-//            if (formPassword.equals(password)) {
-//                response.sendRedirect("./secure/app/main.jsf");
-//            } else {
-//                response.sendRedirect("login.xhtml");
-//            }
-//        } else {
-//            response.sendRedirect("login.xhtml");
-//        }
+//        response.sendRedirect("./secure/app/main.bej");
+        if (formNombre.equals(nombre)) {
+            if (formPassword.equals(password)) {
+                response.sendRedirect("./secure/app/main.bej");
+            } else {
+                response.sendRedirect("login.xhtml");
+            }
+        } else {
+            response.sendRedirect("login.xhtml");
+        }
         processRequest(request, response);
     }
 

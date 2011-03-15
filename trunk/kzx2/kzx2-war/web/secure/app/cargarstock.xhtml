@@ -71,13 +71,13 @@
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="costo">Precio de Costo: </label></div>
-                                    <div class="cont"><input type="text" id="costo" name="costo" jsfc="h:inputText" size="13" maxlength="13"
+                                    <div class="cont"><input class="d_num" type="text" id="costo" name="costo" jsfc="h:inputText" size="13" maxlength="13"
                                                              value="#{motostockBean.costo}"><f:ajax event="blur" render="costo"/>
                                         </input><h:message errorClass="msgError" for="frm:costo"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="venta">Precio de Venta: </label></div>
-                                    <div class="cont"><input type="text" id="venta" name="venta" jsfc="h:inputText" size="13" maxlength="13"
+                                    <div class="cont"><input class="d_num" type="text" id="venta" name="venta" jsfc="h:inputText" size="13" maxlength="13"
                                                              value="#{motostockBean.precioVenta}"><f:ajax event="blur" render="venta"/>
                                         </input><h:message errorClass="msgError" for="frm:venta"/></div>
                                 </div>

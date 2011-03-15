@@ -13,7 +13,6 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -24,6 +23,7 @@ import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.PersonaPK;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.PersonaFacade;
+import py.com.bej.orm.utils.Orden;
 
 /**
  *
@@ -31,22 +31,15 @@ import py.com.bej.orm.session.PersonaFacade;
  */
 @ManagedBean
 @SessionScoped
-public class PersonaBean {
+public class PersonaBean extends AbstractPageBean {
 
     @EJB
     private PersonaFacade facade;
     private PersonaPK pk;
-    private Persona c;
-    private List<Persona> lista;
-    private Integer desde;
-    private Integer max;
-    private Integer total;
-    private String nav = "listapersonas";
     private String id;
     private Boolean valido;
     private DateFormat df;
     private Calendar ahora;
-    private CategoriaFacade cf;
     private List<Categoria> listaCategorias;
     private List<SelectItem> listaCategoria;
     //Persona
@@ -61,7 +54,6 @@ public class PersonaBean {
     private String email;
     private String fechaIngreso;
     private String contacto;
-    private String edad;
     private String profesion;
     private Character estadoCivil;
     private String fechaNacimiento;
@@ -75,191 +67,228 @@ public class PersonaBean {
     public PersonaBean() {
     }
 
-    private void deEntity() {
-        this.setId(c.getPersonaPK().getId().toString());
-        this.setDocumento(c.getPersonaPK().getDocumento());
-        this.setPk(c.getPersonaPK());
-        this.setNombre(getC().getNombre());
-        this.setDireccion1(getC().getDireccion1());
-        this.setDireccion2(getC().getDireccion2());
-        this.setTelefonoFijo(getC().getTelefonoFijo());
-        this.setTelefonoMovil(getC().getTelefonoMovil());
-        this.setEmail(getC().getEmail());
-        this.setFechaIngreso(getC().getFechaIngresoString());
-        this.setRuc(getC().getRuc());
-        this.setContacto(getC().getContacto());
-        this.setProfesion(c.getProfesion());
-        this.setEstadoCivil(c.getEstadoCivil());
-        this.setFechaNacimiento(c.getFechaNacimientoString());
-        this.setTratamiento(c.getTratamiento());
-        this.setFisica(c.getFisica());
-        this.setSexo(c.getSexo());
-        this.setHijos(c.getHijos());
-        this.setHabilitado(c.getHabilitado());
-        this.setCategoria(c.getCategoria());
+    /**
+     * @return the facade
+     */
+    public PersonaFacade getFacade() {
+        if (this.facade == null) {
+            this.facade = new PersonaFacade();
+        }
+        return facade;
     }
 
-    private void deCampos() {
-        setC(new Persona(pk));
-        if (this.id != null && !this.id.trim().equals("")) {
-            this.getC().getPersonaPK().setId(new Integer(getId()));
+    @Override
+    void deEntity() {
+        setId(facade.getEntity().getPersonaPK().getId().toString());
+        setDocumento(facade.getEntity().getPersonaPK().getDocumento());
+        setPk(facade.getEntity().getPersonaPK());
+        setNombre(facade.getEntity().getNombre());
+        setDireccion1(facade.getEntity().getDireccion1());
+        setDireccion2(facade.getEntity().getDireccion2());
+        setTelefonoFijo(facade.getEntity().getTelefonoFijo());
+        setTelefonoMovil(facade.getEntity().getTelefonoMovil());
+        setEmail(facade.getEntity().getEmail());
+        setFechaIngreso(facade.getEntity().getFechaIngresoString());
+        setRuc(facade.getEntity().getRuc());
+        setContacto(facade.getEntity().getContacto());
+        setProfesion(facade.getEntity().getProfesion());
+        setEstadoCivil(facade.getEntity().getEstadoCivil());
+        setFechaNacimiento(facade.getEntity().getFechaNacimientoString());
+        setTratamiento(facade.getEntity().getTratamiento());
+        setFisica(facade.getEntity().getFisica());
+        setSexo(facade.getEntity().getSexo());
+        setHijos(facade.getEntity().getHijos());
+        setHabilitado(facade.getEntity().getHabilitado());
+        setCategoria(facade.getEntity().getCategoria());
+    }
+
+    @Override
+    void deCampos() {
+        if (id != null && !id.trim().equals("")) {
+            facade.getEntity().getPersonaPK().setId(new Integer(getId()));
         } else {
-            this.getC().getPersonaPK().setId(null);
+            facade.getEntity().getPersonaPK().setId(null);
         }
-        if (this.getFisica() != null && (this.getFisica().equals('S') || this.getFisica().equals('N'))) {
-            this.c.setFisica(fisica);
+        if (getFisica() != null && (getFisica().equals('S') || getFisica().equals('N'))) {
+            facade.getEntity().setFisica(fisica);
         } else {
-            this.c.setFisica(null);
+            facade.getEntity().setFisica(null);
         }
-        if (this.documento != null && !this.documento.trim().equals("")) {
-            this.getC().getPersonaPK().setDocumento(documento);
+        if (documento != null && !documento.trim().equals("")) {
+            facade.getEntity().getPersonaPK().setDocumento(documento.trim());
         } else {
-            this.getC().getPersonaPK().setDocumento(null);
+            facade.getEntity().getPersonaPK().setDocumento(null);
         }
-        if (this.getNombre() != null && !this.nombre.trim().equals("")) {
-            this.getC().setNombre((getNombre()));
+        if (getNombre() != null && !nombre.trim().equals("")) {
+            facade.getEntity().setNombre((getNombre().trim()));
         } else {
-            this.getC().setNombre(null);
+            facade.getEntity().setNombre(null);
         }
-        if (this.getDireccion1() != null && !this.direccion1.trim().equals("")) {
-            this.getC().setDireccion1((direccion1));
+        if (getDireccion1() != null && !direccion1.trim().equals("")) {
+            facade.getEntity().setDireccion1((direccion1.trim()));
         } else {
-            this.getC().setDireccion1(null);
+            facade.getEntity().setDireccion1(null);
         }
-        if (this.getDireccion2() != null && !this.direccion2.trim().equals("")) {
-            this.getC().setDireccion2((direccion2));
+        if (getDireccion2() != null && !direccion2.trim().equals("")) {
+            facade.getEntity().setDireccion2((direccion2.trim()));
         } else {
-            this.getC().setDireccion2(null);
+            facade.getEntity().setDireccion2(null);
         }
-        if (this.getTelefonoFijo() != null && !this.telefonoFijo.trim().equals("")) {
-            this.getC().setTelefonoFijo((telefonoFijo));
+        if (getTelefonoFijo() != null && !telefonoFijo.trim().equals("")) {
+            facade.getEntity().setTelefonoFijo((telefonoFijo.trim()));
         } else {
-            this.getC().setTelefonoFijo(null);
+            facade.getEntity().setTelefonoFijo(null);
         }
-        if (this.getTelefonoMovil() != null && !this.telefonoMovil.trim().equals("")) {
-            this.getC().setTelefonoMovil((telefonoMovil));
+        if (getTelefonoMovil() != null && !telefonoMovil.trim().equals("")) {
+            facade.getEntity().setTelefonoMovil((telefonoMovil.trim()));
         } else {
-            this.getC().setTelefonoMovil(null);
+            facade.getEntity().setTelefonoMovil(null);
         }
-        if (this.getEmail() != null && !this.email.trim().equals("")) {
-            this.getC().setEmail((getEmail()));
+        if (getEmail() != null && !email.trim().equals("")) {
+            facade.getEntity().setEmail((getEmail().trim().toLowerCase()));
         } else {
-            this.getC().setEmail(null);
+            facade.getEntity().setEmail(null);
         }
-        if (this.getFechaIngreso() != null && !this.fechaIngreso.trim().equals("")) {
-            this.getC().setFechaIngresoString(fechaIngreso);
+        if (getFechaIngreso() != null && !fechaIngreso.trim().equals("")) {
+            facade.getEntity().setFechaIngresoString(fechaIngreso);
         } else {
-            this.getC().setFechaIngreso(null);
+            facade.getEntity().setFechaIngreso(null);
         }
-        if (this.getRuc() != null && !this.ruc.trim().equals("")) {
-            this.getC().setRuc(getRuc());
+        if (getRuc() != null && !ruc.trim().equals("")) {
+            facade.getEntity().setRuc(getRuc());
         } else {
-            this.getC().setRuc(null);
+            facade.getEntity().setRuc(null);
         }
-        if (this.getContacto() != null && !this.contacto.trim().equals("")) {
-            this.getC().setContacto(getContacto());
+        if (getContacto() != null && !contacto.trim().equals("")) {
+            setContacto(getContacto().trim());
         } else {
-            this.getC().setContacto(null);
+            facade.getEntity().setContacto(null);
         }
-        if (this.getProfesion() != null && !this.profesion.trim().equals("")) {
-            this.c.setProfesion(getProfesion());
+        if (getProfesion() != null && !profesion.trim().equals("")) {
+            facade.getEntity().setProfesion(getProfesion().trim());
         } else {
-            this.c.setProfesion(null);
+            facade.getEntity().setProfesion(null);
         }
-        if (this.getEstadoCivil() != null) {
-            this.c.setEstadoCivil(getEstadoCivil());
+        if (hijos != null && hijos >= 0) {
+            facade.getEntity().setHijos(hijos);
         } else {
-            this.c.setEstadoCivil(null);
+            facade.getEntity().setHijos(null);
         }
-        if (this.getFechaNacimiento() != null && !this.fechaNacimiento.trim().equals("")) {
-            this.c.setFechaNacimientoString(getFechaNacimiento());
+        if (getEstadoCivil() != null) {
+            facade.getEntity().setEstadoCivil(getEstadoCivil());
         } else {
-            this.c.setFechaNacimiento(null);
+            facade.getEntity().setEstadoCivil(null);
         }
-        if (this.getTratamiento() != null && !this.tratamiento.trim().equals("")) {
-            this.c.setTratamiento(getTratamiento());
+        if (fechaNacimiento != null && !fechaNacimiento.trim().equals("")) {
+            facade.getEntity().setFechaNacimientoString(getFechaNacimiento());
         } else {
-            this.c.setTratamiento(null);
+            facade.getEntity().setFechaNacimiento(null);
         }
-        if (this.getSexo() != null) {
-            this.c.setSexo(sexo);
+        if (getTratamiento() != null && !tratamiento.trim().equals("")) {
+            facade.getEntity().setTratamiento(getTratamiento());
         } else {
-            this.c.setSexo(null);
+            facade.getEntity().setTratamiento(null);
         }
-        if (this.getHabilitado() != null && (this.getHabilitado().equals('S') || this.getHabilitado().equals('N'))) {
-            this.c.setHabilitado(habilitado);
+        if (getSexo() != null) {
+            facade.getEntity().setSexo(sexo);
         } else {
-            this.c.setHabilitado(null);
+            facade.getEntity().setSexo(null);
         }
-        if (this.getCategoria() != null && !this.categoria.equals(-1)) {
-            this.getC().getPersonaPK().setId(new Integer(getId()));
+        if (getHabilitado() != null && (getHabilitado().equals('S') || getHabilitado().equals('N'))) {
+            facade.getEntity().setHabilitado(habilitado);
         } else {
-            this.getC().getPersonaPK().setId(null);
+            facade.getEntity().setHabilitado(null);
+        }
+        if (getCategoria() != null && !categoria.equals(-1)) {
+            facade.getEntity().setCategoria(categoria);
+        } else {
+            facade.getEntity().setCategoria(null);
         }
     }
 
-    private void limpiarCampos() {
-        this.setId(null);
-        this.setDocumento(null);
-        this.setPk(new PersonaPK());
-        this.setNombre(null);
-        this.setDireccion1(null);
-        this.setDireccion2(null);
-        this.setTelefonoFijo(null);
-        this.setTelefonoMovil(null);
-        this.setEmail(null);
-        this.setFechaIngreso(null);
-        this.setRuc(null);
-        this.setContacto(null);
-        this.setProfesion(null);
-        this.setEstadoCivil(null);
-        this.setFechaNacimiento(null);
-        this.setTratamiento(null);
-        this.setSexo(null);
-        this.setFisica(null);
-        this.setHabilitado(null);
-        this.setHijos(null);
-        this.setCategoria(-1);
+    @Override
+    void limpiarCampos() {
+        facade.setEntity(new Persona(new PersonaPK()));
+        if (getFacade().getOrden() == null) {
+            getFacade().setOrden(new Orden("id", false));
+        }
+        setId(null);
+        setDocumento(null);
+        setPk(new PersonaPK());
+        setNombre(null);
+        setDireccion1(null);
+        setDireccion2(null);
+        setTelefonoFijo(null);
+        setTelefonoMovil(null);
+        setEmail(null);
+        setFechaIngreso(null);
+        setRuc(null);
+        setContacto(null);
+        setProfesion(null);
+        setEstadoCivil(null);
+        setFechaNacimiento(null);
+        setTratamiento(null);
+        setSexo(null);
+        setFisica(null);
+        setHabilitado(null);
+        setHijos(null);
+        setCategoria(-1);
+        setNav("listapersonas");
     }
 
+    @Override
     public String listar() {
-        limpiarCampos();
-        deCampos();
-        this.setDesde(new Integer(0));
-        this.setMax(new Integer(10));
-        this.setValido((Boolean) true);
-        this.filtrar();
-        if (this.getLista().isEmpty()) {
-            setErrorMessage(null, facade.r0);
+        setNav("listapersonas");
+        setCategoria(null);
+        setDesde(0);
+        setMax(10);
+        if (getFacade().getOrden() == null) {
+            getFacade().setOrden(new Orden("id", false));
         }
-        return nav;
+        setLista(filtrar());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().r0);
+        }
+        return getNav();
     }
 
-    public List<Persona> filtrar() {
+    @Override
+    List filtrar() {
+        facade.setEntity(new Persona(new PersonaPK()));
         deCampos();
-        setLista(new ArrayList<Persona>());
-        int[] range = {this.getDesde(), this.getMax()};
-        setLista(facade.findRange());
+        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        setLista(getFacade().findRange());
         return getLista();
     }
 
-    public String buscar() {
-        setDesde((Integer) 0);
-        setMax((Integer) 10);
-        getFacade().setContador(null);
-        this.filtrar();
-        if (this.getLista().isEmpty()) {
-            setErrorMessage(null, facade.c0);
+    @Override
+    void obtenerListas() {
+        listaCategorias = new CategoriaFacade().findBetween(20, 30);
+        if (!listaCategorias.isEmpty()) {
+            Iterator<Categoria> it = listaCategorias.iterator();
+            do {
+                Categoria x = it.next();
+                listaCategoria.add(new SelectItem(x.getId(), x.getDescripcion()));
+            } while (it.hasNext());
+
         }
-        return nav;
     }
 
+    @Override
+    public String buscar() {
+        facade.setEntity(new Persona(new PersonaPK()));
+        deCampos();
+        getFacade().setContador(null);
+        setLista(getFacade().findRange());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().c0);
+        }
+        return getNav();
+    }
+
+    @Override
     public String nuevo() {
-        setC(new Persona(new PersonaPK()));
-        getC().setFisica('X');
-        getC().setTratamiento("X");
-        getC().setEstadoCivil('X');
-        this.fechaNacimiento = "";
+        facade.setEntity(null);
         listaCategoria = new ArrayList<SelectItem>();
         listaCategoria.add(new SelectItem("-1", "-SELECCIONAR-"));
         listaCategorias = new CategoriaFacade().findBetween(20, 30);
@@ -274,30 +303,23 @@ public class PersonaBean {
         return "crearpersona";
     }
 
+    @Override
     public String modificar() {
         //recuperar la seleccion
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        this.setId((String) request.getParameter("radio"));
-        if (this.getId() != null) {
+        setId((String) request.getParameter("radio"));
+        if (getId() != null) {
             pk = new PersonaPK(new Integer(
-                    this.id.substring(0, this.id.indexOf(":"))), this.id.substring(this.id.indexOf(":") + 1, this.id.length()));
+                    id.substring(0, id.indexOf(":"))), id.substring(id.indexOf(":") + 1, id.length()));
             try {
-                this.setC(facade.find(pk));
+                facade.setEntity(facade.find(pk));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
             deEntity();
             listaCategoria = new ArrayList<SelectItem>();
-            listaCategorias = new CategoriaFacade().findBetween(20, 30);
-            if (!listaCategorias.isEmpty()) {
-                Iterator<Categoria> it = listaCategorias.iterator();
-                do {
-                    Categoria x = it.next();
-                    listaCategoria.add(new SelectItem(x.getId(), x.getDescripcion()));
-                } while (it.hasNext());
-
-            }
+            obtenerListas();
             return "modificarpersona";
         } else {
             setErrorMessage(null, facade.sel);
@@ -305,87 +327,79 @@ public class PersonaBean {
         }
     }
 
-    public String guardarNuevo() {
-        boolean validado = validarNuevo();
-        if (validado) {
-            this.c.setHabilitado('S');
-            this.c.setFechaIngreso(new Date());
-            //boolean exito = facade.create();
-//            if (exito) {
-//                setInfoMessage(null, facade.ex1);
-//                return this.listar();
-//            } else {
-//                FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
-//                return null;
-//            }
-//        } else {
-//            return null;
-//        }
-        }
-        return null;
-    }
-
-    public boolean validarNuevo() {
-        if (this.c.getFisica().equals('X')) {
+    @Override
+    boolean validarNuevo() {
+        if (getFisica().equals('X')) {
             setErrorMessage("frm:fisica", "Seleccione un valor");
             return false;
         }
         boolean res = true;
-        if (this.c.getPersonaPK().getDocumento().trim().equals("")) {
+        if (getDocumento().trim().equals("")) {
             setErrorMessage("frm:documento", "Ingrese un valor");
             res = false;
+        } else {
+            Persona existe = null;
+            existe = getFacade().findByDocumento(getDocumento().trim());
+            if (existe != null) {
+                if (facade.getEntity() != null && existe.getPersonaPK().getId().equals(facade.getEntity().getPersonaPK().getId())) {
+                    existe = null;
+                }
+            }
+            if (existe != null) {
+                setErrorMessage("frm:documento", "Ya existe una persona con este documento.");
+                res = false;
+            }
         }
-        if (this.c.getNombre().trim().equals("")) {
+        if (getNombre().trim().equals("")) {
             setErrorMessage("frm:nombre", "Ingrese un nombre");
             res = false;
         }
-        if (this.c.getDireccion1().trim().equals("")) {
+        if (getDireccion1().trim().equals("")) {
             setErrorMessage("frm:direccion1", "Ingrese una Dirección");
             res = false;
         }
-        if (this.c.getTelefonoFijo().trim().equals("") && this.c.getTelefonoMovil().trim().equals("")) {
+        if (getTelefonoFijo().trim().equals("") && getTelefonoMovil().trim().equals("")) {
             setErrorMessage("frm:telefonoFijo", "Ingrese por lo menos un Número de teléfono");
             res = false;
         }
-        if (this.c.getTratamiento().trim().equals("X")) {
-            String component = c.getFisica().equals('S') ? "frm:tratamiento" : "frm:tratamiento2";
+        if (getTratamiento().trim().equals("X")) {
+            String component = getFisica().equals('S') ? "frm:tratamiento" : "frm:tratamiento2";
             setErrorMessage(component, "Seleccione un valor");
             res = false;
         }
-        if (this.c.getFisica().equals('N')) {
+        if (getFisica().equals('N')) {
             //Persona Juridica
-            this.c.setRuc(documento);
-            if (this.c.getContacto().trim().equals("")) {
+            if (getContacto().trim().equals("")) {
                 setErrorMessage("frm:contacto", "Ingrese un Contacto");
                 res = false;
             }
-        } else if (this.c.getFisica().equals('S')) {
+        } else if (getFisica().equals('S')) {
             //Persona Fisica
-            if (this.c.getSexo().equals('X')) {
+            if (getSexo().equals('X')) {
                 setErrorMessage("frm:sexo", "Seleccione un valor");
                 res = false;
             }
-            if (this.c.getEstadoCivil().equals('X')) {
+            if (getEstadoCivil().equals('X')) {
                 setErrorMessage("frm:estadoCivil", "Seleccione un valor");
                 res = false;
             }
-            if (this.c.getProfesion().trim().equals("")) {
+            if (getProfesion().trim().equals("")) {
                 setErrorMessage("frm:profesion", "Ingrese un valor");
                 res = false;
             }
-            if (this.getHijos() == null || this.getHijos() > 10 || this.getHijos() < 0) {
+            if (getHijos() == null || getHijos() > 10 || getHijos() < 0) {
                 setErrorMessage("frm:hijos", "Ingrese un valor");
                 res = false;
             } else {
-                this.c.setHijos(hijos);
+                setHijos(hijos);
             }
-            if (this.getCategoria() == null || this.getCategoria() == -1) {
+            if (getCategoria() == null || getCategoria() == -1) {
                 setErrorMessage("frm:categoria", "Seleccione un valor");
                 res = false;
             } else {
-                this.c.setCategoria(getCategoria());
+                setCategoria(getCategoria());
             }
-            if (this.getFechaNacimiento().trim().equals("")) {
+            if (getFechaNacimiento().trim().equals("")) {
                 setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha de nacimiento");
                 res = false;
             } else {
@@ -406,7 +420,6 @@ public class PersonaBean {
                         setErrorMessage("frm:fechaNacimiento", "El cliente debe tener 18 años cumplidos");
                         res = false;
                     }
-                    this.c.setFechaNacimiento(fecha);
                 } catch (Exception e) {
                     e.printStackTrace();
                     setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha con el formato dd/MM/yyyy");
@@ -417,233 +430,176 @@ public class PersonaBean {
         return res;
     }
 
-    public boolean validarModificar() {
-        if (this.c.getFisica().equals('X')) {
-            setErrorMessage("frm:fisica", "Seleccione un valor");
-            return false;
-        }
-        boolean res = true;
-        if (this.c.getPersonaPK().getDocumento().trim().equals("")) {
-            setErrorMessage("frm:documento", "Ingrese un valor");
-            res = false;
-        }
-        if (this.c.getNombre().trim().equals("")) {
-            setErrorMessage("frm:nombre", "Ingrese un nombre");
-            res = false;
-        }
-        if (this.c.getDireccion1().trim().equals("")) {
-            setErrorMessage("frm:direccion1", "Ingrese una Dirección");
-            res = false;
-        }
-        if (this.c.getTelefonoFijo().trim().equals("") && this.c.getTelefonoMovil().trim().equals("")) {
-            setErrorMessage("frm:telefonoFijo", "Ingrese por lo menos un Número de teléfono");
-            res = false;
-        }
-        if (this.c.getTratamiento().trim().equals("X")) {
-            String component = c.getFisica().equals('S') ? "frm:tratamiento" : "frm:tratamiento2";
-            setErrorMessage(component, "Seleccione un valor");
-            res = false;
-        }
-        if (this.c.getFisica().equals('N')) {
-            //Persona Juridica
-            this.c.setFisica(fisica);
-            this.c.setRuc(documento);
-            if (this.c.getContacto().trim().equals("")) {
-                setErrorMessage("frm:contacto", "Ingrese un Contacto");
-                res = false;
-            }
-        } else if (this.c.getFisica().equals('S')) {
-            //Persona Fisica
-            this.c.setFisica(fisica);
-            if (this.c.getSexo().equals('X')) {
-                setErrorMessage("frm:sexo", "Seleccione un valor");
-                res = false;
-            }
-            if (this.c.getEstadoCivil().equals('X')) {
-                setErrorMessage("frm:estadoCivil", "Seleccione un valor");
-                res = false;
-            }
-            if (this.c.getProfesion().trim().equals("")) {
-                setErrorMessage("frm:profesion", "Ingrese un valor");
-                res = false;
-            }
-            if (this.getHijos() == null || this.getHijos() > 10 || this.getHijos() < 0) {
-                setErrorMessage("frm:hijos", "Ingrese un valor");
-                res = false;
-            } else {
-                this.c.setHijos(hijos);
-            }
-            if (this.getFechaNacimiento().trim().equals("")) {
-                setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha de nacimiento");
-                res = false;
-            } else {
-                Date fecha = null;
-                df = new SimpleDateFormat("dd/MM/yyyy");
-                ahora = GregorianCalendar.getInstance();
-                try {
-                    fecha = df.parse(getFechaNacimiento());
-                    Calendar fechaIntroducida = GregorianCalendar.getInstance();
-                    fechaIntroducida.setTime(fecha);
-                    int e = (ahora.get(GregorianCalendar.YEAR) - fechaIntroducida.get(GregorianCalendar.YEAR));
-                    if (e == 18) {
-                        if (ahora.get(GregorianCalendar.DAY_OF_YEAR) < fechaIntroducida.get(GregorianCalendar.DAY_OF_YEAR)) {
-                            setErrorMessage("frm:fechaNacimiento", "El cliente debe tener 18 años cumplidos");
-                            res = false;
-                        }
-                    } else if (e < 18) {
-                        setErrorMessage("frm:fechaNacimiento", "El cliente debe tener 18 años cumplidos");
-                        res = false;
-                    }
-                    this.c.setFechaNacimiento(fecha);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha con el formato dd/MM/yyyy");
-                    res = false;
-                }
-            }
-        }
-        return res;
-    }
-
-    public String guardarModificar() {
-        boolean validado = validarModificar();
+    @Override
+    public String guardarNuevo() {
+        boolean validado = validarNuevo();
         if (validado) {
-            //facade.guardar(getC());
+            facade.setEntity(new Persona(new PersonaPK()));
+            deCampos();
+            facade.getEntity().setCategoria(categoria);
+            facade.getEntity().setHabilitado('S');
+            facade.getEntity().setFechaIngreso(new Date());
+            if (fisica.equals('S')) {
+                facade.getEntity().setEstadoCivil(estadoCivil);
+            } else {
+                facade.getEntity().setEstadoCivil('X');
+            }
+            facade.create();
+            setInfoMessage(null, facade.ex1);
+        } else {
+            return null;
+        }
+        limpiarCampos();
+        return listar();
+    }
+
+    @Override
+    public String guardarModificar() {
+        boolean validado = validarNuevo();
+        if (validado) {
+            deCampos();
+            facade.guardar();
             setInfoMessage(null, facade.ex2);
-            return this.listar();
+            limpiarCampos();
+            return listar();
         } else {
             return null;
         }
     }
 
+    @Override
     public String cancelar() {
-        return this.listar();
+        limpiarCampos();
+        return listar();
     }
 
+    @Override
+    public String anterior() {
+        setLista(getFacade().anterior());
+        return getNav();
+    }
+
+    @Override
+    public String siguiente() {
+        setLista(getFacade().siguiente());
+        return getNav();
+    }
+
+    @Override
     public String todos() {
         limpiarCampos();
-        //facade.setCol(null);
-        this.setValido((Boolean) true);
+        getFacade().setContador(null);
+        getFacade().setUltimo(null);
+        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setOrden(new Orden("id", false));
+        setValido((Boolean) true);
         deCampos();
-        setDesde((Integer) 0);
-        setMax((Integer) 10);
-        this.filtrar();
-        return nav;
+        getFacade().setRango(new Integer[]{0, 10});
+        filtrar();
+        return getNav();
     }
 
-    public String anterior() {
-        desde -= max;
-        if (desde < 10) {
-            desde = 0;
+    @Override
+    boolean validarModificar() {
+        if (facade.getEntity().getFisica().equals('X')) {
+            setErrorMessage("frm:fisica", "Seleccione un valor");
+            return false;
         }
-        int[] range = {desde, max};
-        //this.lista = getFacade().anterior(range, getC());
-
-        return nav;
-    }
-
-    public String siguiente() {
-        desde += max;
-        if (desde > this.total) {
-            desde = this.total - 1;
-        } else {
-            int[] range = {desde, max};
-            //this.lista = getFacade().siguiente(range, getC());
+        boolean res = true;
+        if (facade.getEntity().getPersonaPK().getDocumento().trim().equals("")) {
+            setErrorMessage("frm:documento", "Ingrese un valor");
+            res = false;
         }
-        return nav;
-    }
-
-    public Integer getUltimoItem() {
-        deCampos();
-        // PersonaFacade.c = getC();
-        int[] range = {getDesde(), getMax()};
-        return null;//getFacade().getUltimoItem(range);
-    }
-
-    /**
-     * @return the lista
-     */
-    public List<Persona> getLista() {
-        return lista;
-    }
-
-    /**
-     * @param lista the lista to set
-     */
-    public void setLista(List<Persona> lista) {
-        this.lista = lista;
-    }
-
-    /**
-     * @return the desde
-     */
-    public Integer getDesde() {
-        return desde;
-    }
-
-    /**
-     * @param desde the desde to set
-     */
-    public void setDesde(Integer desde) {
-        this.desde = desde;
-    }
-
-    /**
-     * @return the max
-     */
-    public Integer getMax() {
-        return max;
-    }
-
-    /**
-     * @param max the max to set
-     */
-    public void setMax(Integer max) {
-        this.max = max;
-    }
-
-    /**
-     * @return the total
-     */
-    public Integer getTotal() {
-        //this.total = getFacade().count();
-        return total;
-    }
-
-    /**
-     * @param total the total to set
-     */
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
-
-    /**
-     * @return the facade
-     */
-    public PersonaFacade getFacade() {
-        return facade;
-    }
-
-    /**
-     * @return the c
-     */
-    public Persona getC() {
-        return c;
+        if (facade.getEntity().getNombre().trim().equals("")) {
+            setErrorMessage("frm:nombre", "Ingrese un nombre");
+            res = false;
+        }
+        if (facade.getEntity().getDireccion1().trim().equals("")) {
+            setErrorMessage("frm:direccion1", "Ingrese una Dirección");
+            res = false;
+        }
+        if (facade.getEntity().getTelefonoFijo().trim().equals("") && facade.getEntity().getTelefonoMovil().trim().equals("")) {
+            setErrorMessage("frm:telefonoFijo", "Ingrese por lo menos un Número de teléfono");
+            res = false;
+        }
+        if (facade.getEntity().getTratamiento().trim().equals("X")) {
+            String component = facade.getEntity().getFisica().equals('S') ? "frm:tratamiento" : "frm:tratamiento2";
+            setErrorMessage(component, "Seleccione un valor");
+            res = false;
+        }
+        if (facade.getEntity().getFisica().equals('N')) {
+            //Persona Juridica
+            facade.getEntity().setFisica(fisica);
+            facade.getEntity().setRuc(documento);
+            if (facade.getEntity().getContacto().trim().equals("")) {
+                setErrorMessage("frm:contacto", "Ingrese un Contacto");
+                res = false;
+            }
+        } else if (facade.getEntity().getFisica().equals('S')) {
+            //Persona Fisica
+            facade.getEntity().setFisica(fisica);
+            if (facade.getEntity().getSexo().equals('X')) {
+                setErrorMessage("frm:sexo", "Seleccione un valor");
+                res = false;
+            }
+            if (facade.getEntity().getEstadoCivil().equals('X')) {
+                setErrorMessage("frm:estadoCivil", "Seleccione un valor");
+                res = false;
+            }
+            if (facade.getEntity().getProfesion().trim().equals("")) {
+                setErrorMessage("frm:profesion", "Ingrese un valor");
+                res = false;
+            }
+            if (getHijos() == null || getHijos() > 10 || getHijos() < 0) {
+                setErrorMessage("frm:hijos", "Ingrese un valor");
+                res = false;
+            } else {
+                facade.getEntity().setHijos(hijos);
+            }
+            if (getFechaNacimiento().trim().equals("")) {
+                setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha de nacimiento");
+                res = false;
+            } else {
+                Date fecha = null;
+                df = new SimpleDateFormat("dd/MM/yyyy");
+                ahora = GregorianCalendar.getInstance();
+                try {
+                    fecha = df.parse(getFechaNacimiento());
+                    Calendar fechaIntroducida = GregorianCalendar.getInstance();
+                    fechaIntroducida.setTime(fecha);
+                    int e = (ahora.get(GregorianCalendar.YEAR) - fechaIntroducida.get(GregorianCalendar.YEAR));
+                    if (e == 18) {
+                        if (ahora.get(GregorianCalendar.DAY_OF_YEAR) < fechaIntroducida.get(GregorianCalendar.DAY_OF_YEAR)) {
+                            setErrorMessage("frm:fechaNacimiento", "El cliente debe tener 18 años cumplidos");
+                            res = false;
+                        }
+                    } else if (e < 18) {
+                        setErrorMessage("frm:fechaNacimiento", "El cliente debe tener 18 años cumplidos");
+                        res = false;
+                    }
+                    facade.getEntity().setFechaNacimiento(fecha);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setErrorMessage("frm:fechaNacimiento", "Ingrese una fecha con el formato dd/MM/yyyy");
+                    res = false;
+                }
+            }
+        }
+        return res;
     }
 
     /**
-     * @param c the c to set
+     * @return the categoria
      */
-    public void setC(Persona c) {
-        this.c = c;
+    public Integer getCategoria() {
+        return categoria;
     }
 
-    protected void setErrorMessage(String component, String summary) {
-        FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, null));
-    }
-
-    protected void setInfoMessage(String component, String summary) {
-        FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null));
+    /**
+     * @param categoria the categoria to set
+     */
+    public void setCategoria(Integer categoria) {
+        this.categoria = categoria;
     }
 
     /**
@@ -938,20 +894,6 @@ public class PersonaBean {
      */
     public void setHabilitado(Character habilitado) {
         this.habilitado = habilitado;
-    }
-
-    /**
-     * @return the categoria
-     */
-    public Integer getCategoria() {
-        return categoria;
-    }
-
-    /**
-     * @param categoria the categoria to set
-     */
-    public void setCategoria(Integer categoria) {
-        this.categoria = categoria;
     }
 
     /**

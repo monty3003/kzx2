@@ -4,17 +4,16 @@
  */
 package py.com.bej.web.beans.view;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.session.CategoriaFacade;
+import py.com.bej.orm.utils.Orden;
 
 /**
  *
@@ -22,86 +21,184 @@ import py.com.bej.orm.session.CategoriaFacade;
  */
 @ManagedBean
 @SessionScoped
-public class CategoriaBean {
+public class CategoriaBean extends AbstractPageBean {
 
     @EJB
     private CategoriaFacade facade;
-    private Categoria c;
-    private List lista;
-    private Integer desde;
-    private Integer max;
-    private Integer total;
-    private String nav = "listacategoria";
     private String id;
     private String descripcion;
-    private Boolean valido;
 
     /** Creates a new instance of CategoriaBean */
     public CategoriaBean() {
     }
 
-    public String listar() {
-        this.id = null;
-        this.descripcion = null;
-        mapearValores();
-        this.setDesde(new Integer(0));
-        this.setMax(new Integer(10));
-        this.valido = true;
-        this.filtrar();
-        if (this.lista.isEmpty()) {
-            setErrorMessage(null, facade.r0, null);
+    /**
+     * @return the facade
+     */
+    public CategoriaFacade getFacade() {
+        if (this.facade == null) {
+            this.facade = new CategoriaFacade();
         }
-        return nav;
+        return facade;
     }
 
-    public List<Categoria> filtrar() {
-        mapearValores();
-        setLista(new ArrayList<Categoria>());
-        int[] range = {this.getDesde(), this.getMax()};
-        lista = facade.findRange(range, c);
+    @Override
+    void deEntity() {
+        this.setId(getFacade().getEntity().getId().toString());
+        this.setDescripcion(getFacade().getEntity().getDescripcion());
+    }
+
+    @Override
+    void deCampos() {
+        getFacade().setEntity(new Categoria());
+        if (this.getId() != null && !this.id.trim().equals("")) {
+            getFacade().getEntity().setId(new Integer(getId().trim()));
+        }
+        if (this.getDescripcion() != null) {
+            getFacade().getEntity().setDescripcion(this.getDescripcion().trim());
+        }
+    }
+
+    @Override
+    void limpiarCampos() {
+        getFacade().setEntity(new Categoria());
+        if (getFacade().getOrden() == null) {
+            getFacade().setOrden(new Orden("id", false));
+        }
+        setDesde(0);
+        setMax(10);
+        this.setId(null);
+        this.setDescripcion(null);
+        setNav("listacategoria");
+    }
+
+    @Override
+    public String listar() {
+        setNav("listacategoria");
+        setDesde(0);
+        setMax(10);
+        setValido(true);
+       if(getFacade().getOrden()==null){
+            getFacade().setOrden(new Orden("id", false));
+        }
+        setLista(filtrar());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().r0);
+        }
+        return getNav();
+    }
+
+    @Override
+    List filtrar() {
+        deCampos();
+        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        setLista(getFacade().findRange());
         return getLista();
     }
 
-    public String buscar() {
-        mapearValores();
-        desde = 0;
-        max = 10;
-        this.filtrar();
-        if (this.lista.isEmpty()) {
-            setErrorMessage(null, facade.c0, null);
-        }
-        return nav;
+    @Override
+    void obtenerListas() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public String buscar() {
+        if (id != null && !id.trim().equals("")) {
+            Integer x = null;
+            try {
+                x = new Integer(id.trim());
+            } catch (Exception e) {
+                e.printStackTrace();
+                setErrorMessage("frm:id", "Ingrese un número válido");
+                return null;
+            }
+        }
+        deCampos();
+        getFacade().setContador(null);
+        setLista(getFacade().findRange());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().c0);
+        }
+        return getNav();
+    }
+
+    @Override
     public String nuevo() {
-        c = new Categoria();
+        limpiarCampos();
         return "crearcategoria";
     }
 
+    @Override
     public String modificar() {
         //recuperar la seleccion
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        this.id = (String) request.getParameter("radio");
-        if (this.id != null) {
+        String xid = null;
+        xid = ((String) request.getParameter("radio"));
+        if (xid != null) {
             try {
-                this.c = facade.find(new Integer(id));
+                getFacade().setEntity(getFacade().find(new Integer(xid)));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-            this.id = c.getId().toString();
-            this.descripcion = c.getDescripcion();
+            deEntity();
+            setModificar(true);
             return "modificarcategoria";
         } else {
-            setErrorMessage(null, facade.sel, null);
+            setErrorMessage(null, getFacade().sel);
             return null;
         }
     }
 
-    public String guardar() {
-        boolean exito = facade.create(c);
-        if (exito) {
-            setInfoMessage(null, facade.ex1, null);
+    @Override
+    boolean validarNuevo() {
+        boolean res = true;
+        if (this.getId().trim().equals("")) {
+            setErrorMessage("frm:id", "Ingrese un valor");
+            return false;
+        } else {
+            Integer x = null;
+            try {
+                x = new Integer(this.getId());
+                if (x < 0) {
+                    setErrorMessage("frm:id", "Ingrese un valor positivo");
+                    res = false;
+                } else {
+                    Categoria existe = null;
+                    existe = getFacade().find(x);
+                    if (existe != null) {
+                        setErrorMessage("frm:id", "Esta categoria ya existe");
+                        res = false;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (this.getDescripcion().trim().equals("")) {
+            setErrorMessage("frm:descripcion", "Ingrese un valor");
+            res = false;
+        }
+        return res;
+    }
+
+    @Override
+    boolean validarModificar() {
+        if (this.getDescripcion().trim().equals("")) {
+            setErrorMessage("frm:descripcion", "Ingrese un valor");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public String guardarNuevo() {
+        boolean validado = validarNuevo();
+        if (validado) {
+            getFacade().create();
+            setInfoMessage(null, getFacade().ex1);
             return this.listar();
         } else {
             FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
@@ -109,154 +206,61 @@ public class CategoriaBean {
         }
     }
 
+    @Override
     public String guardarModificar() {
-        if (this.descripcion.trim().equals("")) {
-            FacesContext.getCurrentInstance().addMessage("frm:descripcion", new FacesMessage("Ingrese una descripción"));
-            return null;
-        } else {
-            this.c.setDescripcion(descripcion);
-            facade.guardar(c);
-            setInfoMessage(null, facade.ex2, null);
+        boolean validado = validarModificar();
+        if (validado) {
+            getFacade().guardar();
+            setInfoMessage(null, facade.ex2);
+            limpiarCampos();
             return this.listar();
+        } else {
+            return null;
         }
     }
 
+    @Override
     public String cancelar() {
+        limpiarCampos();
         return this.listar();
     }
 
-    public String todos() {
-        id = null;
-        descripcion = null;
-        c = new Categoria();
-        facade.setCol(null);
-        this.valido = true;
-        mapearValores();
-        desde = 0;
-        max = 10;
-        this.filtrar();
-        return nav;
-    }
-
+    @Override
     public String anterior() {
-        desde -= max;
-        int[] range = {desde, max};
-        this.lista = getFacade().anterior(range, getC());
-        return nav;
+        setLista(getFacade().anterior());
+        return getNav();
     }
 
+    @Override
     public String siguiente() {
-        desde += max;
-        int[] range = {desde, max};
-        this.lista = getFacade().siguiente(range, getC());
-        return nav;
+        setLista(getFacade().siguiente());
+        return getNav();
     }
 
-    public Integer getUltimoItem() {
-        mapearValores();
-        CategoriaFacade.c = c;
-        int[] range = {desde, max};
-        return getFacade().getUltimoItem(range);
-    }
-
-    private void mapearValores() {
-        c = new Categoria();
-        if (this.id != null && !this.id.trim().equals("")) {
-            this.c.setId(new Integer(id));
-        } else {
-            this.c.setId(null);
-        }
-        if (this.descripcion != null && !this.descripcion.trim().equals("")) {
-            this.c.setDescripcion(descripcion);
-        } else {
-            this.c.setDescripcion(null);
-        }
+    @Override
+    public String todos() {
+        limpiarCampos();
+        getFacade().setContador(null);
+        getFacade().setUltimo(null);
+        this.setValido((Boolean) true);
+        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setOrden(new Orden("id", false));
+        this.filtrar();
+        return getNav();
     }
 
     /**
-     * @return the lista
+     * @return the id
      */
-    public List getLista() {
-        return lista;
+    public String getId() {
+        return id;
     }
 
     /**
-     * @param lista the lista to set
+     * @param id the id to set
      */
-    public void setLista(List lista) {
-        this.lista = lista;
-    }
-
-    /**
-     * @return the desde
-     */
-    public Integer getDesde() {
-        return desde;
-    }
-
-    /**
-     * @param desde the desde to set
-     */
-    public void setDesde(Integer desde) {
-        this.desde = desde;
-    }
-
-    /**
-     * @return the max
-     */
-    public Integer getMax() {
-        return max;
-    }
-
-    /**
-     * @param max the max to set
-     */
-    public void setMax(Integer max) {
-        this.max = max;
-    }
-
-    /**
-     * @return the total
-     */
-    public Integer getTotal() {
-        this.total = getFacade().count();
-        return total;
-    }
-
-    /**
-     * @param total the total to set
-     */
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
-
-    /**
-     * @return the facade
-     */
-    public CategoriaFacade getFacade() {
-        return facade;
-    }
-
-    /**
-     * @return the c
-     */
-    public Categoria getC() {
-        return c;
-    }
-
-    /**
-     * @param c the c to set
-     */
-    public void setC(Categoria c) {
-        this.c = c;
-    }
-
-    protected void setErrorMessage(UIComponent component, String summary, String detail) {
-        FacesContext.getCurrentInstance().addMessage(((component != null) ? component.getClientId(FacesContext.getCurrentInstance()) : null), new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail));
-    }
-
-    protected void setInfoMessage(UIComponent component, String summary, String detail) {
-        FacesContext.getCurrentInstance().addMessage(((component != null) ? component.getClientId(FacesContext.getCurrentInstance()) : null), new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail));
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**
@@ -271,44 +275,5 @@ public class CategoriaBean {
      */
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-
-    }
-
-    /**
-     * @return the id
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(String id) {
-        if (id != null && !id.trim().equals("")) {
-            try {
-                new Integer(id);
-                this.valido = true;
-            } catch (Exception e) {
-                this.valido = false;
-                FacesContext.getCurrentInstance().addMessage("frmBuscar:id", new FacesMessage(null, "Ingrese un número válido"));
-            } finally {
-                this.id = id;
-            }
-        }
-    }
-
-    /**
-     * @return the valido
-     */
-    public Boolean getValido() {
-        return valido;
-    }
-
-    /**
-     * @param valido the valido to set
-     */
-    public void setValido(Boolean valido) {
-        this.valido = valido;
     }
 }
