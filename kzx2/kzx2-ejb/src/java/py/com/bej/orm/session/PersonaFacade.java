@@ -7,16 +7,9 @@ package py.com.bej.orm.session;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import py.com.bej.orm.entities.Persona;
 
 /**
@@ -26,34 +19,16 @@ import py.com.bej.orm.entities.Persona;
 @Stateless
 public class PersonaFacade extends AbstractFacade<Persona> {
 
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-    public static Persona c = new Persona();
-    private Integer contador;
-
-    @Override
-    protected EntityManager getEm() {
-        if (em == null) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("kzx2-ejbPU");
-            em = emf.createEntityManager();
-        }
-        return em;
-    }
+    private Persona c = new Persona();
 
     public PersonaFacade() {
         super(Persona.class);
     }
 
-    public Persona findById(Integer id) {
-        Query q = getEm().createNamedQuery("Persona.findById");
-        q.setParameter("id", id);
-        return (Persona) q.getSingleResult();
-    }
-
     @Override
-    public List<Persona> findRange(int[] range, Persona c) {
+    public List<Persona> findRange() {
         inicio();
-        List<Predicate> criteria = predicarCriteria(c);
+        List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
             if (criteria.size() == 1) {
                 cq.where(criteria.get(0));
@@ -61,136 +36,58 @@ public class PersonaFacade extends AbstractFacade<Persona> {
                 cq.where(cb.and(criteria.toArray(new Predicate[0])));
             }
         }
-        if (col != null && asc != null) {
-            if (col.equals("id")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("id")));
+        if (getOrden().getColumna() != null && getOrden().getAsc() != null) {
+            if (getOrden().getColumna().equals("categoria")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("id")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("id")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("id")));
                 }
-            } else if (col.equals("documento")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("personaPK").get("documento")));
+            } else if (getOrden().getColumna().equals("id") || getOrden().getColumna().equals("documento")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get("personaPK").get(getOrden().getColumna())));
                 } else {
-                    cq.orderBy(cb.desc(r.get("personaPK").get("documento")));
+                    cq.orderBy(cb.desc(r.get("personaPK").get(getOrden().getColumna())));
                 }
-
-            } else if (col.equals("nombre")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("nombre")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("nombre")));
-                }
-            } else if (col.equals("direccion1")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("direccion1")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("direccion1")));
-                }
-            } else if (col.equals("direccion2")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("direccion2")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("direccion2")));
-                }
+            } else if (getOrden().getAsc()) {
+                cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
+            } else {
+                cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
             }
         }
-        TypedQuery<Persona> q = setearConsulta(c);
-        q.setMaxResults(range[1]);
-        q.setFirstResult(range[0]);
+         TypedQuery<Persona> q = setearConsulta();
+        if (getContador() == null) {
+            setContador(q.getResultList().size());
+        }
+        q.setMaxResults(getRango()[1]);
+        q.setFirstResult(getRango()[0]);
+        setDesde(getRango()[0]);
+        setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
-
     }
 
     @Override
-    public int count() {
-        inicio();
-        Root<Persona> rt = cq.from(Persona.class);
-        cq.select(getEm().getCriteriaBuilder().count(rt));
-        Query q = getEm().createQuery(cq);
-        return ((Long) q.getSingleResult()).intValue();
-    }
-
-    public void inicio() {
-        cb = getEm().getCriteriaBuilder();
-        cq = (CriteriaQuery<Persona>) cb.createQuery(c.getClass());
-        r = (Root<Persona>) cq.from(c.getClass());
-        et = r.getModel();
-        this.orden = null;
-    }
-
-    @Override
-    public List<Persona> anterior(int[] range, Persona entity) {
-        range[0] = -range[1];
-        if (range[0] < 0) {
-            range[0] = 0;
+    public List<Persona> anterior() {
+        getRango()[0] -= getRango()[1];
+        if (getRango()[0] < 10) {
+            getRango()[0] = 0;
         }
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer getContador(Persona entity) {
-        this.contador = this.totalFiltrado(entity);
-        return this.contador;
-    }
-
-    @Override
-    public List<Persona> siguiente(int[] range, Persona entity) {
-        c = entity;
-        if (range[0] + range[1] < getContador(c)) {
-            range[0] = range[0] + range[1];
+    public List<Persona> siguiente() {
+         getRango()[0] += getRango()[1];
+        if (getRango()[0] > getContador()) {
+            getRango()[0] = getContador() - 1;
         }
-
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer totalFiltrado(Persona entity) {
-        inicio();
-        List<Predicate> criteria = predicarCriteria(entity);
-        if (!criteria.isEmpty()) {
-            if (criteria.size() == 1) {
-                cq.where(criteria.get(0));
-            } else {
-                cq.where(cb.and(criteria.toArray(new Predicate[0])));
-            }
-        }
-        TypedQuery<Persona> q = setearConsulta(entity);
-        return q.getResultList().size();
-    }
-
-    @Override
-    public Integer getUltimoItem(int[] range) {
-        this.contador = getContador(c);
-        return range[0] + range[1] > this.contador ? this.contador : range[0] + range[1];
-    }
-
-    @Override
-    public boolean create(Persona c) {
-        Persona aux = null;
-        boolean res = true;
+    public void guardar() {
         try {
-            aux = em.find(Persona.class, c.getPersonaPK());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (aux != null) {
-                if (aux.getPersonaPK().getDocumento().equals(c.getPersonaPK().getDocumento())) {
-                    res = false;
-                }
-            } else {
-                em.persist(c);
-                res = true;
-            }
-            return res;
-        }
-
-    }
-
-    @Override
-    public void guardar(Persona c) {
-        try {
-            em.merge(c);
+            getEm().merge(getEntity());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -214,91 +111,91 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         return res;
     }
 
+    public Persona findById() {
+        inicio();
+        ParameterExpression<Integer> p1 =
+                cb.parameter(Integer.class, "id");
+        Persona res = null;
+        cq.where(cb.equal(r.get("personaPK").get("id"), p1));
+        TypedQuery<Persona> q = getEm().createQuery(cq);
+        q.setParameter("id", getEntity().getPersonaPK().getId());
+        try {
+            res = q.getSingleResult();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return res;
+    }
+
+    public Persona findByDocumento(String documento) {
+        inicio();
+        ParameterExpression<String> p1 =
+                cb.parameter(String.class, "documento");
+        Persona res = null;
+        cq.where(cb.equal(r.get("personaPK").get("documento"), p1));
+        TypedQuery<Persona> q = getEm().createQuery(cq);
+        q.setParameter("documento", documento);
+        try {
+            res = q.getSingleResult();
+
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return res;
+    }
+
     /**
      * @return the col
      */
     @Override
-    public String getCol() {
-        return col;
-    }
-
-    /**
-     * @param col the col to set
-     */
-    @Override
-    public void setCol(String col) {
-        this.col = col;
-    }
-
-    /**
-     * @return the asc
-     */
-    @Override
-    public Boolean getAsc() {
-        return asc;
-    }
-
-    /**
-     * @param asc the asc to set
-     */
-    @Override
-    public void setAsc(Boolean asc) {
-        if (this.asc == asc) {
-            this.asc = !asc;
-        } else {
-            this.asc = asc;
-        }
-    }
-
-    @Override
-    public List<Predicate> predicarCriteria(Persona c) {
+    public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getPersonaPK().getId() != null) {
+        if (getEntity().getPersonaPK().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "id");
-            criteria.add(cb.equal(r.get("personaPK").get("id"), p));
+            criteria.add(cb.equal(r.get("id"), p));
         }
-        if (c.getPersonaPK().getDocumento() != null) {
+        if (getEntity().getPersonaPK().getDocumento() != null) {
             criteria.add(cb.like(cb.lower(
                     r.get("personaPK").get("documento")), "%"
-                    + c.getPersonaPK().getDocumento() + "%"));
+                    + getEntity().getPersonaPK().getDocumento() + "%"));
         }
-        if (c.getNombre() != null) {
+        if (getEntity().getNombre() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("nombre", String.class))), "%"
-                    + c.getNombre().toLowerCase() + "%"));
+                    r.get("nombre")), "%"
+                    + getEntity().getNombre() + "%"));
         }
-        if (c.getDireccion1() != null) {
+        if (getEntity().getDireccion1() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("direccion1", String.class))), "%"
-                    + c.getDireccion1().toLowerCase() + "%"));
+                    r.get("direccion1")), "%"
+                    + getEntity().getDireccion1() + "%"));
         }
-        if (c.getDireccion2() != null) {
+        if (getEntity().getDireccion2() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("direccion2", String.class))), "%"
-                    + c.getDireccion2().toLowerCase() + "%"));
+                    r.get("direccion2")), "%"
+                    + getEntity().getDireccion2() + "%"));
         }
-        if (c.getTelefonoFijo() != null) {
+        if (getEntity().getTelefonoFijo() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("telefonoFijo", String.class))), "%"
-                    + c.getTelefonoFijo().toLowerCase() + "%"));
+                    r.get("telefonoFijo")), "%"
+                    + getEntity().getTelefonoFijo() + "%"));
         }
-        if (c.getTelefonoMovil() != null) {
+        if (getEntity().getTelefonoMovil() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("telefonoMovil", String.class))), "%"
-                    + c.getTelefonoMovil().toLowerCase() + "%"));
+                    r.get("telefonoMovil")), "%"
+                    + getEntity().getTelefonoMovil() + "%"));
         }
-        if (c.getHabilitado() != null) {
+        if (getEntity().getHabilitado() != null) {
             ParameterExpression<Character> p =
                     cb.parameter(Character.class, "habilitado");
             criteria.add(cb.equal(r.get("habilitado"), p));
         }
-        if (c.getFisica() != null) {
+        if (getEntity().getFisica() != null) {
             ParameterExpression<Character> p =
                     cb.parameter(Character.class, "fisica");
             criteria.add(cb.equal(r.get("fisica"), p));
         }
-        if (c.getCategoria() != null) {
+        if (getEntity().getCategoria() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "categoria");
             criteria.add(cb.equal(r.get("categoria"), p));
@@ -307,37 +204,37 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     }
 
     @Override
-    public TypedQuery<Persona> setearConsulta(Persona c) {
+    public TypedQuery<Persona> setearConsulta() {
         TypedQuery<Persona> q = getEm().createQuery(cq);
-        if (c.getPersonaPK().getId() != null) {
-            q.setParameter("id", c.getPersonaPK().getId());
+        if (getEntity().getPersonaPK().getId() != null) {
+            q.setParameter("id", getEntity().getPersonaPK().getId());
         }
-        if (c.getPersonaPK().getDocumento() != null) {
-            q.setParameter("documento", c.getPersonaPK().getDocumento());
+        if (getEntity().getPersonaPK().getDocumento() != null) {
+            q.setParameter("documento", getEntity().getPersonaPK().getDocumento());
         }
-        if (c.getNombre() != null) {
-            q.setParameter("nombre", c.getNombre());
+        if (getEntity().getNombre() != null) {
+            q.setParameter("nombre", getEntity().getNombre());
         }
-        if (c.getDireccion1() != null) {
-            q.setParameter("direccion1", c.getDireccion1());
+        if (getEntity().getDireccion1() != null) {
+            q.setParameter("direccion1", getEntity().getDireccion1());
         }
-        if (c.getDireccion2() != null) {
-            q.setParameter("direccion2", c.getDireccion2());
+        if (getEntity().getDireccion2() != null) {
+            q.setParameter("direccion2", getEntity().getDireccion2());
         }
-        if (c.getTelefonoFijo() != null) {
-            q.setParameter("telefonoFijo", c.getTelefonoFijo());
+        if (getEntity().getTelefonoFijo() != null) {
+            q.setParameter("telefonoFijo", getEntity().getTelefonoFijo());
         }
-        if (c.getTelefonoMovil() != null) {
-            q.setParameter("telefonoMovil", c.getTelefonoMovil());
+        if (getEntity().getTelefonoMovil() != null) {
+            q.setParameter("telefonoMovil", getEntity().getTelefonoMovil());
         }
-        if (c.getHabilitado() != null) {
-            q.setParameter("habilitado", c.getHabilitado());
+        if (getEntity().getHabilitado() != null) {
+            q.setParameter("habilitado", getEntity().getHabilitado());
         }
-        if (c.getFisica() != null) {
-            q.setParameter("fisica", c.getFisica());
+        if (getEntity().getFisica() != null) {
+            q.setParameter("fisica", getEntity().getFisica());
         }
-        if (c.getCategoria() != null) {
-            q.setParameter("categoria", c.getCategoria());
+        if (getEntity().getCategoria() != null) {
+            q.setParameter("categoria", getEntity().getCategoria());
         }
         return q;
     }

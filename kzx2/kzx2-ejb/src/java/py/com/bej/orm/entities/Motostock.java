@@ -30,7 +30,7 @@ public class Motostock implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @JoinColumn(name = "moto", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "moto", referencedColumnName = "codigo", insertable = true, updatable = true)
     @ManyToOne(optional = false)
     private Moto moto;
     @Column(name = "motor")

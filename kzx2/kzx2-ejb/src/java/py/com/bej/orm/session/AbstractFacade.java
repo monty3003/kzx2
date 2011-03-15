@@ -6,6 +6,9 @@ package py.com.bej.orm.session;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -20,14 +23,19 @@ import py.com.bej.orm.utils.Orden;
  */
 public abstract class AbstractFacade<T> {
 
+    @PersistenceContext(unitName = "kzx2-ejbPU")
+    private EntityManager em;
     private Class<T> entityClass;
+    private T entity;
     public CriteriaBuilder cb;
     public CriteriaQuery cq;
     public Root r;
     public EntityType et;
-    public Orden orden;
-    public String col;
-    public Boolean asc;
+    private Orden orden;
+    private Integer contador;
+    private Integer desde;
+    private Integer ultimo;
+    private Integer[] rango;
     public String c0 = "No se encontraron coincidencias";
     public String r0 = "No se encontraron coincidencias";
     public String ex1 = "El registro se ha guardado con éxito";
@@ -39,9 +47,13 @@ public abstract class AbstractFacade<T> {
         this.entityClass = entityClass;
     }
 
-    protected abstract EntityManager getEm();
-
-    public abstract boolean create(T entity);
+    protected EntityManager getEm() {
+        if (em == null) {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("kzx2-ejbPU");
+            em = emf.createEntityManager();
+        }
+        return em;
+    }
 
     public void edit(T entity) {
         getEm().merge(entity);
@@ -61,46 +73,17 @@ public abstract class AbstractFacade<T> {
         return getEm().createQuery(cq).getResultList();
     }
 
-    public List<T> findRange(int[] range, T entity) {
-        cq = getEm().getCriteriaBuilder().createQuery();
-        cq.select(cq.from(getEntityClass()));
-        javax.persistence.Query q = getEm().createQuery(cq);
-        q.setMaxResults(range[1] - range[0]);
-        q.setFirstResult(range[0]);
-        return q.getResultList();
-    }
+    public abstract List<T> findRange();
 
-    public int count() {
-        cq = getEm().getCriteriaBuilder().createQuery();
-        javax.persistence.criteria.Root<T> rt = cq.from(getEntityClass());
-        cq.select(getEm().getCriteriaBuilder().count(rt));
-        javax.persistence.Query q = getEm().createQuery(cq);
-        return ((Long) q.getSingleResult()).intValue();
-    }
+    public abstract List<T> anterior();
 
-    public abstract Integer totalFiltrado(T entity);
+    public abstract List<T> siguiente();
 
-    public abstract List<T> anterior(int[] range, T entity);
+    public abstract void guardar();
 
-    public abstract List<T> siguiente(int[] range, T entity);
+    public abstract List<Predicate> predicarCriteria();
 
-    public abstract Integer getContador(T entity);
-
-    public abstract Integer getUltimoItem(int[] range);
-
-    public abstract void setCol(String col);
-
-    public abstract String getCol();
-
-    public abstract void setAsc(Boolean asc);
-
-    public abstract Boolean getAsc();
-
-    public abstract void guardar(T entity);
-
-    public abstract List<Predicate> predicarCriteria(T entity);
-
-    public abstract TypedQuery<T> setearConsulta(T entity);
+    public abstract TypedQuery<T> setearConsulta();
 
     /**
      * @return the entityClass
@@ -113,6 +96,104 @@ public abstract class AbstractFacade<T> {
      * @param entityClass the entityClass to set
      */
     public void setEntityClass(Class<T> entityClass) {
-        this.entityClass = entityClass;
+        this.setEntityClass(entityClass);
+    }
+
+    public void create() {
+        getEm().persist(entity);
+    }
+
+    public void inicio() {
+        cb = getEm().getCriteriaBuilder();
+        cq = (CriteriaQuery<T>) cb.createQuery(entityClass);
+        r = (Root<T>) cq.from(entityClass);
+    }
+
+    /**
+     * @return the contador
+     */
+    public Integer getContador() {
+        return contador;
+    }
+
+    /**
+     * @param contador the contador to set
+     */
+    public void setContador(Integer contador) {
+        this.contador = contador;
+    }
+
+    /**
+     * @return the rango
+     */
+    public Integer[] getRango() {
+        return rango;
+    }
+
+    /**
+     * @param rango the rango to set
+     */
+    public void setRango(Integer[] rango) {
+        this.rango = rango;
+    }
+
+    /**
+     * @return the desde
+     */
+    public Integer getDesde() {
+        return desde;
+    }
+
+    /**
+     * @param desde the desde to set
+     */
+    public void setDesde(Integer desde) {
+        this.desde = desde;
+    }
+
+    /**
+     * @return the ultimo
+     */
+    public Integer getUltimo() {
+        return ultimo;
+    }
+
+    /**
+     * @param ultimo the ultimo to set
+     */
+    public void setUltimo(Integer ultimo) {
+        this.ultimo = ultimo;
+    }
+
+    /**
+     * @return the entity
+     */
+    public T getEntity() {
+        return entity;
+    }
+
+    /**
+     * @param entity the entity to set
+     */
+    public void setEntity(T entity) {
+        this.entity = entity;
+    }
+
+    /**
+     * @return the orden
+     */
+    public Orden getOrden() {
+        return orden;
+    }
+
+    /**
+     * @param orden the orden to set
+     */
+    public void setOrden(Orden orden) {
+        this.orden = orden;
+    }
+
+    public void persist(Object object) {
+        getEm().persist(object);
     }
 }

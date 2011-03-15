@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import py.com.bej.orm.utils.Conversor;
 
 /**
  *
@@ -182,6 +183,14 @@ public class Transaccion implements Serializable {
 
     public void setFechaEntrega(Date fechaEntrega) {
         this.fechaEntrega = fechaEntrega;
+    }
+
+    public String getFechaEntregaString() {
+        return Conversor.deDateToString(fechaEntrega);
+    }
+
+    public void setFechaEntregaString(String fechaEntrega) {
+        this.fechaEntrega = Conversor.deStringToDate(fechaEntrega);
     }
 
     public Persona getVendedor() {

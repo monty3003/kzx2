@@ -7,16 +7,9 @@ package py.com.bej.orm.session;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import py.com.bej.orm.entities.Moto;
 
 /**
@@ -26,28 +19,14 @@ import py.com.bej.orm.entities.Moto;
 @Stateless
 public class MotoFacade extends AbstractFacade<Moto> {
 
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-    public static Moto c = new Moto();
-    private Integer contador;
-
-    @Override
-    protected EntityManager getEm() {
-        if (em == null) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("kzx2-ejbPU");
-            em = emf.createEntityManager();
-        }
-        return em;
-    }
-
     public MotoFacade() {
         super(Moto.class);
     }
 
     @Override
-    public List<Moto> findRange(int[] range, Moto c) {
+    public List<Moto> findRange() {
         inicio();
-        List<Predicate> criteria = predicarCriteria(c);
+        List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
             if (criteria.size() == 1) {
                 cq.where(criteria.get(0));
@@ -55,239 +34,128 @@ public class MotoFacade extends AbstractFacade<Moto> {
                 cq.where(cb.and(criteria.toArray(new Predicate[0])));
             }
         }
-        if (col != null && asc != null) {
-            if (col.equals("codigo")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("codigo")));
+        if (getOrden().getColumna() != null && getOrden().getAsc() != null) {
+            if (getOrden().getColumna().equals("categoria")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("descripcion")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("codigo")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
-            } else if (col.equals("codigoFabrica")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("codigoFabrica")));
+            } else if (getOrden().getColumna().equals("fabricante")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("nombre")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("codigoFabrica")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("nombre")));
                 }
-            } else if (col.equals("marca")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("marca")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("marca")));
-                }
-            } else if (col.equals("modelo")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("modelo")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("modelo")));
-                }
-            } else if (col.equals("color")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("color")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("color")));
-                }
-            } else if (col.equals("fabricante")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("fabricante")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("fabricante")));
-                }
+            } else if (getOrden().getAsc()) {
+                cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
+            } else {
+                cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
             }
         }
-        TypedQuery<Moto> q = setearConsulta(c);
-
-        q.setMaxResults(range[1]);
-        q.setFirstResult(range[0]);
+        TypedQuery<Moto> q = setearConsulta();
+        if (getContador() == null) {
+            setContador(q.getResultList().size());
+        }
+        q.setMaxResults(getRango()[1]);
+        q.setFirstResult(getRango()[0]);
+        setDesde(getRango()[0]);
+        setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
-
     }
 
     @Override
-    public int count() {
-        inicio();
-        Root<Moto> rt = cq.from(Moto.class);
-        cq.select(getEm().getCriteriaBuilder().count(rt));
-        Query q = getEm().createQuery(cq);
-        return ((Long) q.getSingleResult()).intValue();
-    }
-
-    public void inicio() {
-        cb = getEm().getCriteriaBuilder();
-        cq = (CriteriaQuery<Moto>) cb.createQuery(c.getClass());
-        r = (Root<Moto>) cq.from(c.getClass());
-        et = r.getModel();
-        this.orden = null;
-    }
-
-    @Override
-    public List<Moto> anterior(int[] range, Moto entity) {
-        range[0] = -range[1];
-        if (range[0] < 0) {
-            range[0] = 0;
+    public List<Moto> anterior() {
+        getRango()[0] -= getRango()[1];
+        if (getRango()[0] < 10) {
+            getRango()[0] = 0;
         }
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer getContador(Moto entity) {
-        this.contador = this.totalFiltrado(entity);
-        return this.contador;
-    }
-
-    @Override
-    public List<Moto> siguiente(int[] range, Moto entity) {
-        c = entity;
-        if (range[0] + range[1] < getContador(c)) {
-            range[0] = range[0] + range[1];
+    public List<Moto> siguiente() {
+        getRango()[0] += getRango()[1];
+        if (getRango()[0] > getContador()) {
+            getRango()[0] = getContador() - 1;
         }
-
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer totalFiltrado(Moto entity) {
-        inicio();
-        List<Predicate> criteria = predicarCriteria(c);
-        if (!criteria.isEmpty()) {
-            if (criteria.size() == 1) {
-                cq.where(criteria.get(0));
-            } else {
-                cq.where(cb.and(criteria.toArray(new Predicate[0])));
-            }
-        }
-        TypedQuery<Moto> q = setearConsulta(c);
-        return q.getResultList().size();
-    }
-
-    @Override
-    public Integer getUltimoItem(int[] range) {
-        this.contador = getContador(c);
-        return range[0] + range[1] > this.contador ? this.contador : range[0] + range[1];
-    }
-
-    @Override
-    public boolean create(Moto c) {
-        Moto aux = null;
-        boolean res = true;
+    public void guardar() {
         try {
-            aux = em.find(Moto.class, c.getCodigo());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (aux != null) {
-                if (aux.getCodigo().equals(c.getCodigo())) {
-                    res = false;
-                }
-            } else {
-                em.persist(c);
-                res = true;
-            }
-            return res;
-        }
-
-    }
-
-    @Override
-    public void guardar(Moto c) {
-        try {
-            em.merge(c);
+            getEm().merge(getEntity());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    /**
-     * @return the col
-     */
     @Override
-    public String getCol() {
-        return col;
-    }
-
-    /**
-     * @param col the col to set
-     */
-    @Override
-    public void setCol(String col) {
-        this.col = col;
-    }
-
-    /**
-     * @return the asc
-     */
-    @Override
-    public Boolean getAsc() {
-        return asc;
-    }
-
-    /**
-     * @param asc the asc to set
-     */
-    @Override
-    public void setAsc(Boolean asc) {
-        if (this.asc == asc) {
-            this.asc = !asc;
-        } else {
-            this.asc = asc;
-        }
-    }
-
-    @Override
-    public List<Predicate> predicarCriteria(Moto c) {
+    public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getCodigo() != null) {
+        if (getEntity().getCodigo() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("codigo", String.class))), "%"
-                    + c.getCodigo().toLowerCase() + "%"));
+                    r.get("codigo")), "%"
+                    + getEntity().getCodigo().toLowerCase() + "%"));
         }
-        if (c.getCodigoFabrica() != null) {
+        if (getEntity().getCodigoFabrica() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("codigoFabrica", String.class))), "%"
-                    + c.getCodigoFabrica().toLowerCase() + "%"));
+                    r.get("codigoFabrica")), "%"
+                    + getEntity().getCodigoFabrica().toLowerCase() + "%"));
         }
-        if (c.getMarca() != null) {
+        if (getEntity().getMarca() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("marca", String.class))), "%"
-                    + c.getMarca().toLowerCase() + "%"));
+                    r.get("marca")), "%"
+                    + getEntity().getMarca().toLowerCase() + "%"));
         }
-        if (c.getModelo() != null) {
+        if (getEntity().getModelo() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("modelo", String.class))), "%"
-                    + c.getModelo().toLowerCase() + "%"));
+                    r.get("modelo")), "%"
+                    + getEntity().getModelo().toLowerCase() + "%"));
         }
-        if (c.getColor() != null) {
+        if (getEntity().getColor() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("color", String.class))), "%"
-                    + c.getColor().toLowerCase() + "%"));
+                    r.get("color")), "%"
+                    + getEntity().getColor().toLowerCase() + "%"));
         }
-        if (c.getFabricante() != null) {
+        if (getEntity().getFabricante() != null) {
             ParameterExpression<Integer> p =
-                    cb.parameter(Integer.class, "id");
-            criteria.add(cb.equal(r.get("fabricante"), p));
+                    cb.parameter(Integer.class, "fabricante");
+            criteria.add(cb.equal(r.get("fabricante").get("personaPK").get("id"), p));
         }
+        if (getEntity().getCategoria() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "categoria");
+            criteria.add(cb.equal(r.get("categoria").get("id"), p));
+        }
+
         return criteria;
     }
 
     @Override
-    public TypedQuery<Moto> setearConsulta(Moto c) {
+    public TypedQuery<Moto> setearConsulta() {
         TypedQuery<Moto> q = getEm().createQuery(cq);
-        if (c.getCodigo() != null) {
-            q.setParameter("codigo", c.getCodigo());
+        if (getEntity().getCodigo() != null) {
+            q.setParameter("codigo", getEntity().getCodigo());
         }
-        if (c.getCodigoFabrica() != null) {
-            q.setParameter("codigoFabrica", c.getCodigoFabrica());
+        if (getEntity().getCodigoFabrica() != null) {
+            q.setParameter("codigoFabrica", getEntity().getCodigoFabrica());
         }
-        if (c.getMarca() != null) {
-            q.setParameter("marca", c.getMarca());
+        if (getEntity().getMarca() != null) {
+            q.setParameter("marca", getEntity().getMarca());
         }
-        if (c.getModelo() != null) {
-            q.setParameter("modelo", c.getModelo());
+        if (getEntity().getModelo() != null) {
+            q.setParameter("modelo", getEntity().getModelo());
         }
-        if (c.getColor() != null) {
-            q.setParameter("color", c.getColor());
+        if (getEntity().getColor() != null) {
+            q.setParameter("color", getEntity().getColor());
         }
-        if (c.getFabricante() != null) {
-            q.setParameter("fabricante", c.getFabricante());
+        if (getEntity().getFabricante() != null) {
+            q.setParameter("fabricante", getEntity().getFabricante().getPersonaPK().getId());
+        }
+        if (getEntity().getCategoria() != null) {
+            q.setParameter("categoria", getEntity().getCategoria().getId());
         }
         return q;
     }

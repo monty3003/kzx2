@@ -26,7 +26,7 @@ import py.com.bej.orm.utils.Conversor;
 @NamedQueries({
     @NamedQuery(name = "Persona.findById", query = "SELECT p FROM Persona p WHERE p.personaPK.id = :id"),
     @NamedQuery(name = "Persona.findByDocumento", query = "SELECT p FROM Persona p WHERE p.personaPK.documento = :documento")
-    })
+})
 public class Persona implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -87,20 +87,31 @@ public class Persona implements Serializable {
         this.personaPK = personaPK;
     }
 
-    public Persona(PersonaPK personaPK, Character fisica, String nombre, String direccion1, Date fechaIngreso, Character estadoCivil, String profesion, String tratamiento, Character habilitado, Integer categoria) {
+    public Persona(PersonaPK personaPK, Character fisica, String nombre, String direccion1, String direccion2, String telefonoFijo, String telefonoMovil, String email, Date fechaIngreso, String ruc, String contacto, Date fechaNacimiento, Character estadoCivil, String profesion, String tratamiento, Character sexo, Short hijos, Character habilitado, Integer categoria) {
         this.personaPK = personaPK;
         this.fisica = fisica;
         this.nombre = nombre;
         this.direccion1 = direccion1;
+        this.direccion2 = direccion2;
+        this.telefonoFijo = telefonoFijo;
+        this.telefonoMovil = telefonoMovil;
+        this.email = email;
         this.fechaIngreso = fechaIngreso;
+        this.ruc = ruc;
+        this.contacto = contacto;
+        this.fechaNacimiento = fechaNacimiento;
         this.estadoCivil = estadoCivil;
         this.profesion = profesion;
         this.tratamiento = tratamiento;
+        this.sexo = sexo;
+        this.hijos = hijos;
         this.habilitado = habilitado;
         this.categoria = categoria;
     }
 
-    public Persona(int id, String documento) {
+    
+
+    public Persona(Integer id, String documento) {
         this.personaPK = new PersonaPK(id, documento);
     }
 
@@ -213,7 +224,7 @@ public class Persona implements Serializable {
     }
 
     public void setFechaNacimientoString(String fechaNacimiento) {
-        this.fechaIngreso = Conversor.deStringToDate(fechaNacimiento);
+        this.fechaNacimiento = Conversor.deStringToDate(fechaNacimiento);
     }
 
     public Character getEstadoCivil() {
