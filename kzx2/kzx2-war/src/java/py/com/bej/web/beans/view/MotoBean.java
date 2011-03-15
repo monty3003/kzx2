@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -17,9 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Persona;
+import py.com.bej.orm.entities.PersonaPK;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.PersonaFacade;
+import py.com.bej.orm.utils.Orden;
 
 /**
  *
@@ -27,24 +28,21 @@ import py.com.bej.orm.session.PersonaFacade;
  */
 @ManagedBean
 @SessionScoped
-public class MotoBean {
+public class MotoBean extends AbstractPageBean {
 
     @EJB
+    private CategoriaFacade categoriaFacade;
+    @EJB
+    private PersonaFacade personaFacade;
+    @EJB
     private MotoFacade facade;
-    private Moto c;
-    private List<Moto> lista;
-    private Integer desde;
-    private Integer max;
-    private Integer total;
-    private String nav = "listamotos";
-    private String id;
-    private Boolean valido;
     private List<Categoria> listaCategorias;
     private List<SelectItem> listaCategoria;
     private List<Persona> listaPersonas;
     private List<SelectItem> listaPersona;
     //Moto
     private String codigo;
+    private Integer categoria;
     private String codigoFabrica;
     private String marca;
     private String modelo;
@@ -55,91 +53,130 @@ public class MotoBean {
     public MotoBean() {
     }
 
-    private void deEntity() {
-        this.setCodigo(c.getCodigo());
-        this.setCodigoFabrica(c.getCodigoFabrica());
-        this.setMarca(c.getMarca());
-        this.setModelo(c.getModelo());
-        this.setColor(c.getColor());
-        this.setFabricante(c.getFabricante());
+    /**
+     * @return the facade
+     */
+    public MotoFacade getFacade() {
+        if (this.facade == null) {
+            this.facade = new MotoFacade();
+        }
+        return facade;
     }
 
-    private void deCampos() {
-        setC(new Moto());
-        if (this.id != null && !this.id.trim().equals("")) {
-            this.getC().setCodigo(getCodigo());
+    /**
+     * @return the facade
+     */
+    public PersonaFacade getPersonaFacade() {
+        if (this.personaFacade == null) {
+            this.personaFacade = new PersonaFacade();
+        }
+        return personaFacade;
+    }
+
+    /**
+     * @return the facade
+     */
+    public CategoriaFacade getCategoriaFacade() {
+        if (this.categoriaFacade == null) {
+            this.categoriaFacade = new CategoriaFacade();
+        }
+        return categoriaFacade;
+    }
+
+    @Override
+    void deEntity() {
+        this.setCodigo(facade.getEntity().getCodigo());
+        this.setCodigoFabrica(facade.getEntity().getCodigoFabrica());
+        this.setMarca(facade.getEntity().getMarca());
+        this.setModelo(facade.getEntity().getModelo());
+        this.setColor(facade.getEntity().getColor());
+        if (facade.getEntity().getFabricante() != null) {
+            this.setFabricante(facade.getEntity().getFabricante().getPersonaPK().getId());
+        }
+        if (facade.getEntity().getCategoria() != null) {
+            setCategoria(facade.getEntity().getCategoria().getId());
+        }
+    }
+
+    @Override
+    void deCampos() {
+        if (this.codigo != null && !this.codigo.trim().equals("")) {
+            facade.getEntity().setCodigo(getCodigo().trim().toUpperCase());
         } else {
-            this.getC().setCodigo(null);
+            facade.getEntity().setCodigo(null);
         }
         if (this.getCodigoFabrica() != null && !this.getCodigoFabrica().trim().equals("")) {
-            this.getC().setCodigoFabrica(getCodigoFabrica());
+            facade.getEntity().setCodigoFabrica(getCodigoFabrica().trim().toUpperCase());
         } else {
-            this.getC().setCodigoFabrica(null);
+            facade.getEntity().setCodigoFabrica(null);
         }
         if (this.getMarca() != null && !this.getMarca().trim().equals("")) {
-            this.c.setMarca(marca);
+            facade.getEntity().setMarca(marca.trim().toUpperCase());
         } else {
-            this.c.setMarca(null);
+            facade.getEntity().setMarca(null);
         }
         if (this.getModelo() != null && !this.getModelo().trim().equals("")) {
-            this.c.setModelo(modelo);
+            facade.getEntity().setModelo(modelo.trim().toUpperCase());
         } else {
-            this.c.setModelo(null);
+            facade.getEntity().setModelo(null);
         }
         if (this.getColor() != null && !this.getColor().trim().equals("")) {
-            this.c.setColor(color);
+            facade.getEntity().setColor(color.trim().toUpperCase());
         } else {
-            this.c.setColor(null);
+            facade.getEntity().setColor(null);
         }
     }
 
-    private void limpiarCampos() {
-        this.setCodigo(null);
-        this.setCodigoFabrica(null);
-        this.setMarca(null);
-        this.setModelo(null);
-        this.setColor(null);
-        this.setFabricante(null);
+    @Override
+    void limpiarCampos() {
+        getFacade().setEntity(new Moto());
+        if (facade.getOrden() == null) {
+            getFacade().setOrden(new Orden("codigo", false));
+        }
+        setCodigo(null);
+        setCodigoFabrica(null);
+        setMarca(null);
+        setModelo(null);
+        setColor(null);
+        setFabricante(null);
+        setCategoria(null);
+        setDesde(0);
+        setMax(10);
+        setNav("listamotos");
     }
 
+    @Override
     public String listar() {
-        limpiarCampos();
-        deCampos();
-        this.setDesde(new Integer(0));
-        this.setMax(new Integer(10));
-        this.setValido((Boolean) true);
-        this.filtrar();
-        if (this.getLista().isEmpty()) {
-            setErrorMessage(null, facade.r0);
+        setNav("listamotos");
+        setDesde(0);
+        setMax(10);
+        if (facade.getOrden() == null) {
+            getFacade().setOrden(new Orden("codigo", false));
         }
-        return nav;
+        setLista(filtrar());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().r0);
+        }
+        return getNav();
     }
 
-    public List<Moto> filtrar() {
+    @Override
+    List filtrar() {
+        getFacade().setEntity(new Moto());
         deCampos();
-        setLista(new ArrayList<Moto>());
-        int[] range = {this.getDesde(), this.getMax()};
-        setLista(facade.findRange(range, getC()));
+        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        setLista(getFacade().findRange());
         return getLista();
     }
 
-    public String buscar() {
-        setDesde((Integer) 0);
-        setMax((Integer) 10);
-        this.filtrar();
-        if (this.getLista().isEmpty()) {
-            setErrorMessage(null, facade.c0);
-        }
-        return nav;
-    }
-
-    private void obtenerListas() {
+    @Override
+    void obtenerListas() {
         listaCategorias = new CategoriaFacade().findBetween(50, 60);
         if (!listaCategorias.isEmpty()) {
             Iterator<Categoria> it = listaCategorias.iterator();
             do {
                 Categoria x = it.next();
-                listaCategoria.add(new SelectItem(x.getId(), x.getDescripcion()));
+                getListaCategoria().add(new SelectItem(x.getId(), x.getDescripcion()));
             } while (it.hasNext());
 
         }
@@ -148,29 +185,43 @@ public class MotoBean {
             Iterator<Persona> it = listaPersonas.iterator();
             do {
                 Persona x = it.next();
-                listaPersona.add(new SelectItem(x.getPersonaPK().getId(), x.getNombre()));
+                getListaPersona().add(new SelectItem(x.getPersonaPK().getId(), x.getNombre()));
             } while (it.hasNext());
 
         }
     }
 
+    @Override
+    public String buscar() {
+        getFacade().setEntity(new Moto());
+        deCampos();
+        getFacade().setContador(null);
+        setLista(getFacade().findRange());
+        if (getLista().isEmpty()) {
+            setErrorMessage(null, getFacade().c0);
+        }
+        return getNav();
+    }
+
+    @Override
     public String nuevo() {
-        setC(new Moto());
+        getFacade().setEntity(null);
         listaCategoria = new ArrayList<SelectItem>();
-        listaCategoria.add(new SelectItem("-1", "-SELECCIONAR-"));
+        getListaCategoria().add(new SelectItem("-1", "-SELECCIONAR-"));
         listaPersona = new ArrayList<SelectItem>();
-        listaPersona.add(new SelectItem(-1, "-SELECCIONAR-"));
+        getListaPersona().add(new SelectItem(-1, "-SELECCIONAR-"));
         obtenerListas();
         return "crearmoto";
     }
 
+    @Override
     public String modificar() {
         //recuperar la seleccion
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         this.setCodigo((String) request.getParameter("radio"));
         if (this.getCodigo() != null) {
             try {
-                this.setC(facade.find(this.getCodigo()));
+                getFacade().setEntity(facade.find(this.getCodigo()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -179,6 +230,8 @@ public class MotoBean {
             listaCategoria = new ArrayList<SelectItem>();
             listaPersona = new ArrayList<SelectItem>();
             obtenerListas();
+            setFabricante(facade.getEntity().getCategoria().getId());
+            setCategoria(facade.getEntity().getCategoria().getId());
             return "modificarmoto";
         } else {
             setErrorMessage(null, facade.sel);
@@ -186,186 +239,128 @@ public class MotoBean {
         }
     }
 
-    public String guardarNuevo() {
-        boolean validado = validarNuevo();
-        if (validado) {
-            boolean exito = facade.create(getC());
-            if (exito) {
-                setInfoMessage(null, facade.ex1);
-                return this.listar();
-            } else {
-                FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    public boolean validarNuevo() {
-        if (this.c.getCodigo().trim().equals("")) {
+    @Override
+    boolean validarNuevo() {
+        if (getCodigo().trim().equals("")) {
             setErrorMessage("frm:codigo", "Ingrese un valor");
             return false;
+        } else {
+            Moto existe = null;
+            existe = facade.find(getCodigo().trim());
+            if (existe != null && facade.getEntity() == null) {
+                setErrorMessage("frm:codigo", "Ya existe una moto con este código");
+                return false;
+            }
         }
         boolean res = true;
-        if (this.c.getCodigoFabrica().trim().equals("")) {
+        if (getCodigoFabrica().trim().equals("")) {
             setErrorMessage("frm:codigoFabrica", "Ingrese un valor");
             res = false;
         }
-        if (this.c.getMarca().trim().equals("")) {
+        if (getMarca().trim().equals("")) {
             setErrorMessage("frm:marca", "Ingrese un valor");
             res = false;
         }
-        if (this.c.getModelo().trim().equals("")) {
+        if (getModelo().trim().equals("")) {
             setErrorMessage("frm:modelo", "Ingrese un valor");
             res = false;
         }
-        if (this.c.getColor().trim().equals("")) {
+        if (getColor().trim().equals("")) {
             setErrorMessage("frm:color", "Ingrese un valor");
             res = false;
         }
-        if (this.c.getFabricante() == -1) {
+        if (getFabricante() == -1) {
             setErrorMessage("frm:fabricante", "Seleccione un valor");
             res = false;
         }
-        if (this.c.getCategoria() == -1) {
+        if (getCategoria() == -1) {
             setErrorMessage("frm:categoria", "Seleccione un valor");
             res = false;
         }
         return res;
     }
 
+    @Override
+    public String guardarNuevo() {
+        boolean validado = validarNuevo();
+        if (validado) {
+            getFacade().setEntity(new Moto());
+            deCampos();
+            Persona xfabricante = null;
+            Categoria xcategoria = null;
+            getPersonaFacade().setEntity(new Persona(new PersonaPK(getFabricante(), null)));
+            xfabricante = getPersonaFacade().findById();
+            xcategoria = getCategoriaFacade().find(getCategoria());
+            facade.getEntity().setFabricante(xfabricante);
+            facade.getEntity().setCategoria(xcategoria);
+            facade.create();
+            setInfoMessage(null, facade.ex1);
+        } else {
+            return null;
+        }
+        limpiarCampos();
+        return this.listar();
+    }
+
+    @Override
     public String guardarModificar() {
         boolean validado = validarNuevo();
         if (validado) {
-            facade.guardar(getC());
+            deCampos();
+            if (!facade.getEntity().getFabricante().getPersonaPK().getId().equals(getFabricante())) {
+                Persona xfabricante = null;
+                xfabricante = getPersonaFacade().find(getFabricante());
+                facade.getEntity().setFabricante(xfabricante);
+            }
+            if (!facade.getEntity().getCategoria().getId().equals(getCategoria())) {
+                Categoria xcategoria = null;
+                xcategoria = getCategoriaFacade().find(getCategoria());
+                facade.getEntity().setCategoria(xcategoria);
+            }
+            facade.guardar();
             setInfoMessage(null, facade.ex2);
+            limpiarCampos();
             return this.listar();
         } else {
             return null;
         }
     }
 
+    @Override
     public String cancelar() {
+        limpiarCampos();
         return this.listar();
     }
 
+    @Override
+    public String anterior() {
+        setLista(getFacade().anterior());
+        return getNav();
+    }
+
+    @Override
+    public String siguiente() {
+        setLista(getFacade().siguiente());
+        return getNav();
+    }
+
+    @Override
     public String todos() {
         limpiarCampos();
-        facade.setCol(null);
-        deCampos();
+        getFacade().setContador(null);
+        getFacade().setUltimo(null);
+        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setOrden(new Orden("codigo", false));
         this.setValido((Boolean) true);
-        setDesde((Integer) 0);
-        setMax((Integer) 10);
-        this.filtrar();
-        return nav;
-    }
-
-    public String anterior() {
-        setDesde((Integer) (getDesde() - getMax()));
-        int[] range = {getDesde(), getMax()};
-        this.setLista(getFacade().anterior(range, getC()));
-        return nav;
-    }
-
-    public String siguiente() {
-        setDesde((Integer) (getDesde() + getMax()));
-        int[] range = {getDesde(), getMax()};
-        this.setLista(getFacade().siguiente(range, getC()));
-        return nav;
-    }
-
-    public Integer getUltimoItem() {
         deCampos();
-        MotoFacade.c = getC();
-        int[] range = {getDesde(), getMax()};
-        return getFacade().getUltimoItem(range);
+        getFacade().setRango(new Integer[]{0, 10});
+        this.filtrar();
+        return getNav();
     }
 
-    /**
-     * @return the lista
-     */
-    public List<Moto> getLista() {
-        return lista;
-    }
-
-    /**
-     * @param lista the lista to set
-     */
-    public void setLista(List<Moto> lista) {
-        this.lista = lista;
-    }
-
-    /**
-     * @return the desde
-     */
-    public Integer getDesde() {
-        return desde;
-    }
-
-    /**
-     * @param desde the desde to set
-     */
-    public void setDesde(Integer desde) {
-        this.desde = desde;
-    }
-
-    /**
-     * @return the max
-     */
-    public Integer getMax() {
-        return max;
-    }
-
-    /**
-     * @param max the max to set
-     */
-    public void setMax(Integer max) {
-        this.max = max;
-    }
-
-    /**
-     * @return the total
-     */
-    public Integer getTotal() {
-        this.total = getFacade().count();
-        return total;
-    }
-
-    /**
-     * @param total the total to set
-     */
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
-
-    /**
-     * @return the facade
-     */
-    public MotoFacade getFacade() {
-        return facade;
-    }
-
-    /**
-     * @return the c
-     */
-    public Moto getC() {
-        return c;
-    }
-
-    /**
-     * @param c the c to set
-     */
-    public void setC(Moto c) {
-        this.c = c;
-    }
-
-    protected void setErrorMessage(String component, String summary) {
-        FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, null));
-    }
-
-    protected void setInfoMessage(String component, String summary) {
-        FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null));
+    @Override
+    boolean validarModificar() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -380,6 +375,20 @@ public class MotoBean {
      */
     public void setCodigo(String codigo) {
         this.codigo = codigo;
+    }
+
+    /**
+     * @return the codigoFabrica
+     */
+    public String getCodigoFabrica() {
+        return codigoFabrica;
+    }
+
+    /**
+     * @param codigoFabrica the codigoFabrica to set
+     */
+    public void setCodigoFabrica(String codigoFabrica) {
+        this.codigoFabrica = codigoFabrica;
     }
 
     /**
@@ -439,31 +448,17 @@ public class MotoBean {
     }
 
     /**
-     * @return the valido
+     * @return the categoria
      */
-    public Boolean getValido() {
-        return valido;
+    public Integer getCategoria() {
+        return categoria;
     }
 
     /**
-     * @param valido the valido to set
+     * @param categoria the categoria to set
      */
-    public void setValido(Boolean valido) {
-        this.valido = valido;
-    }
-
-    /**
-     * @return the listaPersona
-     */
-    public List<SelectItem> getListaPersona() {
-        return listaPersona;
-    }
-
-    /**
-     * @param listaPersona the listaPersona to set
-     */
-    public void setListaPersona(List<SelectItem> listaPersona) {
-        this.listaPersona = listaPersona;
+    public void setCategoria(Integer categoria) {
+        this.categoria = categoria;
     }
 
     /**
@@ -474,23 +469,9 @@ public class MotoBean {
     }
 
     /**
-     * @param listaCategoria the listaCategoria to set
+     * @return the listaPersona
      */
-    public void setListaCategoria(List<SelectItem> listaCategoria) {
-        this.listaCategoria = listaCategoria;
-    }
-
-    /**
-     * @return the codigoFabrica
-     */
-    public String getCodigoFabrica() {
-        return codigoFabrica;
-    }
-
-    /**
-     * @param codigoFabrica the codigoFabrica to set
-     */
-    public void setCodigoFabrica(String codigoFabrica) {
-        this.codigoFabrica = codigoFabrica;
+    public List<SelectItem> getListaPersona() {
+        return listaPersona;
     }
 }
