@@ -4,19 +4,20 @@
  */
 package py.com.bej.orm.session;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.transaction.UserTransaction;
+import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Transaccion;
 
 /**
@@ -26,28 +27,17 @@ import py.com.bej.orm.entities.Transaccion;
 @Stateless
 public class TransaccionFacade extends AbstractFacade<Transaccion> {
 
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-    public static Transaccion c = new Transaccion();
-    private Integer contador;
-
-    @Override
-    protected EntityManager getEm() {
-        if (em == null) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("kzx2-ejbPU");
-            em = emf.createEntityManager();
-        }
-        return em;
-    }
+    @EJB
+    private MotostockFacade motostockFacade;
 
     public TransaccionFacade() {
         super(Transaccion.class);
     }
 
     @Override
-    public List<Transaccion> findRange(int[] range, Transaccion c) {
+    public List<Transaccion> findRange() {
         inicio();
-        List<Predicate> criteria = predicarCriteria(c);
+        List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
             if (criteria.size() == 1) {
                 cq.where(criteria.get(0));
@@ -55,105 +45,79 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
                 cq.where(cb.and(criteria.toArray(new Predicate[0])));
             }
         }
-        if (col != null && asc != null) {
-            if (col.equals("vendedor")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get(col).get("nombre")));
+        if (getOrden().getColumna() != null && getOrden().getAsc() != null) {
+            if (getOrden().getColumna().equals("codigo")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("descripcion")));
                 } else {
-                    cq.orderBy(cb.desc(r.get(col).get("nombre")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
+            } else if (getOrden().getColumna().equals("vendedor")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("nombre")));
+                } else {
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("nombre")));
+                }
+            } else if (getOrden().getAsc()) {
+                cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
             } else {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get(col)));
-                } else {
-                    cq.orderBy(cb.desc(r.get(col)));
-                }
+                cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
             }
         }
-        TypedQuery<Transaccion> q = setearConsulta(c);
-        q.setMaxResults(range[1]);
-        q.setFirstResult(range[0]);
+        TypedQuery<Transaccion> q = setearConsulta();
+        if (getContador() == null) {
+            setContador(q.getResultList().size());
+        }
+        q.setMaxResults(getRango()[1]);
+        q.setFirstResult(getRango()[0]);
+        setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
-
     }
 
     @Override
-    public int count() {
-        inicio();
-        Root<Transaccion> rt = cq.from(Transaccion.class);
-        cq.select(getEm().getCriteriaBuilder().count(rt));
-        Query q = getEm().createQuery(cq);
-        return ((Long) q.getSingleResult()).intValue();
-    }
-
-    public void inicio() {
-        cb = getEm().getCriteriaBuilder();
-        cq = (CriteriaQuery<Transaccion>) cb.createQuery(c.getClass());
-        r = (Root<Transaccion>) cq.from(c.getClass());
-        et = r.getModel();
-        this.orden = null;
-    }
-
-    @Override
-    public List<Transaccion> anterior(int[] range, Transaccion entity) {
-        range[0] = -range[1];
-        if (range[0] < 0) {
-            range[0] = 0;
+    public List<Transaccion> anterior() {
+        getRango()[0] -= getRango()[1];
+        if (getRango()[0] < 10) {
+            getRango()[0] = 0;
         }
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer getContador(Transaccion entity) {
-        this.contador = this.totalFiltrado(entity);
-        return this.contador;
-    }
-
-    @Override
-    public List<Transaccion> siguiente(int[] range, Transaccion entity) {
-        c = entity;
-        if (range[0] + range[1] < getContador(c)) {
-            range[0] = range[0] + range[1];
+    public List<Transaccion> siguiente() {
+        getRango()[0] += getRango()[1];
+        if (getRango()[0] > getContador()) {
+            getRango()[0] = getContador() - 1;
         }
-
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer totalFiltrado(Transaccion entity) {
-        inicio();
-        List<Predicate> criteria = predicarCriteria(entity);
-        if (!criteria.isEmpty()) {
-            if (criteria.size() == 1) {
-                cq.where(criteria.get(0));
-            } else {
-                cq.where(cb.and(criteria.toArray(new Predicate[0])));
-            }
-        }
-        TypedQuery<Transaccion> q = setearConsulta(entity);
-        return q.getResultList().size();
-    }
-
-    @Override
-    public Integer getUltimoItem(int[] range) {
-        this.contador = getContador(c);
-        return range[0] + range[1] > this.contador ? this.contador : range[0] + range[1];
-    }
-
-    @Override
-    public boolean create(Transaccion c) {
-        boolean res = true;
-        em.persist(c);
-        res = true;
-        return res;
-    }
-
-    @Override
-    public void guardar(Transaccion c) {
+    public void guardar() {
         try {
-            em.merge(c);
+            getEm().merge(getEntity());
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public int guardarCompra(List<Motostock> motos) {
+        int res = 0;
+        try {
+            motostockFacade = new MotostockFacade();
+            getEm().persist(getEntity());
+            getEm().flush();
+            for (Motostock m : motos) {
+                m.setPrecioVenta(BigDecimal.ZERO);
+                m.setCompra(getEntity());
+                motostockFacade.persist(m);
+                res++;
+            }
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", e);
+            throw new RuntimeException(e);
+        } finally {
+            return res;
         }
     }
 
@@ -168,6 +132,7 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
         criteria.add(cb.equal(r.get("categoria"), p1));
         criteria.add(cb.equal(r.get("habilitado"), p2));
         cq.where(cb.and(criteria.toArray(new Predicate[0])));
+        cq.orderBy(cb.desc(r.get("id")));
         TypedQuery<Transaccion> q = getEm().createQuery(cq);
         q.setParameter("categoria", categoria);
         q.setParameter("habilitado", 'S');
@@ -175,76 +140,50 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
         return res;
     }
 
-    /**
-     * @return the col
-     */
-    @Override
-    public String getCol() {
-        return col;
-    }
-
-    /**
-     * @param col the col to set
-     */
-    @Override
-    public void setCol(String col) {
-        this.col = col;
-    }
-
-    /**
-     * @return the asc
-     */
-    @Override
-    public Boolean getAsc() {
-        return asc;
-    }
-
-    /**
-     * @param asc the asc to set
-     */
-    @Override
-    public void setAsc(Boolean asc) {
-        if (this.asc == asc) {
-            this.asc = !asc;
-        } else {
-            this.asc = asc;
-        }
+    public List<Transaccion> findByTransaccion(Integer inicio, Integer fin) {
+        List<Transaccion> res = new ArrayList<Transaccion>();
+        inicio();
+        cq.where(cb.between(r.get("codigo").get("id"), inicio, fin));
+        cq.orderBy(cb.desc(r.get("id")));
+        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
     }
 
     @Override
-    public List<Predicate> predicarCriteria(Transaccion c) {
+    public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getId() != null) {
+        if (getEntity().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "id");
             criteria.add(cb.equal(r.get("id"), p));
         }
-        if (c.getCodigo() != null) {
+        if (getEntity().getCodigo() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "codigo");
             criteria.add(cb.equal(r.get("codigo").get("id"), p));
         }
-        if (c.getComprobante() != null) {
+        if (getEntity().getComprobante() != null) {
             criteria.add(cb.like(cb.lower(
                     r.get("comprobante")), "%"
-                    + c.getComprobante().toLowerCase() + "%"));
+                    + getEntity().getComprobante().toLowerCase() + "%"));
         }
-        if (c.getComprador() != null) {
+        if (getEntity().getComprador() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "comprador");
             criteria.add(cb.equal(r.get("comprador").get("personaPK").get("id"), p));
         }
-        if (c.getVendedor() != null) {
+        if (getEntity().getVendedor() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "vendedor");
             criteria.add(cb.equal(r.get("vendedor").get("personaPK").get("id"), p));
         }
-        if (c.getAnulado() != null) {
+        if (getEntity().getAnulado() != null) {
             ParameterExpression<Character> p =
                     cb.parameter(Character.class, "anulado");
             criteria.add(cb.equal(r.get("anulado"), p));
         }
-        if (c.getSaldado() != null) {
+        if (getEntity().getSaldado() != null) {
             ParameterExpression<Character> p =
                     cb.parameter(Character.class, "saldado");
             criteria.add(cb.equal(r.get("saldado"), p));
@@ -253,28 +192,28 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
     }
 
     @Override
-    public TypedQuery<Transaccion> setearConsulta(Transaccion c) {
+    public TypedQuery<Transaccion> setearConsulta() {
         TypedQuery<Transaccion> q = getEm().createQuery(cq);
-        if (c.getId() != null) {
-            q.setParameter("id", c.getId());
+        if (getEntity().getId() != null) {
+            q.setParameter("id", getEntity().getId());
         }
-        if (c.getCodigo() != null) {
-            q.setParameter("codigo", c.getCodigo().getId());
+        if (getEntity().getCodigo() != null) {
+            q.setParameter("codigo", getEntity().getCodigo().getId());
         }
-        if (c.getComprobante() != null) {
-            q.setParameter("comprobante", c.getComprobante());
+        if (getEntity().getComprobante() != null) {
+            q.setParameter("comprobante", getEntity().getComprobante());
         }
-        if (c.getVendedor() != null) {
-            q.setParameter("vendedor", c.getVendedor().getPersonaPK().getId());
+        if (getEntity().getVendedor() != null) {
+            q.setParameter("vendedor", getEntity().getVendedor().getPersonaPK().getId());
         }
-        if (c.getComprador() != null) {
-            q.setParameter("comprador", c.getComprador().getPersonaPK().getId());
+        if (getEntity().getComprador() != null) {
+            q.setParameter("comprador", getEntity().getComprador().getPersonaPK().getId());
         }
-        if (c.getAnulado() != null) {
-            q.setParameter("anulado", c.getAnulado());
+        if (getEntity().getAnulado() != null) {
+            q.setParameter("anulado", getEntity().getAnulado());
         }
-        if (c.getSaldado() != null) {
-            q.setParameter("saldado", c.getSaldado());
+        if (getEntity().getSaldado() != null) {
+            q.setParameter("saldado", getEntity().getSaldado());
         }
         return q;
     }

@@ -13,11 +13,11 @@ public class Orden {
     private String columna;
     private Boolean asc;
 
-
-    public Orden(String col, Boolean asc){
+    public Orden(String col, Boolean asc) {
         this.columna = col;
         this.asc = asc;
     }
+
     /**
      * @return the columna
      */
@@ -43,6 +43,10 @@ public class Orden {
      * @param asc the asc to set
      */
     public void setAsc(Boolean asc) {
-        this.asc = asc;
+        if (this.asc == asc) {
+            this.asc = !asc;
+        } else {
+            this.asc = asc;
+        }
     }
 }

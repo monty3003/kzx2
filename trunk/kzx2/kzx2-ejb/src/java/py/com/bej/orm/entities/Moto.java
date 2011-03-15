@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
@@ -10,8 +9,9 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -21,6 +21,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "Moto")
 public class Moto implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -38,12 +39,14 @@ public class Moto implements Serializable {
     @Basic(optional = false)
     @Column(name = "color")
     private String color;
-    @Basic(optional = false)
-    @Column(name = "fabricante")
-    private Integer fabricante;
-    @Basic(optional = false)
-    @Column(name = "categoria")
-    private Integer categoria;
+    @JoinColumns({
+        @JoinColumn(name = "fabricante", referencedColumnName = "documento", insertable = false, updatable = false),
+        @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = true, updatable = true)})
+    @ManyToOne(optional = false)
+    private Persona fabricante;
+    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
+    private Categoria categoria;
 
     public Moto() {
     }
@@ -52,7 +55,7 @@ public class Moto implements Serializable {
         this.codigo = codigo;
     }
 
-    public Moto(String codigo, String codigoFabrica, String marca, String modelo, String color, Integer fabricante, Integer categoria) {
+    public Moto(String codigo, String codigoFabrica, String marca, String modelo, String color, Persona fabricante, Categoria categoria) {
         this.codigo = codigo;
         this.codigoFabrica = codigoFabrica;
         this.marca = marca;
@@ -102,19 +105,19 @@ public class Moto implements Serializable {
         this.color = color;
     }
 
-    public Integer getFabricante() {
+    public Persona getFabricante() {
         return fabricante;
     }
 
-    public void setFabricante(Integer fabricante) {
+    public void setFabricante(Persona fabricante) {
         this.fabricante = fabricante;
     }
 
-    public Integer getCategoria() {
+    public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(Integer categoria) {
+    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
@@ -142,5 +145,4 @@ public class Moto implements Serializable {
     public String toString() {
         return "py.com.bej.orm.entities.Moto[codigo=" + codigo + "]";
     }
-
 }

@@ -4,20 +4,13 @@
  */
 package py.com.bej.orm.session;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Motostock;
 
 /**
@@ -27,28 +20,14 @@ import py.com.bej.orm.entities.Motostock;
 @Stateless
 public class MotostockFacade extends AbstractFacade<Motostock> {
 
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-    public static Motostock c = new Motostock();
-    private Integer contador;
-
-    @Override
-    protected EntityManager getEm() {
-        if (em == null) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("kzx2-ejbPU");
-            em = emf.createEntityManager();
-        }
-        return em;
-    }
-
     public MotostockFacade() {
         super(Motostock.class);
     }
 
     @Override
-    public List<Motostock> findRange(int[] range, Motostock c) {
+    public List<Motostock> findRange() {
         inicio();
-        List<Predicate> criteria = predicarCriteria(c);
+        List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
             if (criteria.size() == 1) {
                 cq.where(criteria.get(0));
@@ -56,217 +35,116 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
                 cq.where(cb.and(criteria.toArray(new Predicate[0])));
             }
         }
-        if (col != null && asc != null) {
-            if (col.equals("codigo")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("codigo")));
+        if (getOrden().getColumna() != null && getOrden().getAsc() != null) {
+            if (getOrden().getColumna().equals("moto")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("codigo")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("codigo")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("codigo")));
                 }
-            } else if (col.equals("codigoFabrica")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("codigoFabrica")));
+            } else if (getOrden().getColumna().equals("compra")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("id")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("codigoFabrica")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("id")));
                 }
-            } else if (col.equals("marca")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("marca")));
+            } else if (getOrden().getColumna().equals("venta")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("id")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("marca")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("id")));
                 }
-            } else if (col.equals("modelo")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("modelo")));
+            } else if (getOrden().getColumna().equals("ubicacion")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("descripcion")));
                 } else {
-                    cq.orderBy(cb.desc(r.get("modelo")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
-            } else if (col.equals("color")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("color")));
+            } else {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
                 } else {
-                    cq.orderBy(cb.desc(r.get("color")));
-                }
-            } else if (col.equals("fabricante")) {
-                if (asc) {
-                    cq.orderBy(cb.asc(r.get("fabricante")));
-                } else {
-                    cq.orderBy(cb.desc(r.get("fabricante")));
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
                 }
             }
         }
-        TypedQuery<Motostock> q = setearConsulta(c);
-
-        q.setMaxResults(range[1]);
-        q.setFirstResult(range[0]);
+        TypedQuery<Motostock> q = setearConsulta();
+        if (getContador() == null) {
+            setContador(q.getResultList().size());
+        }
+        q.setMaxResults(getRango()[1]);
+        q.setFirstResult(getRango()[0]);
+        setDesde(getRango()[0]);
+        setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
-
     }
 
     @Override
-    public int count() {
-        inicio();
-        Root<Motostock> rt = cq.from(Motostock.class);
-        cq.select(getEm().getCriteriaBuilder().count(rt));
-        Query q = getEm().createQuery(cq);
-        return ((Long) q.getSingleResult()).intValue();
-    }
-
-    public void inicio() {
-        cb = getEm().getCriteriaBuilder();
-        cq = (CriteriaQuery<Motostock>) cb.createQuery(c.getClass());
-        r = (Root<Motostock>) cq.from(c.getClass());
-        et = r.getModel();
-        this.orden = null;
-    }
-
-    @Override
-    public List<Motostock> anterior(int[] range, Motostock entity) {
-        range[0] = -range[1];
-        if (range[0] < 0) {
-            range[0] = 0;
+    public List<Motostock> anterior() {
+        getRango()[0] -= getRango()[1];
+        if (getRango()[0] < 10) {
+            getRango()[0] = 0;
         }
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer getContador(Motostock entity) {
-        this.contador = this.totalFiltrado(entity);
-        return this.contador;
-    }
-
-    @Override
-    public List<Motostock> siguiente(int[] range, Motostock entity) {
-        c = entity;
-        if (range[0] + range[1] < getContador(c)) {
-            range[0] = range[0] + range[1];
+    public List<Motostock> siguiente() {
+        getRango()[0] += getRango()[1];
+        if (getRango()[0] > getContador()) {
+            getRango()[0] = getContador() - 1;
         }
-
-        return this.findRange(range, entity);
+        return findRange();
     }
 
     @Override
-    public Integer totalFiltrado(Motostock entity) {
-        inicio();
-        List<Predicate> criteria = predicarCriteria(c);
-        if (!criteria.isEmpty()) {
-            if (criteria.size() == 1) {
-                cq.where(criteria.get(0));
-            } else {
-                cq.where(cb.and(criteria.toArray(new Predicate[0])));
-            }
-        }
-        TypedQuery<Motostock> q = setearConsulta(c);
-        return q.getResultList().size();
-    }
-
-    @Override
-    public Integer getUltimoItem(int[] range) {
-        this.contador = getContador(c);
-        return range[0] + range[1] > this.contador ? this.contador : range[0] + range[1];
-    }
-
-    @Override
-    public boolean create(Motostock c) {
-        Motostock aux = null;
-        boolean res = true;
+    public void guardar() {
         try {
-            aux = em.find(Motostock.class, c.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (aux != null) {
-                if (aux.getId().equals(c.getId())) {
-                    res = false;
-                }
-            } else {
-                em.persist(c);
-                res = true;
-            }
-            return res;
-        }
-
-    }
-
-    @Override
-    public void guardar(Motostock c) {
-        try {
-            em.merge(c);
+            getEm().merge(getEntity());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    /**
-     * @return the col
-     */
     @Override
-    public String getCol() {
-        return col;
-    }
-
-    /**
-     * @param col the col to set
-     */
-    @Override
-    public void setCol(String col) {
-        this.col = col;
-    }
-
-    /**
-     * @return the asc
-     */
-    @Override
-    public Boolean getAsc() {
-        return asc;
-    }
-
-    /**
-     * @param asc the asc to set
-     */
-    @Override
-    public void setAsc(Boolean asc) {
-        if (this.asc == asc) {
-            this.asc = !asc;
-        } else {
-            this.asc = asc;
-        }
-    }
-
-    @Override
-    public List<Predicate> predicarCriteria(Motostock c) {
+    public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getId() != null) {
+        if (getEntity().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "id");
             criteria.add(cb.equal(r.get("id"), p));
         }
-        if (c.getMoto() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("moto").get(et.getSingularAttribute("codigo", String.class))), "%"
-                    + c.getMoto().getCodigo().toLowerCase() + "%"));
+        if (getEntity().getMoto() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "moto");
+            criteria.add(cb.equal(r.get("moto").get("codigo"), p));
         }
-        if (c.getMotor() != null) {
+        if (getEntity().getMotor() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("motor", String.class))), "%"
-                    + c.getMotor().toLowerCase() + "%"));
+                    r.get("motor")), "%"
+                    + getEntity().getMotor().toLowerCase() + "%"));
         }
-        if (c.getChasis() != null) {
+        if (getEntity().getChasis() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get(et.getSingularAttribute("chasis", String.class))), "%"
-                    + c.getChasis().toLowerCase() + "%"));
+                    r.get("chasis")), "%"
+                    + getEntity().getChasis().toLowerCase() + "%"));
         }
-        if (c.getCompra() != null) {
+        if (getEntity().getCompra() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "compra");
             criteria.add(cb.equal(r.get("compra").get("id"), p));
         }
-        if (c.getVenta() != null) {
+        if (getEntity().getVenta() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "venta");
             criteria.add(cb.equal(r.get("venta").get("id"), p));
         }
-        if (c.getUbicacion() != null) {
+        if (getEntity().getPrecioVenta() != null) {
+            ParameterExpression<BigDecimal> p =
+                    cb.parameter(BigDecimal.class, "precioVenta");
+            criteria.add(cb.equal(r.get("precioVenta"), p));
+        }
+        if (getEntity().getUbicacion() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "ubicacion");
             criteria.add(cb.equal(r.get("ubicacion").get("id"), p));
@@ -275,29 +153,44 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
     }
 
     @Override
-    public TypedQuery<Motostock> setearConsulta(Motostock c) {
+    public TypedQuery<Motostock> setearConsulta() {
         TypedQuery<Motostock> q = getEm().createQuery(cq);
-        if (c.getId() != null) {
-            q.setParameter("id", c.getId());
+        if (getEntity().getId() != null) {
+            q.setParameter("id", getEntity().getId());
         }
-        if (c.getMoto() != null) {
-            q.setParameter("moto", c.getMoto().getCodigo());
+        if (getEntity().getMoto() != null) {
+            q.setParameter("moto", getEntity().getMoto().getCodigo());
         }
-        if (c.getMotor() != null) {
-            q.setParameter("motor", c.getMotor());
+        if (getEntity().getMotor() != null) {
+            q.setParameter("motor", getEntity().getMotor());
         }
-        if (c.getChasis() != null) {
-            q.setParameter("chasis", c.getChasis());
+        if (getEntity().getChasis() != null) {
+            q.setParameter("chasis", getEntity().getChasis());
         }
-        if (c.getCompra() != null) {
-            q.setParameter("compra", c.getCompra().getId());
+         if (getEntity().getCompra() != null) {
+            q.setParameter("compra", getEntity().getCompra().getId());
         }
-        if (c.getVenta() != null) {
-            q.setParameter("venta", c.getVenta().getId());
+         if (getEntity().getVenta() != null) {
+            q.setParameter("venta", getEntity().getVenta().getId());
         }
-        if (c.getUbicacion() != null) {
-            q.setParameter("ubicacion", c.getUbicacion().getId());
+        if (getEntity().getPrecioVenta() != null) {
+            q.setParameter("precioVenta", getEntity().getPrecioVenta());
+        }
+        if (getEntity().getUbicacion() != null) {
+            q.setParameter("ubicacion", getEntity().getUbicacion().getId());
         }
         return q;
+    }
+
+    public List<Motostock> findByCompra(Integer compra) {
+        inicio();
+        ParameterExpression<Integer> p =
+                cb.parameter(Integer.class, "compra");
+        List<Motostock> res = new ArrayList<Motostock>();
+        cq.where(cb.and(cb.equal(r.get("compra").get("id"), p)));
+        TypedQuery<Motostock> q = getEm().createQuery(cq);
+        q.setParameter("compra", compra);
+        res = q.getResultList();
+        return res;
     }
 }
