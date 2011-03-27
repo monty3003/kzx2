@@ -63,6 +63,9 @@ public class Credito implements Serializable {
     @Column(name = "amortizacion")
     private short amortizacion;
     @Basic(optional = false)
+    @Column(name = "credito_total")
+    private BigDecimal creditoTotal;
+    @Basic(optional = false)
     @Column(name = "total_amortizado_pagado")
     private BigDecimal totalAmortizadoPagado;
     @Basic(optional = false)
@@ -86,7 +89,7 @@ public class Credito implements Serializable {
         this.id = id;
     }
 
-    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, BigDecimal capital, short amortizacion, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, Categoria estado) {
+    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, Categoria estado) {
         this.id = id;
         this.categoria = categoria;
         this.transaccion = transaccion;
@@ -97,6 +100,7 @@ public class Credito implements Serializable {
         this.tae = tae;
         this.capital = capital;
         this.amortizacion = amortizacion;
+        this.creditoTotal = creditoTotal;
         this.totalAmortizadoPagado = totalAmortizadoPagado;
         this.totalInteresesPagado = totalInteresesPagado;
         this.estado = estado;
@@ -180,6 +184,14 @@ public class Credito implements Serializable {
 
     public void setAmortizacion(short amortizacion) {
         this.amortizacion = amortizacion;
+    }
+
+    public BigDecimal getCreditoTotal() {
+        return creditoTotal;
+    }
+
+    public void setCreditoTotal(BigDecimal creditoTotal) {
+        this.creditoTotal = creditoTotal;
     }
 
     public BigDecimal getTotalAmortizadoPagado() {
