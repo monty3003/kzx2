@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,27 +15,40 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import py.com.bej.orm.interfaces.WithId;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Entity
-@Table(name = "Ubicacion")
+@Table(name = "Ubicacion", catalog = "bejdb", schema = "")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Ubicacion.findAll", query = "SELECT u FROM Ubicacion u"),
     @NamedQuery(name = "Ubicacion.findById", query = "SELECT u FROM Ubicacion u WHERE u.id = :id"),
     @NamedQuery(name = "Ubicacion.findByDescripcion", query = "SELECT u FROM Ubicacion u WHERE u.descripcion = :descripcion")})
-public class Ubicacion implements Serializable {
+public class Ubicacion implements Serializable, WithId<Integer> {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Integer id;
     @Basic(optional = false)
-    @Column(name = "descripcion")
+    @Column(name = "descripcion", nullable = false, length = 45)
     private String descripcion;
+    @Column(name = "activo", length = 1)
+    @Basic(optional = false)
+    private Character activo;
+    @Column(name = "ultimaModificacion")
+    @Basic(optional = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimaModificacion;
 
     public Ubicacion() {
     }
@@ -44,15 +57,19 @@ public class Ubicacion implements Serializable {
         this.id = id;
     }
 
-    public Ubicacion(Integer id, String descripcion) {
+    public Ubicacion(Integer id, String descripcion, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.descripcion = descripcion;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }
@@ -87,7 +104,39 @@ public class Ubicacion implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Ubicacion[id=" + id + "]";
+        return "py.com.bej.orm.entities.Ubicacion[ id=" + id + " ]";
     }
 
+    @Override
+    public String getlabel() {
+        return this.descripcion;
+    }
+
+    /**
+     * @return the activo
+     */
+    public Character getActivo() {
+        return activo;
+    }
+
+    /**
+     * @param activo the activo to set
+     */
+    public void setActivo(Character activo) {
+        this.activo = activo;
+    }
+
+    /**
+     * @return the ultimaModificacion
+     */
+    public Date getUltimaModificacion() {
+        return ultimaModificacion;
+    }
+
+    /**
+     * @param ultimaModificacion the ultimaModificacion to set
+     */
+    public void setUltimaModificacion(Date ultimaModificacion) {
+        this.ultimaModificacion = ultimaModificacion;
+    }
 }
