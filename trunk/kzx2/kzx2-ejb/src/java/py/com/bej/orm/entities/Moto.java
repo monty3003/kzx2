@@ -6,12 +6,16 @@ package py.com.bej.orm.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,13 +62,13 @@ public class Moto implements Serializable, WithId<String> {
     @Column(name = "color", nullable = false, length = 20)
     private String color;
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "fabricante", nullable = false)
-    private int fabricante;
+    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = false, updatable = true)
+    @ManyToOne
+    private Persona fabricante;
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "categoria", nullable = false)
-    private int categoria;
+    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
+    @ManyToOne
+    private Categoria categoria;
     @Column(name = "activo", length = 1)
     @Basic(optional = false)
     private Character activo;
@@ -72,24 +76,14 @@ public class Moto implements Serializable, WithId<String> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @OneToMany(mappedBy = "moto")
+    private List<Motostock> motostocks;
 
     public Moto() {
     }
 
     public Moto(String codigo) {
         this.codigo = codigo;
-    }
-
-    public Moto(String codigo, String codigoFabrica, String marca, String modelo, String color, int fabricante, int categoria, Character activo, Date ultimaModificacion) {
-        this.codigo = codigo;
-        this.codigoFabrica = codigoFabrica;
-        this.marca = marca;
-        this.modelo = modelo;
-        this.color = color;
-        this.fabricante = fabricante;
-        this.categoria = categoria;
-        this.activo = activo;
-        this.ultimaModificacion = ultimaModificacion;
     }
 
     public String getCodigo() {
@@ -132,19 +126,19 @@ public class Moto implements Serializable, WithId<String> {
         this.color = color;
     }
 
-    public int getFabricante() {
+    public Persona getFabricante() {
         return fabricante;
     }
 
-    public void setFabricante(int fabricante) {
+    public void setFabricante(Persona fabricante) {
         this.fabricante = fabricante;
     }
 
-    public int getCategoria() {
+    public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(int categoria) {
+    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
@@ -176,6 +170,7 @@ public class Moto implements Serializable, WithId<String> {
     /**
      * @return the activo
      */
+    @Override
     public Character getActivo() {
         return activo;
     }
@@ -183,6 +178,7 @@ public class Moto implements Serializable, WithId<String> {
     /**
      * @param activo the activo to set
      */
+    @Override
     public void setActivo(Character activo) {
         this.activo = activo;
     }
@@ -190,6 +186,7 @@ public class Moto implements Serializable, WithId<String> {
     /**
      * @return the ultimaModificacion
      */
+    @Override
     public Date getUltimaModificacion() {
         return ultimaModificacion;
     }
@@ -197,6 +194,7 @@ public class Moto implements Serializable, WithId<String> {
     /**
      * @param ultimaModificacion the ultimaModificacion to set
      */
+    @Override
     public void setUltimaModificacion(Date ultimaModificacion) {
         this.ultimaModificacion = ultimaModificacion;
     }
@@ -214,5 +212,12 @@ public class Moto implements Serializable, WithId<String> {
     @Override
     public String getlabel() {
         return this.marca + " " + this.modelo + " " + this.color;
+    }
+
+    /**
+     * @return the motostocks
+     */
+    public List<Motostock> getMotostocks() {
+        return motostocks;
     }
 }

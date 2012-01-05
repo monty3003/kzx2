@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,71 +16,88 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import py.com.bej.orm.interfaces.WithId;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Entity
-@Table(name = "Financiacion")
-public class Financiacion implements Serializable {
+@Table(name = "Financiacion", catalog = "bejdb", schema = "")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Financiacion.findAll", query = "SELECT f FROM Financiacion f"),
+    @NamedQuery(name = "Financiacion.findById", query = "SELECT f FROM Financiacion f WHERE f.id = :id"),
+    @NamedQuery(name = "Financiacion.findByCredito", query = "SELECT f FROM Financiacion f WHERE f.credito = :credito"),
+    @NamedQuery(name = "Financiacion.findByNumeroCuota", query = "SELECT f FROM Financiacion f WHERE f.numeroCuota = :numeroCuota"),
+    @NamedQuery(name = "Financiacion.findByCapital", query = "SELECT f FROM Financiacion f WHERE f.capital = :capital"),
+    @NamedQuery(name = "Financiacion.findByInteres", query = "SELECT f FROM Financiacion f WHERE f.interes = :interes"),
+    @NamedQuery(name = "Financiacion.findByTotalAPagar", query = "SELECT f FROM Financiacion f WHERE f.totalAPagar = :totalAPagar"),
+    @NamedQuery(name = "Financiacion.findByFechaVencimiento", query = "SELECT f FROM Financiacion f WHERE f.fechaVencimiento = :fechaVencimiento"),
+    @NamedQuery(name = "Financiacion.findByFechaPago", query = "SELECT f FROM Financiacion f WHERE f.fechaPago = :fechaPago"),
+    @NamedQuery(name = "Financiacion.findByInteresMora", query = "SELECT f FROM Financiacion f WHERE f.interesMora = :interesMora"),
+    @NamedQuery(name = "Financiacion.findByTotalPagado", query = "SELECT f FROM Financiacion f WHERE f.totalPagado = :totalPagado")})
+public class Financiacion implements Serializable, WithId<Integer> {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "credito", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne(optional = false)
+    @JoinColumn(name = "credito", referencedColumnName = "id", insertable = false, updatable = true)
+    @ManyToOne
     private Credito credito;
     @Basic(optional = false)
-    @Column(name = "numero_cuota")
+    @Column(name = "numero_cuota", nullable = false)
     private short numeroCuota;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Basic(optional = false)
-    @Column(name = "capital")
+    @Column(name = "capital", nullable = false, precision = 11, scale = 2)
     private BigDecimal capital;
     @Basic(optional = false)
-    @Column(name = "interes")
+    @Column(name = "interes", nullable = false, precision = 11, scale = 2)
     private BigDecimal interes;
     @Basic(optional = false)
-    @Column(name = "total_a_pagar")
+    @Column(name = "total_a_pagar", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalAPagar;
     @Basic(optional = false)
-    @Column(name = "fecha_vencimiento")
+    @Column(name = "fecha_vencimiento", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaVencimiento;
     @Column(name = "fecha_pago")
     @Temporal(TemporalType.DATE)
     private Date fechaPago;
-    @Column(name = "interes_mora")
+    @Column(name = "interes_mora", precision = 11, scale = 2)
     private BigDecimal interesMora;
-    @Column(name = "total_pagado")
+    @Column(name = "total_pagado", precision = 11, scale = 2)
     private BigDecimal totalPagado;
+    @Column(name = "activo", length = 1)
+    @Basic(optional = false)
+    private Character activo;
+    @Column(name = "ultimaModificacion")
+    @Basic(optional = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimaModificacion;
+    @OneToMany(mappedBy = "financiacion")
+    private List<Pago> pagos;
 
     public Financiacion() {
     }
 
-    public Financiacion(Integer id) {
-        this.id = id;
-    }
-
-    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal totalAPagar, Date fechaVencimiento) {
-        this.id = id;
-        this.credito = credito;
-        this.numeroCuota = numeroCuota;
-        this.capital = capital;
-        this.interes = interes;
-        this.totalAPagar = totalAPagar;
-        this.fechaVencimiento = fechaVencimiento;
-    }
-
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }
@@ -179,7 +196,40 @@ public class Financiacion implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Financiacion[id=" + id + "]";
+        return "py.com.bej.orm.entities.Financiacion[ id=" + id + " ]";
     }
 
+    @Override
+    public void setActivo(Character activo) {
+        this.activo = activo;
+    }
+
+    @Override
+    public Character getActivo() {
+        return this.activo;
+    }
+
+    @Override
+    public void setUltimaModificacion(Date ultimaModificacion) {
+        this.ultimaModificacion = ultimaModificacion;
+    }
+
+    @Override
+    public Date getUltimaModificacion() {
+        return this.ultimaModificacion;
+    }
+
+    @Override
+    public String getlabel() {
+        return this.id + " " + this.credito.getlabel();
+
+
+    }
+
+    /**
+     * @return the pagos
+     */
+    public List<Pago> getPagos() {
+        return pagos;
+    }
 }
