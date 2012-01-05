@@ -6,12 +6,14 @@ package py.com.bej.orm.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,6 +51,18 @@ public class Categoria implements Serializable, WithId<Integer> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @OneToMany(mappedBy = "categoria")
+    private List<Persona> personas;
+    @OneToMany(mappedBy = "categoria")
+    private List<Moto> motos;
+    @OneToMany(mappedBy = "codigo")
+    private List<Transaccion> transaccions;
+    @OneToMany(mappedBy = "categoria")
+    private List<Factura> facturas;
+    @OneToMany(mappedBy = "categoria")
+    private List<Credito> creditos;
+    @OneToMany(mappedBy = "sistemaCredito")
+    private List<Credito> creditosSitemaCredito;
 
     public Categoria() {
     }
@@ -142,5 +156,47 @@ public class Categoria implements Serializable, WithId<Integer> {
     @Override
     public void setUltimaModificacion(Date ultimaModificacion) {
         this.ultimaModificacion = ultimaModificacion;
+    }
+
+    /**
+     * @return the personas
+     */
+    public List<Persona> getPersonas() {
+        return personas;
+    }
+
+    /**
+     * @return the motos
+     */
+    public List<Moto> getMotos() {
+        return motos;
+    }
+
+    /**
+     * @return the transaccions
+     */
+    public List<Transaccion> getTransaccions() {
+        return transaccions;
+    }
+
+    /**
+     * @return the facturas
+     */
+    public List<Factura> getFacturas() {
+        return facturas;
+    }
+
+    /**
+     * @return the creditos
+     */
+    public List<Credito> getCreditos() {
+        return creditos;
+    }
+
+    /**
+     * @return the creditosSitemaCredito
+     */
+    public List<Credito> getCreditosSitemaCredito() {
+        return creditosSitemaCredito;
     }
 }

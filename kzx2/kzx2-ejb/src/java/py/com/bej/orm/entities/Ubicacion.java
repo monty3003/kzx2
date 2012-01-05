@@ -6,6 +6,7 @@ package py.com.bej.orm.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,6 +51,8 @@ public class Ubicacion implements Serializable, WithId<Integer> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @OneToMany(mappedBy = "ubicacion")
+    private List<Motostock> motostocks;
 
     public Ubicacion() {
     }
@@ -142,5 +146,12 @@ public class Ubicacion implements Serializable, WithId<Integer> {
     @Override
     public void setUltimaModificacion(Date ultimaModificacion) {
         this.ultimaModificacion = ultimaModificacion;
+    }
+
+    /**
+     * @return the motostocks
+     */
+    public List<Motostock> getMotostocks() {
+        return motostocks;
     }
 }

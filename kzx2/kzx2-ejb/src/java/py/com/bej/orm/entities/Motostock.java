@@ -72,8 +72,9 @@ public class Motostock implements Serializable, WithId<Integer> {
     @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioVenta;
     @Basic(optional = false)
-    @Column(name = "ubicacion", nullable = false)
-    private int ubicacion;
+    @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = false, updatable = true)
+    @ManyToOne
+    private Ubicacion ubicacion;
     @Column(name = "activo", length = 1)
     @Basic(optional = false)
     private Character activo;
@@ -89,7 +90,7 @@ public class Motostock implements Serializable, WithId<Integer> {
         this.id = id;
     }
 
-    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, int ubicacion, Character activo, Date ultimaModificacion) {
+    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, Ubicacion ubicacion, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.moto = moto;
         this.motor = motor;
@@ -145,11 +146,11 @@ public class Motostock implements Serializable, WithId<Integer> {
         this.precioVenta = precioVenta;
     }
 
-    public int getUbicacion() {
+    public Ubicacion getUbicacion() {
         return ubicacion;
     }
 
-    public void setUbicacion(int ubicacion) {
+    public void setUbicacion(Ubicacion ubicacion) {
         this.ubicacion = ubicacion;
     }
 
