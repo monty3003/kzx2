@@ -54,12 +54,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Persona.findByHabilitado", query = "SELECT p FROM Persona p WHERE p.habilitado = :habilitado"),
     @NamedQuery(name = "Persona.findByCategoria", query = "SELECT p FROM Persona p WHERE p.categoria = :categoria")})
 public class Persona implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
     @Basic(optional = false)
-    @Column(name = "documento", nullable = false,unique=true, length = 11)
+    @Column(name = "documento", nullable = false, unique = true, length = 11)
     private String documento;
     @Basic(optional = false)
     @Column(name = "fisica", nullable = false)
@@ -108,7 +109,7 @@ public class Persona implements Serializable {
     @Column(name = "habilitado", nullable = false)
     private Character habilitado;
     @Basic(optional = false)
-    @JoinColumn(name = "categoria",referencedColumnName="id",insertable=false,updatable=true)
+    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
     @ManyToOne
     private Categoria categoria;
     @Column(name = "activo", length = 1)
@@ -153,11 +154,11 @@ public class Persona implements Serializable {
         this.ultimaModificacion = ultimaModificacion;
     }
 
-    public char getFisica() {
+    public Character getFisica() {
         return fisica;
     }
 
-    public void setFisica(char fisica) {
+    public void setFisica(Character fisica) {
         this.fisica = fisica;
     }
 
@@ -241,11 +242,11 @@ public class Persona implements Serializable {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public char getEstadoCivil() {
+    public Character getEstadoCivil() {
         return estadoCivil;
     }
 
-    public void setEstadoCivil(char estadoCivil) {
+    public void setEstadoCivil(Character estadoCivil) {
         this.estadoCivil = estadoCivil;
     }
 
@@ -281,11 +282,11 @@ public class Persona implements Serializable {
         this.hijos = hijos;
     }
 
-    public char getHabilitado() {
+    public Character getHabilitado() {
         return habilitado;
     }
 
-    public void setHabilitado(char habilitado) {
+    public void setHabilitado(Character habilitado) {
         this.setHabilitado((Character) habilitado);
     }
 
@@ -296,7 +297,7 @@ public class Persona implements Serializable {
     public void setCategoria(int categoria) {
         this.setCategoria(categoria);
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -315,9 +316,6 @@ public class Persona implements Serializable {
         if (this.getId() != other) {
             return false;
         }
-        if ((documento == null && documento != null) || (documento != null && !this.documento.equals(other))) {
-            return false;
-        }
         return true;
     }
 
@@ -329,14 +327,14 @@ public class Persona implements Serializable {
     /**
      * @return the id
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
     /**
      * @param id the id to set
      */
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -352,13 +350,6 @@ public class Persona implements Serializable {
      */
     public void setDocumento(String documento) {
         this.documento = documento;
-    }
-
-    /**
-     * @param habilitado the habilitado to set
-     */
-    public void setHabilitado(Character habilitado) {
-        this.habilitado = habilitado;
     }
 
     /**
@@ -416,5 +407,4 @@ public class Persona implements Serializable {
     public List<Transaccion> getTransaccionsComprador() {
         return transaccionsComprador;
     }
-    
 }

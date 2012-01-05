@@ -66,8 +66,14 @@ public class Financiacion implements Serializable, WithId<Integer> {
     @Column(name = "interes", nullable = false, precision = 11, scale = 2)
     private BigDecimal interes;
     @Basic(optional = false)
+    @Column(name = "cuota_neta", nullable = false, precision = 11, scale = 2)
+    private BigDecimal cuotaNeta;
+    @Basic(optional = false)
     @Column(name = "total_a_pagar", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalAPagar;
+    @Basic(optional = false)
+    @Column(name = "ajuste_redondeo", nullable = false, precision = 11, scale = 2)
+    private BigDecimal ajusteRedondeo;
     @Basic(optional = false)
     @Column(name = "fecha_vencimiento", nullable = false)
     @Temporal(TemporalType.DATE)
@@ -90,6 +96,22 @@ public class Financiacion implements Serializable, WithId<Integer> {
     private List<Pago> pagos;
 
     public Financiacion() {
+    }
+
+    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal cuotaNeta, BigDecimal totalAPagar, BigDecimal ajusteRedondeo, Date fechaPago, BigDecimal interesMora, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
+        this.id = id;
+        this.credito = credito;
+        this.numeroCuota = numeroCuota;
+        this.capital = capital;
+        this.interes = interes;
+        this.cuotaNeta = cuotaNeta;
+        this.totalAPagar = totalAPagar;
+        this.ajusteRedondeo = ajusteRedondeo;
+        this.fechaPago = fechaPago;
+        this.interesMora = interesMora;
+        this.totalPagado = totalPagado;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
     @Override
@@ -231,5 +253,33 @@ public class Financiacion implements Serializable, WithId<Integer> {
      */
     public List<Pago> getPagos() {
         return pagos;
+    }
+
+    /**
+     * @return the cuotaNeta
+     */
+    public BigDecimal getCuotaNeta() {
+        return cuotaNeta;
+    }
+
+    /**
+     * @param cuotaNeta the cuotaNeta to set
+     */
+    public void setCuotaNeta(BigDecimal cuotaNeta) {
+        this.cuotaNeta = cuotaNeta;
+    }
+
+    /**
+     * @return the ajusteRedondeo
+     */
+    public BigDecimal getAjusteRedondeo() {
+        return ajusteRedondeo;
+    }
+
+    /**
+     * @param ajusteRedondeo the ajusteRedondeo to set
+     */
+    public void setAjusteRedondeo(BigDecimal ajusteRedondeo) {
+        this.ajusteRedondeo = ajusteRedondeo;
     }
 }

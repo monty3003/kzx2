@@ -93,7 +93,7 @@ public class Transaccion implements Serializable, WithId<Integer> {
     private Persona comprador;
     @Basic(optional = false)
     @Column(name = "anulado", nullable = false)
-    private char anulado;
+    private Character anulado;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Basic(optional = false)
     @Column(name = "sub_total_exentas", nullable = false, precision = 10, scale = 2)
@@ -139,7 +139,7 @@ public class Transaccion implements Serializable, WithId<Integer> {
     private BigDecimal montoCuotaIgual;
     @Basic(optional = false)
     @Column(name = "saldado", nullable = false)
-    private char saldado;
+    private Character saldado;
     @Basic(optional = false)
     @Column(name = "cantidad_items", nullable = false)
     private short cantidadItems;
@@ -168,7 +168,7 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.id = id;
     }
 
-    public Transaccion(Integer id, Categoria codigo, Factura comprobante, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, char anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, char saldado, short cantidadItems) {
+    public Transaccion(Integer id, Categoria codigo, Factura comprobante, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, Character anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, Character saldado, short cantidadItems) {
         this.id = id;
         this.codigo = codigo;
         this.comprobante = comprobante;
@@ -253,11 +253,11 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.comprador = comprador;
     }
 
-    public char getAnulado() {
+    public Character getAnulado() {
         return anulado;
     }
 
-    public void setAnulado(char anulado) {
+    public void setAnulado(Character anulado) {
         this.anulado = anulado;
     }
 
@@ -373,11 +373,11 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.montoCuotaIgual = montoCuotaIgual;
     }
 
-    public char getSaldado() {
+    public Character getSaldado() {
         return saldado;
     }
 
-    public void setSaldado(char saldado) {
+    public void setSaldado(Character saldado) {
         this.saldado = saldado;
     }
 
