@@ -115,6 +115,7 @@ public class Categoria implements Serializable, WithId<Integer> {
     /**
      * @return the activo
      */
+    @Override
     public Character getActivo() {
         return activo;
     }
@@ -122,6 +123,7 @@ public class Categoria implements Serializable, WithId<Integer> {
     /**
      * @param activo the activo to set
      */
+    @Override
     public void setActivo(Character activo) {
         this.activo = activo;
     }
@@ -129,6 +131,7 @@ public class Categoria implements Serializable, WithId<Integer> {
     /**
      * @return the ultimaModificacion
      */
+    @Override
     public Date getUltimaModificacion() {
         return ultimaModificacion;
     }
@@ -136,6 +139,7 @@ public class Categoria implements Serializable, WithId<Integer> {
     /**
      * @param ultimaModificacion the ultimaModificacion to set
      */
+    @Override
     public void setUltimaModificacion(Date ultimaModificacion) {
         this.ultimaModificacion = ultimaModificacion;
     }
