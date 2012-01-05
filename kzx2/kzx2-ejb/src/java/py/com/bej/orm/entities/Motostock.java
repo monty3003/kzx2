@@ -6,6 +6,7 @@ package py.com.bej.orm.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,45 +15,72 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import py.com.bej.orm.interfaces.WithId;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Entity
-@Table(name = "Motostock")
-public class Motostock implements Serializable {
+@Table(name = "Motostock", catalog = "bejdb", schema = "")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Motostock.findAll", query = "SELECT m FROM Motostock m"),
+    @NamedQuery(name = "Motostock.findById", query = "SELECT m FROM Motostock m WHERE m.id = :id"),
+    @NamedQuery(name = "Motostock.findByMoto", query = "SELECT m FROM Motostock m WHERE m.moto = :moto"),
+    @NamedQuery(name = "Motostock.findByMotor", query = "SELECT m FROM Motostock m WHERE m.motor = :motor"),
+    @NamedQuery(name = "Motostock.findByChasis", query = "SELECT m FROM Motostock m WHERE m.chasis = :chasis"),
+    @NamedQuery(name = "Motostock.findByCompra", query = "SELECT m FROM Motostock m WHERE m.compra = :compra"),
+    @NamedQuery(name = "Motostock.findByVenta", query = "SELECT m FROM Motostock m WHERE m.venta = :venta"),
+    @NamedQuery(name = "Motostock.findByCosto", query = "SELECT m FROM Motostock m WHERE m.costo = :costo"),
+    @NamedQuery(name = "Motostock.findByPrecioVenta", query = "SELECT m FROM Motostock m WHERE m.precioVenta = :precioVenta"),
+    @NamedQuery(name = "Motostock.findByUbicacion", query = "SELECT m FROM Motostock m WHERE m.ubicacion = :ubicacion")})
+public class Motostock implements Serializable, WithId<Integer> {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "moto", referencedColumnName = "codigo", insertable = true, updatable = true)
-    @ManyToOne(optional = false)
+    @Basic(optional = false)
+    @JoinColumn(name = "moto", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne
     private Moto moto;
-    @Column(name = "motor")
+    @Column(name = "motor", length = 25)
     private String motor;
     @Basic(optional = false)
-    @Column(name = "chasis")
+    @Column(name = "chasis", nullable = false, length = 25)
     private String chasis;
+    @Basic(optional = false)
     @JoinColumn(name = "compra", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne(optional = false)
+    @ManyToOne
     private Transaccion compra;
-    @JoinColumn(name = "venta", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne(optional = false)
+    @JoinColumn(name = "venta", referencedColumnName = "id", nullable = true, insertable = true, updatable = true)
+    @ManyToOne(optional = true)
     private Transaccion venta;
     @Basic(optional = false)
-    @Column(name = "costo")
+    @Column(name = "costo", nullable = false, precision = 10, scale = 2)
     private BigDecimal costo;
     @Basic(optional = false)
-    @Column(name = "precio_venta")
+    @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioVenta;
-    @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne(optional = false)
-    private Ubicacion ubicacion;
+    @Basic(optional = false)
+    @Column(name = "ubicacion", nullable = false)
+    private int ubicacion;
+    @Column(name = "activo", length = 1)
+    @Basic(optional = false)
+    private Character activo;
+    @Column(name = "ultimaModificacion")
+    @Basic(optional = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimaModificacion;
 
     public Motostock() {
     }
@@ -61,7 +89,7 @@ public class Motostock implements Serializable {
         this.id = id;
     }
 
-    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, Ubicacion ubicacion) {
+    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, int ubicacion, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.moto = moto;
         this.motor = motor;
@@ -71,22 +99,18 @@ public class Motostock implements Serializable {
         this.costo = costo;
         this.precioVenta = precioVenta;
         this.ubicacion = ubicacion;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Moto getMoto() {
-        return moto;
-    }
-
-    public void setMoto(Moto moto) {
-        this.moto = moto;
     }
 
     public String getMotor() {
@@ -105,22 +129,6 @@ public class Motostock implements Serializable {
         this.chasis = chasis;
     }
 
-    public Transaccion getCompra() {
-        return compra;
-    }
-
-    public void setCompra(Transaccion compra) {
-        this.compra = compra;
-    }
-
-    public Transaccion getVenta() {
-        return venta;
-    }
-
-    public void setVenta(Transaccion venta) {
-        this.venta = venta;
-    }
-
     public BigDecimal getCosto() {
         return costo;
     }
@@ -137,11 +145,11 @@ public class Motostock implements Serializable {
         this.precioVenta = precioVenta;
     }
 
-    public Ubicacion getUbicacion() {
+    public int getUbicacion() {
         return ubicacion;
     }
 
-    public void setUbicacion(Ubicacion ubicacion) {
+    public void setUbicacion(int ubicacion) {
         this.ubicacion = ubicacion;
     }
 
@@ -167,6 +175,73 @@ public class Motostock implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Motostock[id=" + id + "]";
+        return "py.com.bej.orm.entities.Motostock[ id=" + id + " ]";
+    }
+
+    @Override
+    public void setActivo(Character activo) {
+        this.activo = activo;
+    }
+
+    @Override
+    public Character getActivo() {
+        return this.activo;
+    }
+
+    @Override
+    public void setUltimaModificacion(Date ultimaModificacion) {
+        this.ultimaModificacion = ultimaModificacion;
+    }
+
+    @Override
+    public Date getUltimaModificacion() {
+        return this.ultimaModificacion;
+    }
+
+    @Override
+    public String getlabel() {
+        return this.chasis + " " + this.moto.getlabel();
+    }
+
+    /**
+     * @return the moto
+     */
+    public Moto getMoto() {
+        return moto;
+    }
+
+    /**
+     * @param moto the moto to set
+     */
+    public void setMoto(Moto moto) {
+        this.moto = moto;
+    }
+
+    /**
+     * @return the compra
+     */
+    public Transaccion getCompra() {
+        return compra;
+    }
+
+    /**
+     * @param compra the compra to set
+     */
+    public void setCompra(Transaccion compra) {
+        this.compra = compra;
+    }
+
+    /**
+     * @return the venta
+     */
+    public Transaccion getVenta() {
+        return venta;
+    }
+
+    /**
+     * @param venta the venta to set
+     */
+    public void setVenta(Transaccion venta) {
+        this.venta = venta;
     }
 }
