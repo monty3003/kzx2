@@ -5,6 +5,7 @@
 package py.com.bej.orm.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -42,6 +45,10 @@ public class Categoria implements Serializable, WithId<Integer> {
     @Column(name = "activo", length = 1)
     @Basic(optional = false)
     private Character activo;
+    @Column(name = "ultimaModificacion")
+    @Basic(optional = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimaModificacion;
 
     public Categoria() {
     }
@@ -50,10 +57,11 @@ public class Categoria implements Serializable, WithId<Integer> {
         this.id = id;
     }
 
-    public Categoria(Integer id, String descripcion, Character activo) {
+    public Categoria(Integer id, String descripcion, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.descripcion = descripcion;
         this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
     @Override
@@ -116,5 +124,19 @@ public class Categoria implements Serializable, WithId<Integer> {
      */
     public void setActivo(Character activo) {
         this.activo = activo;
+    }
+
+    /**
+     * @return the ultimaModificacion
+     */
+    public Date getUltimaModificacion() {
+        return ultimaModificacion;
+    }
+
+    /**
+     * @param ultimaModificacion the ultimaModificacion to set
+     */
+    public void setUltimaModificacion(Date ultimaModificacion) {
+        this.ultimaModificacion = ultimaModificacion;
     }
 }
