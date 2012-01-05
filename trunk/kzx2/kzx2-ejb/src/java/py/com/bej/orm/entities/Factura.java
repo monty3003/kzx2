@@ -198,7 +198,7 @@ public class Factura implements Serializable, WithId<Integer> {
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (numero != null ? numero.hashCode() : 0);
+        hash += (getNumero() != null ? getNumero().hashCode() : 0);
         return hash;
     }
 
@@ -252,7 +252,7 @@ public class Factura implements Serializable, WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.numero + " " + this.categoria.getDescripcion();
+        return this.getNumero() + " " + this.categoria.getDescripcion();
     }
 
     /**
@@ -260,5 +260,19 @@ public class Factura implements Serializable, WithId<Integer> {
      */
     public List<Transaccion> getTransaccions() {
         return transaccions;
+    }
+
+    /**
+     * @return the numero
+     */
+    public String getNumero() {
+        return numero;
+    }
+
+    /**
+     * @param numero the numero to set
+     */
+    public void setNumero(String numero) {
+        this.numero = numero;
     }
 }

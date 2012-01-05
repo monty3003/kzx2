@@ -92,6 +92,9 @@ public class Credito implements Serializable, WithId<Integer> {
     @Column(name = "amortizacion", nullable = false)
     private short amortizacion;
     @Basic(optional = false)
+    @Column(name = "credito_total", nullable = false)
+    private BigDecimal creditoTotal;
+    @Basic(optional = false)
     @Column(name = "total_amortizado_pagado", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalAmortizadoPagado;
     @Basic(optional = false)
@@ -122,6 +125,28 @@ public class Credito implements Serializable, WithId<Integer> {
 
     public Credito(Integer id) {
         this.id = id;
+    }
+
+    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, BigDecimal totalInteresesPagadoMulta, Date fechaUltimoPago, Short cuotasAtrasadas, Categoria estado, Character activo, Date ultimaModificacion) {
+        this.id = id;
+        this.categoria = categoria;
+        this.transaccion = transaccion;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.sistemaCredito = sistemaCredito;
+        this.tan = tan;
+        this.tae = tae;
+        this.capital = capital;
+        this.amortizacion = amortizacion;
+        this.creditoTotal = creditoTotal;
+        this.totalAmortizadoPagado = totalAmortizadoPagado;
+        this.totalInteresesPagado = totalInteresesPagado;
+        this.totalInteresesPagadoMulta = totalInteresesPagadoMulta;
+        this.fechaUltimoPago = fechaUltimoPago;
+        this.cuotasAtrasadas = cuotasAtrasadas;
+        this.estado = estado;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
     @Override
@@ -302,5 +327,26 @@ public class Credito implements Serializable, WithId<Integer> {
     @Override
     public String getlabel() {
         return this.id + " " + this.categoria.getDescripcion();
+    }
+
+    /**
+     * @return the financiacions
+     */
+    public List<Financiacion> getFinanciacions() {
+        return financiacions;
+    }
+
+    /**
+     * @return the creditoTotal
+     */
+    public BigDecimal getCreditoTotal() {
+        return creditoTotal;
+    }
+
+    /**
+     * @param creditoTotal the creditoTotal to set
+     */
+    public void setCreditoTotal(BigDecimal creditoTotal) {
+        this.creditoTotal = creditoTotal;
     }
 }
