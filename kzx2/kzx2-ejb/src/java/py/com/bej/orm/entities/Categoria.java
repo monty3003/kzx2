@@ -12,36 +12,57 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import py.com.bej.orm.interfaces.WithId;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Entity
-@Table(name = "Categoria")
+@Table(name = "Categoria", catalog = "bejdb", schema = "")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Categoria.findAll", query = "SELECT c FROM Categoria c"),
-    @NamedQuery(name = "Categoria.findByDescripcion", query = "SELECT c FROM Categoria c WHERE c.descripcion = :descripcion"),
-    @NamedQuery(name = "Categoria.findById", query = "SELECT c FROM Categoria c WHERE c.id = :id")})
-public class Categoria implements Serializable {
+    @NamedQuery(name = "Categoria.findById", query = "SELECT c FROM Categoria c WHERE c.id = :id"),
+    @NamedQuery(name = "Categoria.findByDescripcion", query = "SELECT c FROM Categoria c WHERE c.descripcion = :descripcion")})
+public class Categoria implements Serializable, WithId<Integer> {
 
     private static final long serialVersionUID = 1L;
-    @Column(name = "descripcion")
-    private String descripcion;
     @Id
     @Basic(optional = false)
-    @Column(name = "id")
+    @NotNull
+    @Column(name = "id", nullable = false)
     private Integer id;
+    @Size(max = 50)
+    @Column(name = "descripcion", length = 50)
+    private String descripcion;
+    @Column(name = "activo", length = 1)
+    @Basic(optional = false)
+    private Character activo;
 
     public Categoria() {
     }
 
-    public Categoria(Integer id, String descripcion) {
+    public Categoria(Integer id) {
         this.id = id;
-        this.descripcion = descripcion;
     }
 
-    public Categoria(Integer id) {
+    public Categoria(Integer id, String descripcion, Character activo) {
+        this.id = id;
+        this.descripcion = descripcion;
+        this.activo = activo;
+    }
+
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -51,14 +72,6 @@ public class Categoria implements Serializable {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     @Override
@@ -83,6 +96,25 @@ public class Categoria implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Categoria[id=" + id + "]";
+        return "py.com.bej.orm.entities.Categoria[ id=" + id + " ]";
+    }
+
+    @Override
+    public String getlabel() {
+        return this.descripcion;
+    }
+
+    /**
+     * @return the activo
+     */
+    public Character getActivo() {
+        return activo;
+    }
+
+    /**
+     * @param activo the activo to set
+     */
+    public void setActivo(Character activo) {
+        this.activo = activo;
     }
 }
