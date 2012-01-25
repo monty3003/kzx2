@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Ubicacion</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{ubicacionBean.agregar eq true or ubicacionBean.modificar eq true}">
+                        <h5><h:outputText value="#{ubicacionBean.titulo}"/></h5>
+                        <fieldset>
+                            <div class="tablaForm">
+                                <h:panelGroup rendered="#{ubicacionBean.modificar}">
+                                    <div class="fila">
+                                        <div class="etiq"><label for="codigo">Código: </label></div>
+                                        <div class="cont"><h:inputText id="id" size="20" styleClass="d_num" disabled="true"
+                                                                       value="#{ubicacionBean.ubicacion.id}"/></div>
+                                    </div>
+                                </h:panelGroup>
+                                <div class="fila">
+                                    <div class="etiq"><label for="descripcion">Descripción: </label></div>
+                                    <div class="cont"><h:inputText id="descripcion" size="80"
+                                                                   value="#{ubicacionBean.ubicacion.descripcion}"/><rich:messages for="frm:descripcion"/></div>
+                                </div>
+                                <h:panelGroup rendered="#{ubicacionBean.modificar}">
+                                    <div class="fila">
+                                        <div class="etiq"><label for="activo">Activo: </label></div>
+                                        <div class="cont"><h:selectBooleanCheckbox id="activo" value="#{ubicacionBean.activo}"/><h:message for="frm:descripcion"/></div>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{ubicacionBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{ubicacionBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{ubicacionBean.agregar eq false and ubicacionBean.modificar eq false}">
+                        <fieldset>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="codigoFiltro">Código:</label>
+                                        <h:inputText id="codigoFiltro" styleClass="d_num" value="#{ubicacionBean.id}"/>
+                                    </td>
+                                    <td>
+                                        <label for="descripcionFiltro">Descripción: </label>
+                                        <h:inputText id="descripcionFiltro" value="#{ubicacionBean.descripcion}" size="50"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{ubicacionBean.buscar}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{ubicacionBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup rendered="#{not empty ubicacionBean.lista }">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <tr>
+                                            <th width="2%"></th>
+                                            <th width="20%"><p>
+                                                    <h:commandLink action="#{ubicacionBean.listar}" value="Codigo">
+                                                        <f:setPropertyActionListener value="id" target="#{ubicacionBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{ubicacionBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(ubicacionBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{ubicacionBean.facade.orden.columna eq 'id'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{ubicacionBean.listar}" value="Descripcion">
+                                                        <f:setPropertyActionListener value="descripcion" target="#{ubicacionBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{ubicacionBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(ubicacionBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{ubicacionBean.facade.orden.columna eq 'descripcion'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{ubicacionBean.listar}" value="Activo">
+                                                        <f:setPropertyActionListener value="activo" target="#{ubicacionBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{ubicacionBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(ubicacionBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{ubicacionBean.facade.orden.columna eq 'activo'}"/></p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat var="row" value="#{ubicacionBean.lista}">
+                                            <tr>
+                                                <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.descripcion}"/></td>
+                                                <td><h:outputText value="#{row.activo eq 'S'?'SI':'NO'}"/></td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7">
+                                                <h:commandLink action="#{ubicacionBean.anterior}">Anterior</h:commandLink>
+                                                &#160;|&#160;#{ubicacionBean.desde + 1}..#{ubicacionBean.facade.ultimo} de #{ubicacionBean.facade.contador}&#160;|&#160;
+                                                <h:commandLink action="#{ubicacionBean.siguiente}">Siguiente</h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{ubicacionBean.nuevo}" styleClass="submit"/>
+                                <h:commandButton id="btnModificar" value="Modificar" action="#{ubicacionBean.modificar}" styleClass="submit" rendered="#{not empty ubicacionBean.lista }"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
