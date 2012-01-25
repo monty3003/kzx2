@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Categorias</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{categoriaBean.agregar eq true or categoriaBean.modificar eq true}">
+                        <h5><h:outputText value="#{categoriaBean.titulo}"/></h5>
+                        <fieldset>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigo">Código: </label></div>
+                                    <div class="cont"><h:inputText id="id" size="20" styleClass="d_num" disabled="#{categoriaBean.modificar}"
+                                                                   value="#{categoriaBean.categoria.id}"/><rich:messages for="frm:id"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="descripcion">Descripción: </label></div>
+                                    <div class="cont"><h:inputText id="descripcion" size="80"
+                                                                   value="#{categoriaBean.categoria.descripcion}"/><rich:messages for="frm:descripcion"/></div>
+                                </div>
+                                <h:panelGroup rendered="#{categoriaBean.modificar}">
+                                    <div class="fila">
+                                        <div class="etiq"><label for="activo">Activo: </label></div>
+                                        <div class="cont"><h:selectBooleanCheckbox id="activo" value="#{categoriaBean.activo}"/><h:message for="frm:descripcion"/></div>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{categoriaBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{categoriaBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{categoriaBean.agregar eq false and categoriaBean.modificar eq false}">
+                        <fieldset>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="codigoFiltro">Código:</label>
+                                        <h:inputText id="codigoFiltro" styleClass="d_num" value="#{categoriaBean.id}"/>
+                                    </td>
+                                    <td>
+                                        <label for="descripcionFiltro">Descripción: </label>
+                                        <h:inputText id="descripcionFiltro" value="#{categoriaBean.descripcion}" size="50"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{categoriaBean.buscar}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{categoriaBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup rendered="#{not empty categoriaBean.lista }">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <tr>
+                                            <th width="2%"></th>
+                                            <th width="20%"><p>
+                                                    <h:commandLink action="#{categoriaBean.listar}" value="Codigo">
+                                                        <f:setPropertyActionListener value="id" target="#{categoriaBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{categoriaBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(categoriaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{categoriaBean.facade.orden.columna eq 'id'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{categoriaBean.listar}" value="Descripcion">
+                                                        <f:setPropertyActionListener value="descripcion" target="#{categoriaBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{categoriaBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(categoriaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{categoriaBean.facade.orden.columna eq 'descripcion'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{categoriaBean.listar}" value="Activo">
+                                                        <f:setPropertyActionListener value="activo" target="#{categoriaBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{categoriaBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(categoriaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{categoriaBean.facade.orden.columna eq 'activo'}"/></p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat var="row" value="#{categoriaBean.lista}">
+                                            <tr>
+                                                <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.descripcion}"/></td>
+                                                <td><h:outputText value="#{row.activo eq 'S'?'SI':'NO'}"/></td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7">
+                                                <h:commandLink action="#{categoriaBean.anterior}">Anterior</h:commandLink>
+                                                &#160;|&#160;#{categoriaBean.desde + 1}..#{categoriaBean.facade.ultimo} de #{categoriaBean.facade.contador}&#160;|&#160;
+                                                <h:commandLink action="#{categoriaBean.siguiente}">Siguiente</h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{categoriaBean.nuevo}" styleClass="submit"/>
+                                <h:commandButton id="btnModificar" value="Modificar" action="#{categoriaBean.modificar}" styleClass="submit" rendered="#{not empty categoriaBean.lista }"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
