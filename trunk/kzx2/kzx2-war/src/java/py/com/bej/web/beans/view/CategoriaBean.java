@@ -5,8 +5,9 @@
 package py.com.bej.web.beans.view;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -21,11 +22,14 @@ import py.com.bej.orm.utils.Orden;
  */
 @ManagedBean
 @SessionScoped
-public class CategoriaBean extends AbstractPageBean {
+public class CategoriaBean extends AbstractPageBean<Categoria> {
 
     @EJB
     private CategoriaFacade facade;
-    private String id;
+    //Entity
+    private Categoria categoria;
+    //Campos de busqueda
+    private Integer id;
     private String descripcion;
 
     /** Creates a new instance of CategoriaBean */
@@ -43,42 +47,22 @@ public class CategoriaBean extends AbstractPageBean {
     }
 
     @Override
-    void deEntity() {
-        this.setId(getFacade().getEntity().getId().toString());
-        this.setDescripcion(getFacade().getEntity().getDescripcion());
-    }
-
-    @Override
-    void deCampos() {
-        getFacade().setEntity(new Categoria());
-        if (this.getId() != null && !this.id.trim().equals("")) {
-            getFacade().getEntity().setId(new Integer(getId().trim()));
-        }
-        if (this.getDescripcion() != null) {
-            getFacade().getEntity().setDescripcion(this.getDescripcion().trim());
-        }
-    }
-
-    @Override
     void limpiarCampos() {
-        getFacade().setEntity(new Categoria());
-        if (getFacade().getOrden() == null) {
-            getFacade().setOrden(new Orden("id", false));
-        }
-        setDesde(0);
-        setMax(10);
-        this.setId(null);
-        this.setDescripcion(null);
-        setNav("listacategoria");
+        setModificar(Boolean.FALSE);
+        setAgregar(Boolean.FALSE);
+        this.id = null;
+        this.descripcion = null;
     }
 
     @Override
     public String listar() {
-        setNav("listacategoria");
+        limpiarCampos();
+        setNav("categoria");
+        categoria = new Categoria();
         setDesde(0);
         setMax(10);
         setValido(true);
-       if(getFacade().getOrden()==null){
+        if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
         }
         setLista(filtrar());
@@ -90,7 +74,7 @@ public class CategoriaBean extends AbstractPageBean {
 
     @Override
     List filtrar() {
-        deCampos();
+        getFacade().setEntity(categoria);
         getFacade().setRango(new Integer[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
@@ -103,17 +87,8 @@ public class CategoriaBean extends AbstractPageBean {
 
     @Override
     public String buscar() {
-        if (id != null && !id.trim().equals("")) {
-            Integer x = null;
-            try {
-                x = new Integer(id.trim());
-            } catch (Exception e) {
-                e.printStackTrace();
-                setErrorMessage("frm:id", "Ingrese un número válido");
-                return null;
-            }
-        }
-        deCampos();
+        categoria = new Categoria(id, descripcion, null, null);
+        getFacade().setEntity(categoria);
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
@@ -124,8 +99,10 @@ public class CategoriaBean extends AbstractPageBean {
 
     @Override
     public String nuevo() {
-        limpiarCampos();
-        return "crearcategoria";
+        categoria = new Categoria();
+        setAgregar(Boolean.TRUE);
+        setModificar(Boolean.FALSE);
+        return "categoria";
     }
 
     @Override
@@ -136,14 +113,15 @@ public class CategoriaBean extends AbstractPageBean {
         xid = ((String) request.getParameter("radio"));
         if (xid != null) {
             try {
-                getFacade().setEntity(getFacade().find(new Integer(xid)));
+                categoria = getFacade().find(new Integer(xid));
+                setActivo(categoria.getActivo().equals('S') ? Boolean.TRUE : Boolean.FALSE);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.getLogger(CategoriaBean.class.getName()).log(Level.SEVERE, null, e);
                 return null;
             }
-            deEntity();
-            setModificar(true);
-            return "modificarcategoria";
+            setModificar(Boolean.TRUE);
+            setAgregar(Boolean.FALSE);
+            return "categoria";
         } else {
             setErrorMessage(null, getFacade().sel);
             return null;
@@ -151,19 +129,19 @@ public class CategoriaBean extends AbstractPageBean {
     }
 
     @Override
-    boolean validarNuevo() {
+    boolean validar() {
         boolean res = true;
-        if (this.getId().trim().equals("")) {
+        if (categoria.getId() == null) {
             setErrorMessage("frm:id", "Ingrese un valor");
             return false;
         } else {
             Integer x = null;
             try {
-                x = new Integer(this.getId());
+                x = new Integer(categoria.getId());
                 if (x < 0) {
                     setErrorMessage("frm:id", "Ingrese un valor positivo");
                     res = false;
-                } else {
+                } else if (getAgregar()) {
                     Categoria existe = null;
                     existe = getFacade().find(x);
                     if (existe != null) {
@@ -176,43 +154,22 @@ public class CategoriaBean extends AbstractPageBean {
             }
         }
 
-        if (this.getDescripcion().trim().equals("")) {
-            setErrorMessage("frm:descripcion", "Ingrese un valor");
-            res = false;
-        }
         return res;
     }
 
     @Override
-    boolean validarModificar() {
-        if (this.getDescripcion().trim().equals("")) {
-            setErrorMessage("frm:descripcion", "Ingrese un valor");
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public String guardarNuevo() {
-        boolean validado = validarNuevo();
+    public String guardar() {
+        boolean validado = validar();
         if (validado) {
-            getFacade().create();
-            setInfoMessage(null, getFacade().ex1);
-            return this.listar();
-        } else {
-            FacesContext.getCurrentInstance().addMessage("frm:id", new FacesMessage("Id ya existe"));
-            return null;
-        }
-    }
-
-    @Override
-    public String guardarModificar() {
-        boolean validado = validarModificar();
-        if (validado) {
-            getFacade().guardar();
-            setInfoMessage(null, facade.ex2);
-            limpiarCampos();
+            getFacade().setEntity(categoria);
+            if (getModificar()) {
+                getFacade().getEntity().setActivo(getActivo() ? 'S' : 'N');
+                getFacade().guardar();
+                setInfoMessage(null, facade.ex2);
+            } else {
+                getFacade().create();
+                setInfoMessage(null, getFacade().ex1);
+            }
             return this.listar();
         } else {
             return null;
@@ -221,8 +178,9 @@ public class CategoriaBean extends AbstractPageBean {
 
     @Override
     public String cancelar() {
-        limpiarCampos();
-        return this.listar();
+        categoria = new Categoria();
+        getFacade().setEntity(categoria);
+        return getNav();
     }
 
     @Override
@@ -240,6 +198,8 @@ public class CategoriaBean extends AbstractPageBean {
     @Override
     public String todos() {
         limpiarCampos();
+        categoria = new Categoria();
+        getFacade().setEntity(categoria);
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
@@ -249,17 +209,25 @@ public class CategoriaBean extends AbstractPageBean {
         return getNav();
     }
 
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
     /**
      * @return the id
      */
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
     /**
      * @param id the id to set
      */
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
