@@ -4,13 +4,16 @@
  */
 package py.com.bej.orm.interfaces;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author Diego_M
  */
-public interface WithId<T> {
+public abstract class WithId<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public abstract void setId(T id);
 
