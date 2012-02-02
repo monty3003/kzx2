@@ -2,11 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package py.com.bej.web.servlets.security;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author diego
  */
 public class LoginServlet extends HttpServlet {
-   
+
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
@@ -26,7 +28,7 @@ public class LoginServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
@@ -39,11 +41,11 @@ public class LoginServlet extends HttpServlet {
             out.println("<h1>Servlet LoginServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
-            */
-        } finally { 
+             */
+        } finally {
             out.close();
         }
-    } 
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /** 
@@ -55,9 +57,9 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
-    } 
+    }
 
     /** 
      * Handles the HTTP <code>POST</code> method.
@@ -68,21 +70,25 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-          String nombre = "erling";
-        String password = "rebemar";
+            throws ServletException, IOException {
+//        String nombre = "erling";
+//        String password = "rebemar";
         String formNombre = request.getParameter("txtUsuario");
-        String formPassword = request.getParameter("txtPassword");
+//        String formPassword = request.getParameter("txtPassword");
 //        response.sendRedirect("./secure/app/main.bej");
-        if (formNombre.equals(nombre)) {
-            if (formPassword.equals(password)) {
+//        if (formNombre.equals(nombre)) {
+//            if (formPassword.equals(password)) {
+                if (SessionBean.getInstance().getSesionAbierta().containsValue(formNombre)) {
+                    response.sendRedirect(request.getContextPath());
+                }
+                SessionBean.getInstance().registrarSesion(request.getSession().getId(), formNombre);
                 response.sendRedirect("./secure/app/main.bej");
-            } else {
-                response.sendRedirect("login.xhtml");
-            }
-        } else {
-            response.sendRedirect("login.xhtml");
-        }
+//            } else {
+//                response.sendRedirect(request.getContextPath());
+//            }
+//        } else {
+//            response.sendRedirect(request.getContextPath());
+//        }
         processRequest(request, response);
     }
 
@@ -94,5 +100,4 @@ public class LoginServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }

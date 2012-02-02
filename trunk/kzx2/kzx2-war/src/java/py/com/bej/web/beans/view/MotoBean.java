@@ -4,9 +4,9 @@
  */
 package py.com.bej.web.beans.view;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -16,11 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Persona;
-import py.com.bej.orm.entities.PersonaPK;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.PersonaFacade;
 import py.com.bej.orm.utils.Orden;
+import py.com.bej.web.utils.JsfUtils;
 
 /**
  *
@@ -28,7 +28,7 @@ import py.com.bej.orm.utils.Orden;
  */
 @ManagedBean
 @SessionScoped
-public class MotoBean extends AbstractPageBean {
+public class MotoBean extends AbstractPageBean<Moto> {
 
     @EJB
     private CategoriaFacade categoriaFacade;
@@ -36,11 +36,11 @@ public class MotoBean extends AbstractPageBean {
     private PersonaFacade personaFacade;
     @EJB
     private MotoFacade facade;
-    private List<Categoria> listaCategorias;
+    private Moto moto;
+    //Listas
     private List<SelectItem> listaCategoria;
-    private List<Persona> listaPersonas;
     private List<SelectItem> listaPersona;
-    //Moto
+    //Campos de busqueda
     private String codigo;
     private Integer categoria;
     private String codigoFabrica;
@@ -51,6 +51,19 @@ public class MotoBean extends AbstractPageBean {
 
     /** Creates a new instance of MotoBean */
     public MotoBean() {
+    }
+
+    @Override
+    void limpiarCampos() {
+        setAgregar(Boolean.FALSE);
+        setModificar(Boolean.FALSE);
+        this.codigo = null;
+        this.categoria = null;
+        this.codigoFabrica = null;
+        this.marca = null;
+        this.modelo = null;
+        this.color = null;
+        this.fabricante = null;
     }
 
     /**
@@ -84,70 +97,9 @@ public class MotoBean extends AbstractPageBean {
     }
 
     @Override
-    void deEntity() {
-        this.setCodigo(facade.getEntity().getCodigo());
-        this.setCodigoFabrica(facade.getEntity().getCodigoFabrica());
-        this.setMarca(facade.getEntity().getMarca());
-        this.setModelo(facade.getEntity().getModelo());
-        this.setColor(facade.getEntity().getColor());
-        if (facade.getEntity().getFabricante() != null) {
-            this.setFabricante(facade.getEntity().getFabricante().getPersonaPK().getId());
-        }
-        if (facade.getEntity().getCategoria() != null) {
-            setCategoria(facade.getEntity().getCategoria().getId());
-        }
-    }
-
-    @Override
-    void deCampos() {
-        if (this.codigo != null && !this.codigo.trim().equals("")) {
-            facade.getEntity().setCodigo(getCodigo().trim().toUpperCase());
-        } else {
-            facade.getEntity().setCodigo(null);
-        }
-        if (this.getCodigoFabrica() != null && !this.getCodigoFabrica().trim().equals("")) {
-            facade.getEntity().setCodigoFabrica(getCodigoFabrica().trim().toUpperCase());
-        } else {
-            facade.getEntity().setCodigoFabrica(null);
-        }
-        if (this.getMarca() != null && !this.getMarca().trim().equals("")) {
-            facade.getEntity().setMarca(marca.trim().toUpperCase());
-        } else {
-            facade.getEntity().setMarca(null);
-        }
-        if (this.getModelo() != null && !this.getModelo().trim().equals("")) {
-            facade.getEntity().setModelo(modelo.trim().toUpperCase());
-        } else {
-            facade.getEntity().setModelo(null);
-        }
-        if (this.getColor() != null && !this.getColor().trim().equals("")) {
-            facade.getEntity().setColor(color.trim().toUpperCase());
-        } else {
-            facade.getEntity().setColor(null);
-        }
-    }
-
-    @Override
-    void limpiarCampos() {
-        getFacade().setEntity(new Moto());
-        if (facade.getOrden() == null) {
-            getFacade().setOrden(new Orden("codigo", false));
-        }
-        setCodigo(null);
-        setCodigoFabrica(null);
-        setMarca(null);
-        setModelo(null);
-        setColor(null);
-        setFabricante(null);
-        setCategoria(null);
-        setDesde(0);
-        setMax(10);
-        setNav("listamotos");
-    }
-
-    @Override
     public String listar() {
-        setNav("listamotos");
+        limpiarCampos();
+        setNav("moto");
         setDesde(0);
         setMax(10);
         if (facade.getOrden() == null) {
@@ -162,8 +114,7 @@ public class MotoBean extends AbstractPageBean {
 
     @Override
     List filtrar() {
-        getFacade().setEntity(new Moto());
-        deCampos();
+        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color, new Persona(fabricante), new Categoria(categoria)));
         getFacade().setRango(new Integer[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
@@ -171,30 +122,13 @@ public class MotoBean extends AbstractPageBean {
 
     @Override
     void obtenerListas() {
-        listaCategorias = new CategoriaFacade().findBetween(50, 60);
-        if (!listaCategorias.isEmpty()) {
-            Iterator<Categoria> it = listaCategorias.iterator();
-            do {
-                Categoria x = it.next();
-                getListaCategoria().add(new SelectItem(x.getId(), x.getDescripcion()));
-            } while (it.hasNext());
-
-        }
-        listaPersonas = new PersonaFacade().findByPersona(20);
-        if (!listaPersonas.isEmpty()) {
-            Iterator<Persona> it = listaPersonas.iterator();
-            do {
-                Persona x = it.next();
-                getListaPersona().add(new SelectItem(x.getPersonaPK().getId(), x.getNombre()));
-            } while (it.hasNext());
-
-        }
+        listaCategoria = JsfUtils.getSelectItems(new CategoriaFacade().findBetween(30, 40), !getModificar());
+        listaPersona = JsfUtils.getSelectItems(new PersonaFacade().findByPersona(20), !getModificar());
     }
 
     @Override
     public String buscar() {
-        getFacade().setEntity(new Moto());
-        deCampos();
+        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color, new Persona(fabricante), new Categoria(categoria)));
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
@@ -205,13 +139,11 @@ public class MotoBean extends AbstractPageBean {
 
     @Override
     public String nuevo() {
-        getFacade().setEntity(null);
-        listaCategoria = new ArrayList<SelectItem>();
-        getListaCategoria().add(new SelectItem("-1", "-SELECCIONAR-"));
-        listaPersona = new ArrayList<SelectItem>();
-        getListaPersona().add(new SelectItem(-1, "-SELECCIONAR-"));
+        setAgregar(Boolean.TRUE);
+        setModificar(Boolean.FALSE);
+        setMoto(new Moto());
         obtenerListas();
-        return "crearmoto";
+        return "moto";
     }
 
     @Override
@@ -221,18 +153,18 @@ public class MotoBean extends AbstractPageBean {
         this.setCodigo((String) request.getParameter("radio"));
         if (this.getCodigo() != null) {
             try {
-                getFacade().setEntity(facade.find(this.getCodigo()));
+                setMoto(facade.find(this.getCodigo()));
+                setActivo(getMoto().getActivo().equals('S') ? Boolean.TRUE : Boolean.FALSE);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.getLogger(UbicacionBean.class.getName()).log(Level.SEVERE, null, e);
                 return null;
             }
-            deEntity();
-            listaCategoria = new ArrayList<SelectItem>();
-            listaPersona = new ArrayList<SelectItem>();
+            setAgregar(Boolean.FALSE);
+            setModificar(Boolean.TRUE);
             obtenerListas();
             setFabricante(facade.getEntity().getCategoria().getId());
             setCategoria(facade.getEntity().getCategoria().getId());
-            return "modificarmoto";
+            return "moto";
         } else {
             setErrorMessage(null, facade.sel);
             return null;
@@ -240,8 +172,8 @@ public class MotoBean extends AbstractPageBean {
     }
 
     @Override
-    boolean validarNuevo() {
-        if (getCodigo().trim().equals("")) {
+    boolean validar() {
+        if (getMoto().getCodigo().trim().equals("")) {
             setErrorMessage("frm:codigo", "Ingrese un valor");
             return false;
         } else {
@@ -253,27 +185,27 @@ public class MotoBean extends AbstractPageBean {
             }
         }
         boolean res = true;
-        if (getCodigoFabrica().trim().equals("")) {
+        if (getMoto().getCodigoFabrica().trim().equals("")) {
             setErrorMessage("frm:codigoFabrica", "Ingrese un valor");
             res = false;
         }
-        if (getMarca().trim().equals("")) {
+        if (getMoto().getMarca().trim().equals("")) {
             setErrorMessage("frm:marca", "Ingrese un valor");
             res = false;
         }
-        if (getModelo().trim().equals("")) {
+        if (getMoto().getModelo().trim().equals("")) {
             setErrorMessage("frm:modelo", "Ingrese un valor");
             res = false;
         }
-        if (getColor().trim().equals("")) {
+        if (getMoto().getColor().trim().equals("")) {
             setErrorMessage("frm:color", "Ingrese un valor");
             res = false;
         }
-        if (getFabricante() == -1) {
+        if (getMoto().getFabricante() == null) {
             setErrorMessage("frm:fabricante", "Seleccione un valor");
             res = false;
         }
-        if (getCategoria() == -1) {
+        if (getMoto().getCategoria() == null) {
             setErrorMessage("frm:categoria", "Seleccione un valor");
             res = false;
         }
@@ -281,54 +213,28 @@ public class MotoBean extends AbstractPageBean {
     }
 
     @Override
-    public String guardarNuevo() {
-        boolean validado = validarNuevo();
+    public String guardar() {
+        boolean validado = validar();
         if (validado) {
-            getFacade().setEntity(new Moto());
-            deCampos();
-            Persona xfabricante = null;
-            Categoria xcategoria = null;
-            getPersonaFacade().setEntity(new Persona(new PersonaPK(getFabricante(), null)));
-            xfabricante = getPersonaFacade().findById();
-            xcategoria = getCategoriaFacade().find(getCategoria());
-            facade.getEntity().setFabricante(xfabricante);
-            facade.getEntity().setCategoria(xcategoria);
-            facade.create();
-            setInfoMessage(null, facade.ex1);
+            getFacade().setEntity(moto);
+            if (getModificar()) {
+                getFacade().getEntity().setActivo(getActivo() ? 'S' : 'N');
+                getFacade().guardar();
+                setInfoMessage(null, facade.ex2);
+            } else {
+                getFacade().create();
+                setInfoMessage(null, getFacade().ex1);
+            }
         } else {
             return null;
         }
-        limpiarCampos();
         return this.listar();
     }
 
     @Override
-    public String guardarModificar() {
-        boolean validado = validarNuevo();
-        if (validado) {
-            deCampos();
-            if (!facade.getEntity().getFabricante().getPersonaPK().getId().equals(getFabricante())) {
-                Persona xfabricante = null;
-                xfabricante = getPersonaFacade().find(getFabricante());
-                facade.getEntity().setFabricante(xfabricante);
-            }
-            if (!facade.getEntity().getCategoria().getId().equals(getCategoria())) {
-                Categoria xcategoria = null;
-                xcategoria = getCategoriaFacade().find(getCategoria());
-                facade.getEntity().setCategoria(xcategoria);
-            }
-            facade.guardar();
-            setInfoMessage(null, facade.ex2);
-            limpiarCampos();
-            return this.listar();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public String cancelar() {
-        limpiarCampos();
+        setMoto(new Moto());
+        getFacade().setEntity(getMoto());
         return this.listar();
     }
 
@@ -347,20 +253,13 @@ public class MotoBean extends AbstractPageBean {
     @Override
     public String todos() {
         limpiarCampos();
+        setMoto(new Moto());
         getFacade().setContador(null);
         getFacade().setUltimo(null);
-        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setRango(new Integer[]{getDesde(), getMax()});
         getFacade().setOrden(new Orden("codigo", false));
-        this.setValido((Boolean) true);
-        deCampos();
-        getFacade().setRango(new Integer[]{0, 10});
         this.filtrar();
         return getNav();
-    }
-
-    @Override
-    boolean validarModificar() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -473,5 +372,19 @@ public class MotoBean extends AbstractPageBean {
      */
     public List<SelectItem> getListaPersona() {
         return listaPersona;
+    }
+
+    /**
+     * @return the moto
+     */
+    public Moto getMoto() {
+        return moto;
+    }
+
+    /**
+     * @param moto the moto to set
+     */
+    public void setMoto(Moto moto) {
+        this.moto = moto;
     }
 }

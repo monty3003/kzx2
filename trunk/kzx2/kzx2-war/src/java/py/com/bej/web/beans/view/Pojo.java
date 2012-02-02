@@ -21,7 +21,7 @@ public class Pojo {
     private String precio;
     private String ubicacion;
     private Integer venta;
-    private NumberFormat formatNumero = NumberFormat.getNumberInstance(Locale.GERMAN);
+    private NumberFormat formatNumero = NumberFormat.getNumberInstance(Locale.US);
 
     /**
      * @return the modelo
