@@ -3,11 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core">
-    <head>
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Comprar Motos</title>
-    </head> 
+    </h:head> 
 
     <ui:composition template="./../../resources/template/facesTemplate.xhtml">
 
@@ -15,132 +16,203 @@
             <h:form id="frm">
                 <div>
                     <fieldset>
-                        <legend>Compra Nueva</legend>
-                        <body onload="document.getElementById('frm:comprobante').focus();">
+                        <h3>Compra Nueva</h3>
+                        <h:body>
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="comprobante">Nº de Factura: </label></div>
-                                    <div class="cont"><input type="text" id="comprobante" name="comprobante" jsfc="h:inputText" size="20" maxlength="45"
-                                                             value="#{compraMotosBean.comprobante}"/><h:message errorClass="msgError" for="frm:comprobante"/></div>
+                                    <div class="cont"><h:inputText id="comprobante" size="20" maxlength="45"
+                                                                   value="#{compraMotosBean.compra.factura.numero}"/><rich:messages for="frm:comprobante"/></div>
+                                    <div class="etiq"><label for="validoHasta">Factura válido hasta: </label></div>
+                                    <div class="cont"><rich:calendar value="#{compraMotosBean.compra.factura.validoHasta}" id="validoHasta" enableManualInput="true"
+                                                                     popup="true" datePattern="dd/MM/yyyy"
+                                                                     resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar><rich:messages for="frm:validoHasta"/></div>
                                     <div class="etiq"><label for="fechaOperacion">Fecha: </label></div>
-                                    <div class="cont"><input type="text" id="fechaOperacion" name="fechaOperacion" jsfc="h:inputText" size="15" maxlength="20"
-                                                             value="#{compraMotosBean.fechaOperacion}"/><h:message errorClass="msgError" for="frm:fechaOperacion"/>
+                                    <div class="cont"> <rich:calendar value="#{compraMotosBean.compra.fechaOperacion}" id="fechaOperacion" enableManualInput="true"
+                                                                      popup="true" datePattern="dd/MM/yyyy-HH:mm:s"
+                                                                      resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="frm:fechaOperacion"/>
                                         <h:selectBooleanCheckbox id="fechaAhora" title="Ahora" value="#{compraMotosBean.usarFechaAhora}" label="Ahora">
                                             <f:ajax event="change" render="fechaOperacion"/>
                                         </h:selectBooleanCheckbox>Ahora</div>
 
                                     <div class="etiq"><label for="fechaEntrega">Fecha de Entrega: </label></div>
-                                    <div class="cont"><input type="text" id="fechaEntrega" name="fechaEntrega" jsfc="h:inputText" size="15" maxlength="20"
-                                                             value="#{compraMotosBean.fechaEntrega}"/><h:message errorClass="msgError" for="frm:fechaEntrega"/>
+                                    <div class="cont"><rich:calendar value="#{compraMotosBean.compra.fechaEntrega}" id="fechaEntrega" enableManualInput="true"
+                                                                     popup="true" datePattern="dd/MM/yyyy-HH:mm:s"
+                                                                     resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar><rich:messages for="frm:fechaEntrega"/>
                                         <h:selectBooleanCheckbox id="fechaAhoraEntrega" title="Ahora" value="#{compraMotosBean.usarFechaEntregaAhora}" label="Ahora">
                                             <f:ajax event="change" render="fechaEntrega"/>
                                         </h:selectBooleanCheckbox>Ahora</div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="categoria">Categoria: </label></div>
-                                    <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{compraMotosBean.codigo}">
-                                            <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
-                                            <f:ajax event="change" render="panelCategoria"/>
-                                        </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
                                     <div class="etiq"><label for="vendedor">Proveedor: </label></div>
-                                    <div class="cont"><select id="vendedor" name="vendedor" jsfc="h:selectOneMenu" value="#{compraMotosBean.vendedor}">
+                                    <div class="cont"><h:selectOneMenu id="vendedor" value="#{compraMotosBean.idFiltro}">
                                             <f:selectItems value="#{compraMotosBean.listaProveedor}"/>
-                                        </select>&#160;<h:message errorClass="msgError" for="frm:vendedor"/></div>
-
+                                            <f:ajax event="blur" render="@this"/>
+                                        </h:selectOneMenu>&#160;<rich:messages for="frm:vendedor"/></div>
+                                    <div class="etiq"><label for="categoria">Categoria: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{compraMotosBean.compra.codigo.id}">
+                                            <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
+                                            <f:ajax event="blur" render="panelCategoria"/>
+                                        </h:selectOneMenu>&#160;<rich:messages for="frm:categoria"/></div>
                                 </div>
                             </div>
                             <hr/>
-                            <div class="tablaForm">
-                                <div class="fila">
-                                    <div class="t_head" style="width: 70%;"></div>
-                                    <div class="t_head" style="width: 10%;">Exentas</div>
-                                    <div class="t_head" style="width: 10%;">Gravadas 5%</div>
-                                    <div class="t_head" style="width: 10%;">Gravadas 10%</div>
-                                </div>
-                                <div class="filaTabla">
-                                    <div class="d" style="width: 70%;">Sub Total
-                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalExentas"/>
-                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas5"/>
-                                        &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas10"/></div>
-                                    <div class="d" style="width: 10%;">
-                                        <input class="d_num" type="text" id="subTotalExentas" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalExentas}">
-                                            <f:ajax event="blur" render="subTotalExentas"/></input></div>
-                                    <div class="d" style="width: 10%;">
-                                        <input class="d_num" type="text" id="subTotalGravadas5" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalGravadas5}">
-                                            <f:ajax event="blur" render="subTotalGravadas5"/></input></div>
-                                    <div class="d" style="width: 10%;">
-                                        <input class="d_num" type="text" id="subTotalGravadas10" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.subTotalGravadas10}">
-                                            <f:ajax event="blur" render="subTotalGravadas10"/></input></div>
-                                </div>
-                                <div class="filaTabla">
-                                    <div class="d" style="width: 70%;">Total&#160;&#160;<h:message errorClass="msgError" for="frm:toTal"/></div>
-                                    <div class="d" style="width: 10%;"/>
-                                    <div class="d" style="width: 10%;"/>
-                                    <div class="d" style="width: 10%; text-align: right;"><input class="d_num" type="text" id="toTal" jsfc="h:inputText" size="13" maxlength="13" value="#{compraMotosBean.totalPagado}">
-                                            <f:ajax event="blur" render="toTal"/></input></div>
-                                </div>
+                            <div style="margin: 0px auto; width: 70%;">
+                                <table class="tablaGrilla">
+                                    <tr>
+                                        <td width="50%">&nbsp;</td>                                       
+                                        <td>Exentas</td>                                       
+                                        <td>Gravadas 5%</td>                                       
+                                        <td>Gravadas 10%</td>     
+                                    </tr>
+                                    <tr>
+                                        <td width="50%" align="left">Sub Total
+                                            &nbsp;<rich:messages for="frm:subTotalExentas"/>
+                                            &nbsp;<rich:messages for="frm:subTotalGravadas5"/>
+                                            &nbsp;<rich:messages for="frm:subTotalGravadas10"/></td>                                       
+                                        <td>
+                                            <h:inputText id="subTotalExentas" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalExentas}">
+                                                <f:ajax event="blur" render="subTotalExentas"/>
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:inputText>
+                                        </td>                                       
+                                        <td>
+                                            <h:inputText id="subTotalGravadas5" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalGravadas5}">
+                                                <f:ajax event="blur" render="subTotalGravadas5"/>
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:inputText>
+                                        </td>                                       
+                                        <td>
+                                            <h:inputText id="subTotalGravadas10" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalGravadas10}">
+                                                <f:ajax event="blur" render="subTotalGravadas10"/>
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:inputText>
+                                        </td>     
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" align="left">Total&nbsp;<rich:messages for="frm:total"/></td>                                       
+                                        <td><h:inputText styleClass="d_num" id="total" size="13" maxlength="13" value="#{compraMotosBean.compra.totalPagado}">
+                                                <f:ajax event="blur" render="total"/>
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:inputText>
+                                        </td>            
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4">
+                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalExentas"/>
+                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas5"/>
+                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas10"/>
+                                            &#160;&#160;<h:message errorClass="msgError" for="frm:toTal"/>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                             <h:panelGroup id="panelCategoria">
-                                <h:panelGroup rendered="#{compraMotosBean.codigo eq '32'}">
+                                <h:panelGroup rendered="#{compraMotosBean.compra.codigo.id == 45}">
                                     <hr/>
                                     <div class="tablaForm">
                                         <div class="fila">
                                             <div class="etiq"><label for="comprobante">Entrega Inicial: </label></div>
-                                            <div class="cont"><input type="text" id="entregaInicial" name="entregaInicial" jsfc="h:inputText" size="20" maxlength="13"
-                                                                     value="#{compraMotosBean.entregaInicial}">
-                                                    <f:ajax event="blur" render="entregaInicial"/></input><h:message errorClass="msgError" for="frm:entregaInicial"/></div>
+                                            <div class="cont"><h:inputText styleClass="d_num" id="entregaInicial" size="20" maxlength="13" value="#{compraMotosBean.compra.entregaInicial}">
+                                                    <f:ajax event="blur" render="@this"/>
+                                                    <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                                </h:inputText><h:message errorClass="msgError" for="frm:entregaInicial"/></div>
                                             <div class="etiq"><label for="cuotas">Cuotas: </label></div>
-                                            <div class="cont"><input type="text" id="cuotas" name="cuotas" jsfc="h:inputText" size="5" maxlength="2"
-                                                                     value="#{compraMotosBean.cuotas}"/><h:message errorClass="msgError" for="frm:cuotas"/></div>
+                                            <div class="cont"><h:inputText id="cuotas" styleClass="d_num" size="5" maxlength="2" value="#{compraMotosBean.compra.cuotas}">
+                                                </h:inputText><h:message errorClass="msgError" for="frm:cuotas"/></div>
                                             <div class="etiq"><label for="montoCuotaIgual">Monto Cuota: </label></div>
-                                            <div class="cont"><input type="text" id="montoCuotaIgual" name="montoCuotaIgual" jsfc="h:inputText" size="20" maxlength="13"
-                                                                     value="#{compraMotosBean.montoCuotaIgual}">
-                                                    <f:ajax event="blur" render="montoCuotaIgual"/></input><h:message errorClass="msgError" for="frm:montoCuotaIgual"/></div>
+                                            <div class="cont"><h:inputText id="montoCuotaIgual" styleClass="d_num" size="20" maxlength="13" value="#{compraMotosBean.compra.montoCuotaIgual}">
+                                                    <f:ajax event="blur" render="@this"/>
+                                                    <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                                </h:inputText><h:message errorClass="msgError" for="frm:montoCuotaIgual"/></div>
                                         </div>
+                                    </div>
+                                    <script language="text/javascript">
+                                            javascript:formatInputs(document.forms);
+                                    </script>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <hr/>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="cantidadItems"> Cantidad de Motos: </label></div>
+                                    <div class="cont"><h:inputText id="cantidadItems" styleClass="d_num" size="5" maxlength="2" value="#{compraMotosBean.compra.cantidadItems}">
+                                            <f:ajax event="blur" listener="#{compraMotosBean.cargarMotosNuevas}" render="@this"/>
+                                        </h:inputText>
+                                        <input class="submit" type="button" jsfc="h:commandButton" value="Cargar">
+                                            <f:ajax event="click" render="frm:tablaMotos"/>
+                                        </input>
+                                        <rich:messages for="frm:cantidadItems"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <h:panelGroup id="tablaMotos">
+                                <h:panelGroup rendered="#{compraMotosBean.compra.cantidadItems gt 0}">
+                                    <div style="margin: 0px auto; width: 80%;">
+                                        <table class="tablaGrilla">
+                                            <thead>
+                                                <tr>
+                                                    <td>Código</td>
+                                                    <td>Chasis</td>
+                                                    <td>Precio de Costo</td>
+                                                    <td>Ubicación</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <ui:repeat var="m" value="#{compraMotosBean.compra.motostocksCompra}">
+                                                    <tr>
+                                                        <td>
+                                                            <h:selectOneMenu id="modelo" value="#{m.moto.codigo}">
+                                                                <f:selectItems value="#{compraMotosBean.listaMoto}"/></h:selectOneMenu><rich:message for="frm:modelo"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:inputText id="chasis" styleClass="textMayus" value="#{m.chasis}">
+                                                                <f:ajax event="blur" render="@this"/>
+                                                            </h:inputText><rich:message for="frm:chasis"/>    
+                                                        </td>
+                                                        <td>
+                                                            <h:inputText id="costo" styleClass="d_num" value="#{m.costo}">
+                                                                <f:ajax event="blur" render="@this"/>
+                                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                                            </h:inputText><rich:message for="frm:costo"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:selectOneMenu id="ubicacion" value="#{m.ubicacion.id}">
+                                                                <f:selectItems value="#{compraMotosBean.listaUbicacion}"/></h:selectOneMenu><rich:messages for="frm:ubicacion"/>
+                                                        </td>
+                                                    </tr>
+                                                </ui:repeat>
+                                            </tbody>
+                                        </table>
+                                        <script language="text/javascript">
+                                            javascript:formatInputs(document.forms);document.getElementById('frm:modelo').focus();
+                                        </script>
                                     </div>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <hr/>
-                            <div class="etiq"><label for="cantidadItems"> Cantidad de Motos: </label></div>
-                            <div class="cont"><input type="text" id="cantidadItems" name="cantidadItems" jsfc="h:inputText" size="5" maxlength="2" value="#{compraMotosBean.cantidadItems}">
-                                    <f:ajax event="blur" listener="#{compraMotosBean.cargarMotosNuevas}" render="@this"/>
-                                </input>
-                                <input class="submit" type="button" jsfc="h:commandButton" value="Cargar">
-                                    <f:ajax event="click" render="frm:tablaMotos"/>
-                                </input>
-                                <h:message errorClass="msgError" for="frm:cantidadItems"/></div>
-                            <h:panelGroup id="tablaMotos">
-                                <h:panelGroup rendered="#{compraMotosBean.cantidad gt 0}">
-                                    <body onload="document.getElementById('frm:modelo').focus();">
-                                        <div style="margin: 0px auto; width: 70%;">
-                                            <h:messages id="messages" errorClass="messageError1" infoClass="messageInfo" warnClass="messageWarn"/></div>
-                                        <div class="tablaFormEntradaDatos">
-                                            <div class="fila">
-                                                <div class="t_head">Código</div>
-                                                <div class="t_head">Chasis</div>
-                                                <div class="t_head">Precio de Costo</div>
-                                                <div class="t_head">Ubicación</div>
-                                            </div>
-                                            <ui:repeat var="m" value="#{compraMotosBean.listaMotosNuevas}">
-                                                <div class="filaTabla">
-                                                    <div class="d_in"><select jsfc="h:selectOneMenu" id="modelo" name="modelo" value="#{m.modelo}">
-                                                            <f:selectItems value="#{compraMotosBean.listaMoto}"/></select></div>
-                                                    <div class="d_in"><h:inputText styleClass="d_num" value="#{m.chasis}"><f:ajax event="blur" render="@this"/></h:inputText></div>
-                                                    <div class="d_in"><h:inputText styleClass="d_num" value="#{m.precio}"><f:ajax event="blur" render="@this"/></h:inputText></div>
-                                                    <div class="d_in"><select jsfc="h:selectOneMenu" value="#{m.ubicacion}">
-                                                            <f:selectItems value="#{compraMotosBean.listaUbicacion}"/></select></div>
-                                                </div>
-                                            </ui:repeat>
-                                        </div>
-                                    </body>
-                                </h:panelGroup>
+                            <h:panelGroup rendered="#{compraMotosBean.modificar}">
+                                <hr/>
+                                <h4>Estado Actual</h4>
+                                <div class="botonera">
+                                    <h:selectBooleanCheckbox value="#{compraMotosBean.activoFiltro}" label="Activo"/>Activo
+                                    <h:selectBooleanCheckbox value="#{compraMotosBean.saldadoFiltro}" label="Saldado"/>Saldado
+                                    <h:selectBooleanCheckbox value="#{compraMotosBean.anuladoFiltro}" label="Anulado"/>Anulado
+
+                                </div>
                             </h:panelGroup>
                             <hr/>
                             <div class="botonera">
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{compraMotosBean.guardarNuevo}"/>
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{compraMotosBean.cancelar}"/>
+                                <h:commandButton styleClass="submit" value="Guardar" action="#{compraMotosBean.guardar}"/>
+                                <h:commandButton styleClass="submit" value="Cancelar" action="#{compraMotosBean.cancelar}" immediate="true"/>
                             </div>
-                        </body>
+                        </h:body>
                     </fieldset>
                 </div>
             </h:form>

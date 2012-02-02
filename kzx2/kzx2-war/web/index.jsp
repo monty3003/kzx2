@@ -14,6 +14,6 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <jsp:forward page="login.xhtml"/>
+            <jsp:forward page="login.bej"/>
     </body>
 </html>

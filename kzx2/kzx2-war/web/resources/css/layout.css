@@ -16,30 +16,58 @@
 root {
     display: block;
 }
+h3{font-size: 18px;
+   color: #000099;
+   font-family: Arial,Helvetica,sans-serif;
+}
 
 body{
+    background-image: url("./../images/page-bkg2.jpg");
     text-align:center;
-    font-family: Arial,Helvetica,sans-serif;
+    font: 12px Arial,Helvetica,sans-serif;
+    margin: 10px 50px 50px;
+}
+body input, select{
+    padding: 5px;
+}
+body hr{
+    clear: both;
 }
 div {
     margin: .4em 0;
 }
 
-#login{
-    position:absolute;
-    width:300px;
-    height:200px;
-    border:1px solid #006;
-    top:50%;
-    left:50%;
-    margin-top: -100px;
-    margin-left: -100px;
+.lock{
+    width: 100%;
+    height: 200px;
+    display: block;
+    clear: both;
+    text-align: center;
+}
+/*.fondo{
+    background: url(../images/40.jpg) repeat-x;
+    margin: 1px auto auto auto;
+    height: 800px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 5px #07072e;
-    -moz-box-shadow: 4px 4px 5px #07072e;
-    box-shadow: 4px 4px 5px #07072e;
+    -webkit-box-shadow: 4px 4px 5px gray;
+    -moz-box-shadow: 4px 4px 5px gray;
+    box-shadow: 4px 4px 5px gray;
+}*/
+#login{
+    background-color: #f9f9f9;
+    clear: both;
+    width: 30%;
+    height: 100%;
+    border:1px solid #006;
+    margin: 1px auto auto auto;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 5px gray;
+    -moz-box-shadow: 4px 4px 5px gray;
+    box-shadow: 4px 4px 5px gray;
 }
 
 fieldset{
@@ -50,17 +78,17 @@ fieldset{
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 5px #07072e;
-    -moz-box-shadow: 4px 4px 5px #07072e;
-    box-shadow: 4px 4px 5px #07072e;
+    -webkit-box-shadow: 4px 4px 5px gray;
+    -moz-box-shadow: 4px 4px 5px gray;
+    box-shadow: 4px 4px 5px gray;
     background-color: white;
     background-position:center;
-/* Mozilla ignores crazy MS image filters, so it will skip the following */
-filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src="../images/degradado.gif");
+    /* Mozilla ignores crazy MS image filters, so it will skip the following */
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src="../images/degradado.gif");
 }
 /* IE ignores styles with [attributes], so it will skip the following. */
 .degradado[class] {
-background-image:url(../images/degradado.gif);
+    background-image:url(../images/degradado.gif);
 
     background-color: #ffffff;
 }
@@ -80,13 +108,14 @@ background-image:url(../images/degradado.gif);
 }
 
 .mensajes li{
+    background-color: white;
     list-style-position: inside;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 5px #07072e;
-    -moz-box-shadow: 4px 4px 5px #07072e;
-    box-shadow: 4px 4px 5px #07072e;
+    -webkit-box-shadow: 4px 4px 5px gray;
+    -moz-box-shadow: 4px 4px 5px gray;
+    box-shadow: 4px 4px 5px gray;
 }
 
 .submit{
@@ -109,9 +138,9 @@ input:focus {
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 5px #07072e;
-    -moz-box-shadow: 4px 4px 5px #07072e;
-    box-shadow: 4px 4px 5px #07072e;
+    -webkit-box-shadow: 4px 4px 5px gray;
+    -moz-box-shadow: 4px 4px 5px gray;
+    box-shadow: 4px 4px 5px gray;
 }
 
 .buscar{
@@ -161,7 +190,7 @@ input:focus {
     font-size: 12px;
     width:100%;
 }
-    .msgError {
+.msgError {
     padding: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -170,10 +199,61 @@ input:focus {
     width:100%;
 }
 
+/*--------------TABLAS DE BUSQUEDA-----------------*/
+.busqueda{width: 80%;}
+.busqueda label{margin-right: 15px;}
+.busqueda td{text-align: right; padding: 5px;}
+
+/*--------------TABLA DE DATOS---------------------*/
+.tablaDatos{width: 100%; clear: both; overflow: hidden;}
+.tablaDatos thead{
+    font-weight: bold;
+    padding: 2px;
+    background-color: #deddec;
+    border:solid #f9f9f9;
+}
+.tablaDatos tbody{
+    width: 100%;
+    padding: 2px;
+}
+.tablaDatos tbody tr:hover {
+    background-color: #c2dfef;
+}
+.tablaDatos tfoot{
+    width: 100%;
+    padding: 2px;
+    border:1px solid #000;
+    background-color: #f9f9f9;
+    font-size: smaller; color: #cbcad0;
+}
+.tablaDatos td{padding: 5px;}
+
+/*--------------TABLA DE DATOS PARA INGRESO TIPO GRILLA---------------------*/
+.tablaGrilla{width: 100%; clear: both; overflow: hidden;}
+.tablaGrilla thead{
+    font-weight: bold;
+    background-color: #deddec;
+    border:solid #f9f9f9;
+}
+.tablaGrilla tbody{
+    width: 100%;
+}
+.tablaGrilla tbody tr:hover {
+    background-color: #c2dfef;
+}
+.tablaGrilla tfoot{
+    width: 100%;
+    padding: 2px;
+    border:1px solid #000;
+    background-color: #f9f9f9;
+    font-size: smaller; color: #cbcad0;
+}
+.tablaGrilla td input{width: 90%; margin: 1px auto;}
+.tablaGrilla td select{width: 90%; margin: 1px auto;}
+
 /*--------------FORMULARIOS------------------------*/
 
 .tablaForm{
-    display:table;
     width:100%;
     height: 100%;
 }
@@ -182,15 +262,6 @@ input:focus {
     display:table;
     margin: 20px auto;
     max-width: 70%;
-}
-
-.t_head{
-    padding: 2px;
-    display: table-cell;
-    background-color: #deddec;
-    border:solid #f9f9f9;
-
-
 }
 
 .t_footer{
@@ -204,29 +275,25 @@ input:focus {
 
 
 .fila{
-    width: 100%;
-    display:table-row;
+    clear: both;
+    margin: 10px auto;
     padding: 2px;
+    width: 80%;
 }
-
-.filaTabla{
-    width: 100%;
-    display:table-row;
-    padding: 2px;
-}
-
-
-.etiq{
-    padding:5px;
-    display:table-cell;
-    text-align:right;
+.fila label{
+    float: left;
+    margin-top: 5px;
+    margin-right: 15px;
+    padding: 5px;
+    text-align: right;
+    width: 30%;
 }
 
 .cont{
-    padding:5px;
-    display:table-cell;
-    border:2px;
-    text-align:left;
+    border: 2px none;
+    float: left;
+    text-align: left;
+    width: 40%;
 }
 
 .d{
@@ -249,7 +316,7 @@ input:focus {
 
 .d_num{
     display:table-cell;
-    border:none;
+    border:2px solid whitesmoke;
     background-color: #e9e2e2;
     text-align:right;
     font-size: medium;
@@ -264,11 +331,13 @@ input:focus {
 }
 
 .botonera{
-    width: auto;
+    width: 100%;
     display:block;
     border:2px;
     text-align:center;
-
+    float: left;
+    clear: both;
+    margin: 10px auto;
 }
 
 

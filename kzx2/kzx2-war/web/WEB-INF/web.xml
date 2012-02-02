@@ -5,6 +5,39 @@
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
     </context-param>
+    <context-param>
+        <param-name>org.richfaces.SKIN</param-name>
+        <param-value>classic</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.richfaces.enableControlSkinning</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>org.richfaces.enableControlSkinningClasses</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>org.richfaces.skin</param-name>
+        <param-value>plain</param-value>
+    </context-param>
+    <filter>
+        <description>Filtro de seguridad, control de acceso</description>
+        <filter-name>SecurityFilter</filter-name>
+        <filter-class>py.com.bej.web.servlets.security.SecurityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SecurityFilter</filter-name>
+        <url-pattern>/secure/app/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <listener>
+        <description>Listener de sesiones</description>
+        <listener-class>py.com.bej.web.servlets.security.SessionBean</listener-class>
+    </listener>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>py.com.bej.web.servlets.security.LoginServlet</servlet-class>
@@ -31,9 +64,7 @@
         <url-pattern>/lista*</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>5</session-timeout>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

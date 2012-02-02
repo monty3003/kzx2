@@ -16,23 +16,12 @@
                     <fieldset>
                         <div class="tablaForm">
                             <div class="fila">
-                                <div class="etiq"><label for="codigo">Código: </label></div>
-                                <div class="cont"><input id="codigo" jsfc="h:inputText" value="#{motoBean.codigo}" maxlength="14"/>
+                                <div class="etiq"><label for="fechaVencimiento">Fecha de Vencimiento: </label></div>
+                                <div class="cont"><input id="fechaVencimiento" jsfc="h:inputText" value="#{motoBean.fechaVencimiento}" size="15" maxlength="20"/>
                                 </div>
-                                <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
-                                <div class="cont"><input id="codigoFabrica" jsfc="h:inputText" value="#{motoBean.codigoFabrica}" maxlength="20"/>
-                                </div>
-                                <div class="etiq"><label for="marca">Marca: </label></div>
-                                <div class="cont"><input id="marca" jsfc="h:inputText" name="marca" value="#{motoBean.marca}" maxlength="20"/>
-                                </div>
-                            </div>
-                            <div class="fila">
-                                <div class="etiq"><label for="modelo">Modelo: </label></div>
-                                <div class="cont"><input id="modelo" jsfc="h:inputText" name="modelo" value="#{motoBean.modelo}" maxlength="20"/>
-                                </div>
-                                <div class="etiq"><label for="color">Color: </label></div>
-                                <div class="cont"><input id="color" jsfc="h:inputText" value="#{motoBean.color}">
-                                    </input>
+                                <div class="etiq"><label for="fechaPago">Fecha de Pago: </label></div>
+                                <div class="cont"><input id="fechaPago" jsfc="h:inputText" value="#{motoBean.fechaPago}" size="15" maxlength="20"/>
+                                    <h:selectBooleanCheckbox id="noPagadas" title="No Pagadas" value="#{compraMotosBean.noPagadas}" label="No Pagadas"/>No Pagadas
                                 </div>
                             </div>
                         </div>

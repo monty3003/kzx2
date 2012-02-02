@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Motos</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{motoBean.agregar eq true or motoBean.modificar eq true}">
+                        <h5><h:outputText value="#{motoBean.titulo}"/></h5>
+                        <fieldset>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigo">Código: </label></div>
+                                    <div class="cont"><h:inputText id="codigo" styleClass="textMayus" size="20" maxlength="14"
+                                                                   value="#{motoBean.moto.codigo}"/><rich:message for="frm:codigo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
+                                    <div class="cont"><h:inputText id="codigoFabrica" styleClass="textMayus" size="20" maxlength="20"
+                                                                   value="#{motoBean.moto.codigoFabrica}"/><rich:message for="frm:codigoFabrica"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="marca">Marca: </label></div>
+                                    <div class="cont"><h:inputText id="marca" styleClass="textMayus" size="20" maxlength="20"
+                                                                   value="#{motoBean.moto.marca}"/><rich:message for="frm:marca"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="modelo">Modelo: </label></div>
+                                    <div class="cont"><h:inputText id="modelo" styleClass="textMayus" size="20" maxlength="20"
+                                                                   value="#{motoBean.moto.modelo}"/><rich:message  for="frm:modelo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="color">Color: </label></div>
+                                    <div class="cont"><h:inputText id="color" styleClass="textMayus" size="20" maxlength="20"
+                                                                   value="#{motoBean.moto.color}"/><rich:message  for="frm:color"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fabricante">Fabricante: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="fabricante" value="#{motoBean.moto.fabricante.id}">
+                                            <f:selectItems value="#{motoBean.listaPersona}"/>
+                                        </h:selectOneMenu>&#160;<rich:message for="frm:fabricante"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="categoria">Categoría: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{motoBean.moto.categoria.id}">
+                                            <f:selectItems value="#{motoBean.listaCategoria}"/>
+                                        </h:selectOneMenu>&#160;<rich:message for="frm:categoria"/></div>
+                                </div>
+                                <h:panelGroup rendered="#{motoBean.modificar}">
+                                    <div class="fila">
+                                        <div class="etiq"><label for="activo">Activo: </label></div>
+                                        <div class="cont"><h:selectBooleanCheckbox id="activo" value="#{motoBean.activo}"/><h:message for="frm:descripcion"/></div>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{motoBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{motoBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{motoBean.agregar eq false and motoBean.modificar eq false}">
+                        <fieldset>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="codigoFiltro">Código:</label>
+                                        <h:inputText id="codigoFiltro" value="#{motoBean.codigo}" maxlength="14"/>
+                                    </td>
+                                    <td>
+                                        <label for="codigoFabricaFiltro">Código Fábrica: </label>
+                                        <h:inputText id="codigoFabricaFiltro" value="#{motoBean.codigoFabrica}" maxlength="20"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="marcaFiltro">Marca: </label>
+                                        <h:inputText id="marcaFiltro" value="#{motoBean.marca}" maxlength="20"/>
+                                    </td>
+                                    <td>
+                                        <label for="modeloFiltro">Modelo:</label>
+                                        <h:inputText id="modeloFiltro" value="#{motoBean.modelo}" maxlength="14"/>
+                                    </td>
+                                    <td>
+                                        <label for="colorFiltro">Color: </label>
+                                        <h:inputText id="colorFiltro" value="#{motoBean.color}" maxlength="20"/>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{motoBean.buscar}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{motoBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup rendered="#{not empty motoBean.lista }">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <tr>
+                                            <th width="2%"></th>
+                                            <th width="20%"><p>
+                                                    <a id="InkCodigo"  jsfc="h:commandLink" action="#{motoBean.listar}">Codigo
+                                                        <f:setPropertyActionListener value="codigo" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'codigo'}"/></p></th>
+                                            <th width="20%"><p>
+                                                    <a id="InkCodigoFabrica"  jsfc="h:commandLink" action="#{motoBean.listar}">Codigo Fábrica
+                                                        <f:setPropertyActionListener value="codigoFabrica" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'codigoFabrica'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <a id="InkMarca"  jsfc="h:commandLink" action="#{motoBean.listar}">Marca
+                                                        <f:setPropertyActionListener value="marca" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'marca'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <a id="InkModelo"  jsfc="h:commandLink" action="#{motoBean.listar}">Modelo
+                                                        <f:setPropertyActionListener value="modelo" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'modelo'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <a id="InkColor"  jsfc="h:commandLink" action="#{motoBean.listar}">Color
+                                                        <f:setPropertyActionListener value="color" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'color'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <a id="InkActivo"  jsfc="h:commandLink" action="#{motoBean.listar}">Activo
+                                                        <f:setPropertyActionListener value="color" target="#{motoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motoBean.facade.orden.asc}"/>
+                                                    </a>
+                                                    <h:outputText value="#{(motoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motoBean.facade.orden.columna eq 'activo'}"/></p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat var="row" value="#{motoBean.lista}">
+                                            <tr>
+                                                <td><input type="radio" id="radio" name="radio" value="#{row.codigo}"/></td>
+                                                <td><h:outputText value="#{row.codigo}"/></td>
+                                                <td><h:outputText value="#{row.codigoFabrica}"/></td>
+                                                <td><h:outputText value="#{row.marca}"/></td>
+                                                <td><h:outputText value="#{row.modelo}"/></td>
+                                                <td><h:outputText value="#{row.color}"/></td>
+                                                <td><h:outputText value="#{row.activo}"/></td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7">
+                                                <h:commandLink action="#{motoBean.anterior}">Anterior</h:commandLink>
+                                                &#160;|&#160;#{motoBean.desde + 1}..#{motoBean.facade.ultimo} de #{motoBean.facade.contador}&#160;|&#160;
+                                                <h:commandLink action="#{motoBean.siguiente}">Siguiente</h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{motoBean.nuevo}" styleClass="submit"/>
+                                <h:commandButton id="btnModificar" value="Modificar" action="#{motoBean.modificar}" styleClass="submit" rendered="#{not empty motoBean.lista }"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

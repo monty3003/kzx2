@@ -1,32 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+
+    <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/images/moto.png" type="image/x-icon" rel="icon"/>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/images/moto.png" type="image/x-icon" rel="shortcut icon"/>
         <title>Login - BEJ MOTOS</title>
         <link href="./resources/css/layout.css" rel="stylesheet" type="text/css" />
-    </head>
-    <body onload="document.getElementById('txtUsuario').focus();">
-        <div id="login">
-            <form method="post" id="frmLogin" action="Login">
-                <p>Login</p>
-                <div class="tablaForm">
-                    <div class="fila"></div>
-                    <div class="etiq"><label for="txtUsuario">Usuario:</label></div>
-                    <div class="cont"><input type="text" id="txtUsuario" name="txtUsuario" size="20" maxlength="30" tabindex="1"/></div>
+    </h:head>
+    <h:body onload="document.getElementById('txtUsuario').focus();">
+        <div class="lock"/>
+        <div class="lock">
+            <div id="login">
+                <h:form id="frmLogin">
+                    <h3>Login</h3>
                     <div class="fila">
-                        <div class="etiq"><label for="txtPassword">Password:</label></div>
-                        <div class="cont"><input type="password" id="txtPassword" name="txtPassword" size="20" maxlength="50" tabindex="2"/></div>
+                        <label for="txtUsuario">Usuario:</label>
+                        <h:inputText id="txtUsuario" size="20" maxlength="30" value="#{loginBean.userName}"/>
                     </div>
-                </div>
-                <div class="botonera">
-                    <input type="submit" class="submit" id="btnLogin" value="Aceptar" maxlength="3"/>
-                </div>
-            </form>
+                    <div class="fila">
+                        <label for="txtPassword">Password:</label>
+                        <h:inputSecret id="txtpassword" size="20" maxlength="50" value="#{loginBean.password}"/>
+                    </div>
+                    <div class="botonera">
+                        <!--                        <input type="submit" class="submit" id="btnLogin" value="Aceptar" maxlength="3"/>-->
+                        <h:commandButton value="Ingresar" action="#{loginBean.login}"/>
+                    </div>
+                    <h:messages errorClass=""/>
+                </h:form>
+            </div>
         </div>
-    </body>
+        <div class="lock"></div>
+    </h:body>
 </html>
