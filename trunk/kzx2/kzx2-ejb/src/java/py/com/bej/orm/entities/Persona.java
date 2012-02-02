@@ -4,67 +4,55 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConfiguracionEnum;
+import py.com.bej.orm.utils.Conversor;
 
 /**
  *
  * @author Diego_M
  */
 @Entity
-@Table(name = "Persona", catalog = "bejdb", schema = "", uniqueConstraints = {
+@Table(name = "Persona", catalog = "bej", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"documento"})})
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Persona.findAll", query = "SELECT p FROM Persona p"),
-    @NamedQuery(name = "Persona.findById", query = "SELECT p FROM Persona p WHERE p.personaPK.id = :id"),
-    @NamedQuery(name = "Persona.findByDocumento", query = "SELECT p FROM Persona p WHERE p.personaPK.documento = :documento"),
-    @NamedQuery(name = "Persona.findByFisica", query = "SELECT p FROM Persona p WHERE p.fisica = :fisica"),
-    @NamedQuery(name = "Persona.findByNombre", query = "SELECT p FROM Persona p WHERE p.nombre = :nombre"),
-    @NamedQuery(name = "Persona.findByDireccion1", query = "SELECT p FROM Persona p WHERE p.direccion1 = :direccion1"),
-    @NamedQuery(name = "Persona.findByDireccion2", query = "SELECT p FROM Persona p WHERE p.direccion2 = :direccion2"),
-    @NamedQuery(name = "Persona.findByTelefonoFijo", query = "SELECT p FROM Persona p WHERE p.telefonoFijo = :telefonoFijo"),
-    @NamedQuery(name = "Persona.findByTelefonoMovil", query = "SELECT p FROM Persona p WHERE p.telefonoMovil = :telefonoMovil"),
-    @NamedQuery(name = "Persona.findByEmail", query = "SELECT p FROM Persona p WHERE p.email = :email"),
-    @NamedQuery(name = "Persona.findByFechaIngreso", query = "SELECT p FROM Persona p WHERE p.fechaIngreso = :fechaIngreso"),
-    @NamedQuery(name = "Persona.findByRuc", query = "SELECT p FROM Persona p WHERE p.ruc = :ruc"),
-    @NamedQuery(name = "Persona.findByContacto", query = "SELECT p FROM Persona p WHERE p.contacto = :contacto"),
-    @NamedQuery(name = "Persona.findByFechaNacimiento", query = "SELECT p FROM Persona p WHERE p.fechaNacimiento = :fechaNacimiento"),
-    @NamedQuery(name = "Persona.findByEstadoCivil", query = "SELECT p FROM Persona p WHERE p.estadoCivil = :estadoCivil"),
-    @NamedQuery(name = "Persona.findByProfesion", query = "SELECT p FROM Persona p WHERE p.profesion = :profesion"),
-    @NamedQuery(name = "Persona.findByTratamiento", query = "SELECT p FROM Persona p WHERE p.tratamiento = :tratamiento"),
-    @NamedQuery(name = "Persona.findBySexo", query = "SELECT p FROM Persona p WHERE p.sexo = :sexo"),
-    @NamedQuery(name = "Persona.findByHijos", query = "SELECT p FROM Persona p WHERE p.hijos = :hijos"),
-    @NamedQuery(name = "Persona.findByHabilitado", query = "SELECT p FROM Persona p WHERE p.habilitado = :habilitado"),
-    @NamedQuery(name = "Persona.findByCategoria", query = "SELECT p FROM Persona p WHERE p.categoria = :categoria")})
-public class Persona implements Serializable {
+public class Persona extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+    @NotNull(message = "Ingrese un valor")
+    @Size(min = 6, max = 11, message = "Ingrese un valor entre 6 y 11 caracteres")
     @Basic(optional = false)
     @Column(name = "documento", nullable = false, unique = true, length = 11)
     private String documento;
     @Basic(optional = false)
     @Column(name = "fisica", nullable = false)
     private Character fisica;
+    @NotNull(message = "Ingrese un valor")
+    @Size(min = 5, max = 50, message = "Ingrese un nombre valido")
     @Basic(optional = false)
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
@@ -77,17 +65,15 @@ public class Persona implements Serializable {
     private String telefonoFijo;
     @Column(name = "telefono_movil", length = 13)
     private String telefonoMovil;
-    // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
+    @Pattern(regexp = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message = "Ingrese una direccion de email valida")//if the field contains email address consider using this annotation to enforce field validation
     @Column(name = "email", length = 25)
     private String email;
     @Basic(optional = false)
     @Column(name = "fecha_ingreso", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaIngreso;
-    @Size(max = 10)
     @Column(name = "ruc", length = 10)
     private String ruc;
-    @Size(max = 45)
     @Column(name = "contacto", length = 45)
     private String contacto;
     @Column(name = "fecha_nacimiento")
@@ -106,27 +92,53 @@ public class Persona implements Serializable {
     @Column(name = "hijos")
     private Short hijos;
     @Basic(optional = false)
-    @Column(name = "habilitado", nullable = false)
+    @Column(name = "habilitado")
     private Character habilitado;
-    @Basic(optional = false)
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false, insertable = false, updatable = true)
+    @ManyToOne(optional = false)
     private Categoria categoria;
-    @Column(name = "activo", length = 1)
+    @Column(name = "activo", length = 1, nullable = false)
     @Basic(optional = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
+    @Column(name = "ultimaModificacion", nullable = false)
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "fabricante")
+    @OneToMany(mappedBy = "fabricante", cascade = CascadeType.ALL)
     private List<Moto> motos;
-    @OneToMany(mappedBy = "vendedor")
+    @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL)
     private List<Transaccion> transaccionsVendedor;
-    @OneToMany(mappedBy = "comprador")
+    @OneToMany(mappedBy = "comprador", cascade = CascadeType.ALL)
     private List<Transaccion> transaccionsComprador;
+    @Transient
+    private String fechaIngresoString;
+    @Transient
+    private String fechaNacimientoString;
 
     public Persona() {
+        this.categoria = new Categoria();
+    }
+
+    public Persona(String documento, Character fisica, String nombre, String direccion1, String telefonoMovil, Categoria categoria) {
+        this.documento = documento;
+        this.fisica = fisica;
+        this.nombre = nombre;
+        this.direccion1 = direccion1;
+        this.telefonoMovil = telefonoMovil;
+        this.categoria = categoria;
+    }
+
+    public Persona(Integer id) {
+        this.id = id;
+    }
+
+    public Persona(String id) {
+        this.id = new Integer(id);
+    }
+
+    public Persona(Integer id, String documento) {
+        this.id = id;
+        this.documento = documento;
     }
 
     public Persona(int id, String documento, Character fisica, String nombre, String direccion1, String direccion2, String telefonoFijo, String telefonoMovil, String email, Date fechaIngreso, String ruc, String contacto, Date fechaNacimiento, Character estadoCivil, String profesion, String tratamiento, Character sexo, Short hijos, Character habilitado, Categoria categoria, Character activo, Date ultimaModificacion) {
@@ -287,21 +299,17 @@ public class Persona implements Serializable {
     }
 
     public void setHabilitado(Character habilitado) {
-        this.setHabilitado((Character) habilitado);
+        this.habilitado = habilitado;
     }
 
     public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(int categoria) {
-        this.setCategoria(categoria);
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) getId();
+        hash += (getId() != null ? getId().hashCode() : 0);
         hash += (getDocumento() != null ? getDocumento().hashCode() : 0);
         return hash;
     }
@@ -321,12 +329,13 @@ public class Persona implements Serializable {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.PersonaPK[ id=" + getId() + ", documento=" + getDocumento() + " ]";
+        return "py.com.bej.orm.entities[ id=" + getId() + ", documento=" + getDocumento() + " ]";
     }
 
     /**
      * @return the id
      */
+    @Override
     public Integer getId() {
         return id;
     }
@@ -334,6 +343,7 @@ public class Persona implements Serializable {
     /**
      * @param id the id to set
      */
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }
@@ -362,6 +372,7 @@ public class Persona implements Serializable {
     /**
      * @return the activo
      */
+    @Override
     public Character getActivo() {
         return activo;
     }
@@ -369,6 +380,7 @@ public class Persona implements Serializable {
     /**
      * @param activo the activo to set
      */
+    @Override
     public void setActivo(Character activo) {
         this.activo = activo;
     }
@@ -376,6 +388,7 @@ public class Persona implements Serializable {
     /**
      * @return the ultimaModificacion
      */
+    @Override
     public Date getUltimaModificacion() {
         return ultimaModificacion;
     }
@@ -383,6 +396,7 @@ public class Persona implements Serializable {
     /**
      * @param ultimaModificacion the ultimaModificacion to set
      */
+    @Override
     public void setUltimaModificacion(Date ultimaModificacion) {
         this.ultimaModificacion = ultimaModificacion;
     }
@@ -406,5 +420,30 @@ public class Persona implements Serializable {
      */
     public List<Transaccion> getTransaccionsComprador() {
         return transaccionsComprador;
+    }
+
+    /**
+     * @return the fechaIngresoString
+     */
+    public String getFechaIngresoString() {
+        if (fechaIngresoString == null) {
+            fechaIngresoString = Conversor.deDateToString(fechaIngreso, ConfiguracionEnum.DATE_PATTERN_CORTO.getSymbol());
+        }
+        return fechaIngresoString;
+    }
+
+    /**
+     * @return the fechaNacimientoString
+     */
+    public String getFechaNacimientoString() {
+        if (fechaNacimientoString == null) {
+            fechaNacimientoString = Conversor.deDateToString(fechaNacimiento, ConfiguracionEnum.DATE_PATTERN_CORTO.getSymbol());
+        }
+        return fechaNacimientoString;
+    }
+
+    @Override
+    public String getlabel() {
+        return this.nombre;
     }
 }

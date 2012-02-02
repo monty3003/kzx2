@@ -15,8 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,19 +26,11 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Pago", catalog = "bejdb", schema = "")
+@Table(name = "Pago", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Pago.findAll", query = "SELECT p FROM Pago p"),
-    @NamedQuery(name = "Pago.findById", query = "SELECT p FROM Pago p WHERE p.id = :id"),
-    @NamedQuery(name = "Pago.findByFecha", query = "SELECT p FROM Pago p WHERE p.fecha = :fecha"),
-    @NamedQuery(name = "Pago.findByFinanciacion", query = "SELECT p FROM Pago p WHERE p.financiacion = :financiacion"),
-    @NamedQuery(name = "Pago.findByTotalPagado", query = "SELECT p FROM Pago p WHERE p.totalPagado = :totalPagado")})
-public class Pago implements Serializable, WithId<Integer> {
+public class Pago extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
@@ -48,9 +38,8 @@ public class Pago implements Serializable, WithId<Integer> {
     @Column(name = "fecha", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fecha;
-    @Basic(optional = false)
     @JoinColumn(name = "financiacion", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Financiacion financiacion;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Basic(optional = false)
