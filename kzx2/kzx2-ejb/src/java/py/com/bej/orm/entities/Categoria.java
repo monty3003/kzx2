@@ -4,22 +4,20 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -27,21 +25,16 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Categoria", catalog = "bejdb", schema = "")
+@Table(name = "Categoria", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Categoria.findAll", query = "SELECT c FROM Categoria c"),
-    @NamedQuery(name = "Categoria.findById", query = "SELECT c FROM Categoria c WHERE c.id = :id"),
-    @NamedQuery(name = "Categoria.findByDescripcion", query = "SELECT c FROM Categoria c WHERE c.descripcion = :descripcion")})
-public class Categoria implements Serializable, WithId<Integer> {
+public class Categoria extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id", nullable = false)
     private Integer id;
     @Size(max = 50)
+    @NotEmpty(message = "Ingrese un valor")
     @Column(name = "descripcion", length = 50)
     private String descripcion;
     @Column(name = "activo", length = 1)
@@ -51,17 +44,17 @@ public class Categoria implements Serializable, WithId<Integer> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "categoria")
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Persona> personas;
-    @OneToMany(mappedBy = "categoria")
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Moto> motos;
-    @OneToMany(mappedBy = "codigo")
+    @OneToMany(mappedBy = "codigo", cascade = CascadeType.ALL)
     private List<Transaccion> transaccions;
-    @OneToMany(mappedBy = "categoria")
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Factura> facturas;
-    @OneToMany(mappedBy = "categoria")
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Credito> creditos;
-    @OneToMany(mappedBy = "sistemaCredito")
+    @OneToMany(mappedBy = "sistemaCredito", cascade = CascadeType.ALL)
     private List<Credito> creditosSitemaCredito;
 
     public Categoria() {

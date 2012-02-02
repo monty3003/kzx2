@@ -4,25 +4,29 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
 
@@ -31,118 +35,111 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Transaccion", catalog = "bejdb", schema = "")
+@Table(name = "Transaccion", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Transaccion.findAll", query = "SELECT t FROM Transaccion t"),
-    @NamedQuery(name = "Transaccion.findById", query = "SELECT t FROM Transaccion t WHERE t.id = :id"),
-    @NamedQuery(name = "Transaccion.findByCodigo", query = "SELECT t FROM Transaccion t WHERE t.codigo = :codigo"),
-    @NamedQuery(name = "Transaccion.findByComprobante", query = "SELECT t FROM Transaccion t WHERE t.comprobante = :comprobante"),
-    @NamedQuery(name = "Transaccion.findByFechaOperacion", query = "SELECT t FROM Transaccion t WHERE t.fechaOperacion = :fechaOperacion"),
-    @NamedQuery(name = "Transaccion.findByFechaEntrega", query = "SELECT t FROM Transaccion t WHERE t.fechaEntrega = :fechaEntrega"),
-    @NamedQuery(name = "Transaccion.findByVendedor", query = "SELECT t FROM Transaccion t WHERE t.vendedor = :vendedor"),
-    @NamedQuery(name = "Transaccion.findByComprador", query = "SELECT t FROM Transaccion t WHERE t.comprador = :comprador"),
-    @NamedQuery(name = "Transaccion.findByAnulado", query = "SELECT t FROM Transaccion t WHERE t.anulado = :anulado"),
-    @NamedQuery(name = "Transaccion.findBySubTotalExentas", query = "SELECT t FROM Transaccion t WHERE t.subTotalExentas = :subTotalExentas"),
-    @NamedQuery(name = "Transaccion.findBySubTotalGravadas10", query = "SELECT t FROM Transaccion t WHERE t.subTotalGravadas10 = :subTotalGravadas10"),
-    @NamedQuery(name = "Transaccion.findBySubTotalGravadas5", query = "SELECT t FROM Transaccion t WHERE t.subTotalGravadas5 = :subTotalGravadas5"),
-    @NamedQuery(name = "Transaccion.findBySubTotal", query = "SELECT t FROM Transaccion t WHERE t.subTotal = :subTotal"),
-    @NamedQuery(name = "Transaccion.findByTotalIva5", query = "SELECT t FROM Transaccion t WHERE t.totalIva5 = :totalIva5"),
-    @NamedQuery(name = "Transaccion.findByTotalIva10", query = "SELECT t FROM Transaccion t WHERE t.totalIva10 = :totalIva10"),
-    @NamedQuery(name = "Transaccion.findByTotalIva", query = "SELECT t FROM Transaccion t WHERE t.totalIva = :totalIva"),
-    @NamedQuery(name = "Transaccion.findByDescuento", query = "SELECT t FROM Transaccion t WHERE t.descuento = :descuento"),
-    @NamedQuery(name = "Transaccion.findByTotal", query = "SELECT t FROM Transaccion t WHERE t.total = :total"),
-    @NamedQuery(name = "Transaccion.findByTotalDescuento", query = "SELECT t FROM Transaccion t WHERE t.totalDescuento = :totalDescuento"),
-    @NamedQuery(name = "Transaccion.findByTotalPagado", query = "SELECT t FROM Transaccion t WHERE t.totalPagado = :totalPagado"),
-    @NamedQuery(name = "Transaccion.findByEntregaInicial", query = "SELECT t FROM Transaccion t WHERE t.entregaInicial = :entregaInicial"),
-    @NamedQuery(name = "Transaccion.findByCuotas", query = "SELECT t FROM Transaccion t WHERE t.cuotas = :cuotas"),
-    @NamedQuery(name = "Transaccion.findByMontoCuotaIgual", query = "SELECT t FROM Transaccion t WHERE t.montoCuotaIgual = :montoCuotaIgual"),
-    @NamedQuery(name = "Transaccion.findBySaldado", query = "SELECT t FROM Transaccion t WHERE t.saldado = :saldado"),
-    @NamedQuery(name = "Transaccion.findByCantidadItems", query = "SELECT t FROM Transaccion t WHERE t.cantidadItems = :cantidadItems")})
-public class Transaccion implements Serializable, WithId<Integer> {
+public class Transaccion extends WithId<Integer> {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @Basic(optional = false)
     @JoinColumn(name = "codigo", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Categoria codigo;
-    @Basic(optional = false)
-    @JoinColumn(name = "comprobante", referencedColumnName = "id", insertable = true, updatable = true)
-    @ManyToOne
-    private Factura comprobante;
+    @JoinColumn(name = "factura", unique = true, referencedColumnName = "id", insertable = true, updatable = true)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    private Factura factura;
+    @NotNull(message = "Ingrese una fecha de operacion")
+    @Past(message = "Ingrese una fecha válida")
     @Basic(optional = false)
     @Column(name = "fechaOperacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaOperacion;
+    @NotNull(message = "Ingrese una fecha de entrega válida")
     @Basic(optional = false)
     @Column(name = "fechaEntrega", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaEntrega;
-    @Basic(optional = false)
-    @Column(name = "vendedor", nullable = false)
-    @ManyToOne
+    @JoinColumn(name = "vendedor", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
     private Persona vendedor;
-    @Basic(optional = false)
-    @Column(name = "comprador", nullable = false)
-    @ManyToOne
+    @JoinColumn(name = "comprador", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
     private Persona comprador;
     @Basic(optional = false)
     @Column(name = "anulado", nullable = false)
     private Character anulado;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Basic(optional = false)
+    @Min(value = 0, message = "El Sub Total Exentas es un monto muy bajo")
+    @DecimalMin(value="0.00",message="Ingrese un valor")
     @Column(name = "sub_total_exentas", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalExentas;
+    @Min(value = 0, message = "El Sub Total Gravadas 10% es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "sub_total_gravadas_10", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalGravadas10;
+    @Min(value = 0, message = "El Sub Total Gravadas 5% es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "sub_total_gravadas_5", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalGravadas5;
+    @Min(value = 0)
+    @Basic(optional = false)
+    @Column(name = "neto_sin_iva_5", nullable = false)
+    private BigDecimal netoSinIva5;
+    @Min(value = 0)
+    @Basic(optional = false)
+    @Column(name = "neto_sin_iva_10", nullable = false)
+    private BigDecimal netoSinIva10;
+    @Min(value = 1000, message = "El Sub Total es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "sub_total", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotal;
-    @Basic(optional = false)
+    @DecimalMin(value = "0.00", message = "El Sub Total IVA 5% es un monto muy bajo")
     @Column(name = "total_iva5", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva5;
+    @Min(value = 0, message = "El Sub Total IVA 10% es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "total_iva10", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva10;
+    @Min(value = 0, message = "El Total IVA es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "total_iva", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva;
+    @Min(value = 0, message = "El Descuento es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "descuento", nullable = false)
-    private float descuento;
+    private Float descuento;
+    @Min(value = 1000, message = "El Total es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "total", nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
+    @Min(value = 0, message = "El Sub Total Descuento es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "total_descuento", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalDescuento;
+    @Min(value = 0, message = "El Total Pagado es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "total_pagado", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPagado;
+    @Min(value = 0, message = "La entrega inicial es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "entrega_inicial", nullable = false, precision = 10, scale = 2)
     private BigDecimal entregaInicial;
+    @Min(value = 0, message = "El Nro de cuotas es un numero negativo")
     @Basic(optional = false)
     @Column(name = "cuotas", nullable = false)
     private short cuotas;
+    @Min(value = 0, message = "El monto de cada cuota es un monto muy bajo")
     @Basic(optional = false)
     @Column(name = "monto_cuota_igual", nullable = false, precision = 10, scale = 2)
     private BigDecimal montoCuotaIgual;
     @Basic(optional = false)
     @Column(name = "saldado", nullable = false)
     private Character saldado;
+    @Min(value = 1, message = "Seleccione por lo menos un item")
     @Basic(optional = false)
     @Column(name = "cantidad_items", nullable = false)
-    private short cantidadItems;
+    private Short cantidadItems;
     @Column(name = "activo", length = 1)
     @Basic(optional = false)
     private Character activo;
@@ -150,28 +147,46 @@ public class Transaccion implements Serializable, WithId<Integer> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "compra")
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Motostock> motostocksCompra;
-    @OneToMany(mappedBy = "venta")
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<Motostock> motostocksVenta;
     @Transient
     private String fechaOperacionString;
     @Transient
     private String fechaEntregaString;
-    @OneToMany(mappedBy = "transaccion")
+    @Transient
+    private Categoria codigoMax;
+    @OneToMany(mappedBy = "transaccion", cascade = CascadeType.ALL)
     private List<Credito> creditosTransaccion;
 
     public Transaccion() {
+        this.codigo = new Categoria();
+        this.factura = new Factura();
+        this.comprador = new Persona();
+        this.vendedor = new Persona();
+        //Montos
+        this.subTotalExentas = BigDecimal.ZERO;
+        this.subTotalGravadas5 = BigDecimal.ZERO;
+        this.subTotalGravadas10 = BigDecimal.ZERO;
+        this.subTotal = BigDecimal.ZERO;
+        this.netoSinIva5 = BigDecimal.ZERO;
+        this.netoSinIva10 = BigDecimal.ZERO;
+        this.descuento = new Float(0.00);
+        this.totalDescuento = BigDecimal.ZERO;
+        this.totalIva5 = BigDecimal.ZERO;
+        this.totalIva10 = BigDecimal.ZERO;
+        this.totalIva = BigDecimal.ZERO;
+        this.totalPagado = BigDecimal.ZERO;
     }
 
     public Transaccion(Integer id) {
         this.id = id;
     }
 
-    public Transaccion(Integer id, Categoria codigo, Factura comprobante, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, Character anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, Character saldado, short cantidadItems) {
+    public Transaccion(Integer id, Categoria codigo, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, Character anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, Float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, Character saldado, short cantidadItems) {
         this.id = id;
         this.codigo = codigo;
-        this.comprobante = comprobante;
         this.fechaOperacion = fechaOperacion;
         this.fechaEntrega = fechaEntrega;
         this.vendedor = vendedor;
@@ -211,14 +226,6 @@ public class Transaccion implements Serializable, WithId<Integer> {
 
     public void setCodigo(Categoria codigo) {
         this.codigo = codigo;
-    }
-
-    public Factura getComprobante() {
-        return comprobante;
-    }
-
-    public void setComprobante(Factura comprobante) {
-        this.comprobante = comprobante;
     }
 
     public Date getFechaOperacion() {
@@ -317,11 +324,11 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.totalIva = totalIva;
     }
 
-    public float getDescuento() {
+    public Float getDescuento() {
         return descuento;
     }
 
-    public void setDescuento(float descuento) {
+    public void setDescuento(Float descuento) {
         this.descuento = descuento;
     }
 
@@ -357,12 +364,12 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.entregaInicial = entregaInicial;
     }
 
-    public short getCuotas() {
+    public Short getCuotas() {
         return cuotas;
     }
 
-    public void setCuotas(short cuotas) {
-        this.cuotas = cuotas;
+    public void setCuotas(Short cuotas) {
+        this.setCuotas((short) cuotas);
     }
 
     public BigDecimal getMontoCuotaIgual() {
@@ -381,11 +388,11 @@ public class Transaccion implements Serializable, WithId<Integer> {
         this.saldado = saldado;
     }
 
-    public short getCantidadItems() {
+    public Short getCantidadItems() {
         return cantidadItems;
     }
 
-    public void setCantidadItems(short cantidadItems) {
+    public void setCantidadItems(Short cantidadItems) {
         this.cantidadItems = cantidadItems;
     }
 
@@ -450,7 +457,7 @@ public class Transaccion implements Serializable, WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.codigo.getDescripcion() + " " + this.comprobante + " " + this.getFechaOperacionString();
+        return this.codigo.getDescripcion() + " " + this.getFactura().getNumero() + " " + this.getFechaOperacionString();
     }
 
     /**
@@ -472,5 +479,82 @@ public class Transaccion implements Serializable, WithId<Integer> {
      */
     public List<Credito> getCreditosTransaccion() {
         return creditosTransaccion;
+    }
+
+    /**
+     * @param motostocksCompra the motostocksCompra to set
+     */
+    public void setMotostocksCompra(List<Motostock> motostocksCompra) {
+        this.motostocksCompra = motostocksCompra;
+    }
+
+    /**
+     * @param motostocksVenta the motostocksVenta to set
+     */
+    public void setMotostocksVenta(List<Motostock> motostocksVenta) {
+        this.motostocksVenta = motostocksVenta;
+    }
+
+    /**
+     * @return the netoSinIva5
+     */
+    public BigDecimal getNetoSinIva5() {
+        return netoSinIva5;
+    }
+
+    /**
+     * @param netoSinIva5 the netoSinIva5 to set
+     */
+    public void setNetoSinIva5(BigDecimal netoSinIva5) {
+        this.netoSinIva5 = netoSinIva5;
+    }
+
+    /**
+     * @return the netoSinIva10
+     */
+    public BigDecimal getNetoSinIva10() {
+        return netoSinIva10;
+    }
+
+    /**
+     * @param netoSinIva10 the netoSinIva10 to set
+     */
+    public void setNetoSinIva10(BigDecimal netoSinIva10) {
+        this.netoSinIva10 = netoSinIva10;
+    }
+
+    /**
+     * @return the codigoMax
+     */
+    public Categoria getCodigoMax() {
+        return codigoMax;
+    }
+
+    /**
+     * @param codigoMax the codigoMax to set
+     */
+    public void setCodigoMax(Categoria codigoMax) {
+        this.codigoMax = codigoMax;
+    }
+
+    /**
+     * @param cuotas the cuotas to set
+     */
+    public void setCuotas(short cuotas) {
+        this.cuotas = cuotas;
+    }
+
+    /**
+     * @return the factura
+     */
+    public Factura getFactura() {
+        return factura;
+    }
+
+    /**
+     * @param factura the factura to set
+     */
+    public void setFactura(Factura factura) {
+        this.factura = factura;
     }
 }

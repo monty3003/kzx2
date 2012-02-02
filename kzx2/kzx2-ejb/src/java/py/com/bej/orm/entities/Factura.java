@@ -4,22 +4,27 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -27,57 +32,55 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Factura", catalog = "bejdb", schema = "")
+@Table(name = "Factura", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Factura.findAll", query = "SELECT f FROM Factura f"),
-    @NamedQuery(name = "Factura.findById", query = "SELECT f FROM Factura f WHERE f.facturaPK.id = :id"),
-    @NamedQuery(name = "Factura.findByNumero", query = "SELECT f FROM Factura f WHERE f.facturaPK.numero = :numero"),
-    @NamedQuery(name = "Factura.findByValidoHasta", query = "SELECT f FROM Factura f WHERE f.validoHasta = :validoHasta"),
-    @NamedQuery(name = "Factura.findByCategoria", query = "SELECT f FROM Factura f WHERE f.categoria = :categoria"),
-    @NamedQuery(name = "Factura.findBySubTotalExentas", query = "SELECT f FROM Factura f WHERE f.subTotalExentas = :subTotalExentas"),
-    @NamedQuery(name = "Factura.findBySubTotalGravadas10", query = "SELECT f FROM Factura f WHERE f.subTotalGravadas10 = :subTotalGravadas10"),
-    @NamedQuery(name = "Factura.findBySubTotalGravadas5", query = "SELECT f FROM Factura f WHERE f.subTotalGravadas5 = :subTotalGravadas5"),
-    @NamedQuery(name = "Factura.findBySubTotal", query = "SELECT f FROM Factura f WHERE f.subTotal = :subTotal"),
-    @NamedQuery(name = "Factura.findByTotalIva", query = "SELECT f FROM Factura f WHERE f.totalIva = :totalIva"),
-    @NamedQuery(name = "Factura.findByTotalPagado", query = "SELECT f FROM Factura f WHERE f.totalPagado = :totalPagado"),
-    @NamedQuery(name = "Factura.findByDescuento", query = "SELECT f FROM Factura f WHERE f.descuento = :descuento"),
-    @NamedQuery(name = "Factura.findBySaldado", query = "SELECT f FROM Factura f WHERE f.saldado = :saldado")})
-public class Factura implements Serializable, WithId<Integer> {
+public class Factura extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private int id;
-    @Basic(optional = false)
-    @Column(name = "numero", nullable = false, unique = true, length = 45)
+    private Integer id;
+    @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{7}$", message = "Ingrese un valor con el formato ###-###-#######")
+    @Column(name = "numero", nullable = false, length = 45)
     private String numero;
-    @Basic(optional = false)
+    @NotNull(message = "Ingrese una fecha de vencimiento")
+    @Future(message = "Ingrese una fecha de vencimiento válida")
     @Column(name = "valido_hasta", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date validoHasta;
-    @Basic(optional = false)
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = false)
-    @ManyToOne
+    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
     private Categoria categoria;
     @Basic(optional = false)
     @Column(name = "sub_total_exentas", nullable = false)
-    private long subTotalExentas;
+    private BigDecimal subTotalExentas;
     @Basic(optional = false)
     @Column(name = "sub_total_gravadas_10", nullable = false)
-    private long subTotalGravadas10;
+    private BigDecimal subTotalGravadas10;
     @Basic(optional = false)
     @Column(name = "sub_total_gravadas_5", nullable = false)
-    private long subTotalGravadas5;
+    private BigDecimal subTotalGravadas5;
+    @Basic(optional = false)
+    @Column(name = "neto_sin_iva_5", nullable = false)
+    private BigDecimal netoSinIva5;
+    @Basic(optional = false)
+    @Column(name = "neto_sin_iva_10", nullable = false)
+    private BigDecimal netoSinIva10;
+    @Basic(optional = false)
+    @Column(name = "total_iva_5", nullable = false)
+    private BigDecimal totalIva5;
+    @Basic(optional = false)
+    @Column(name = "total_iva_10", nullable = false)
+    private BigDecimal totalIva10;
     @Basic(optional = false)
     @Column(name = "sub_total", nullable = false)
-    private long subTotal;
+    private BigDecimal subTotal;
     @Basic(optional = false)
     @Column(name = "total_iva", nullable = false)
-    private long totalIva;
+    private BigDecimal totalIva;
     @Basic(optional = false)
     @Column(name = "total_pagado", nullable = false)
-    private long totalPagado;
+    private BigDecimal totalPagado;
     @Basic(optional = false)
     @Column(name = "descuento", nullable = false)
     private float descuento;
@@ -91,20 +94,30 @@ public class Factura implements Serializable, WithId<Integer> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "comprobante")
-    private List<Transaccion> transaccions;
+    @OneToOne(optional = false, mappedBy = "factura", cascade = CascadeType.ALL)
+    private Transaccion transaccion;
 
     public Factura() {
+        this.categoria = new Categoria();
     }
 
-    public Factura(int id, String numero, Date validoHasta, Categoria categoria, long subTotalExentas, long subTotalGravadas10, long subTotalGravadas5, long subTotal, long totalIva, long totalPagado, float descuento, Character saldado, Character activo, Date ultimaModificacion) {
+    public Factura(String numero) {
+        this.numero = numero;
+    }
+
+    public Factura(Integer id, String numero, Transaccion transaccion, Date validoHasta, Categoria categoria, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal netoSinIva5, BigDecimal netoSinIva10, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal subTotal, BigDecimal totalIva, BigDecimal totalPagado, float descuento, Character saldado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.numero = numero;
+        this.transaccion = transaccion;
         this.validoHasta = validoHasta;
         this.categoria = categoria;
         this.subTotalExentas = subTotalExentas;
         this.subTotalGravadas10 = subTotalGravadas10;
         this.subTotalGravadas5 = subTotalGravadas5;
+        this.netoSinIva5 = netoSinIva5;
+        this.netoSinIva10 = netoSinIva10;
+        this.totalIva5 = totalIva5;
+        this.totalIva10 = totalIva10;
         this.subTotal = subTotal;
         this.totalIva = totalIva;
         this.totalPagado = totalPagado;
@@ -130,51 +143,51 @@ public class Factura implements Serializable, WithId<Integer> {
         this.categoria = categoria;
     }
 
-    public long getSubTotalExentas() {
+    public BigDecimal getSubTotalExentas() {
         return subTotalExentas;
     }
 
-    public void setSubTotalExentas(long subTotalExentas) {
+    public void setSubTotalExentas(BigDecimal subTotalExentas) {
         this.subTotalExentas = subTotalExentas;
     }
 
-    public long getSubTotalGravadas10() {
+    public BigDecimal getSubTotalGravadas10() {
         return subTotalGravadas10;
     }
 
-    public void setSubTotalGravadas10(long subTotalGravadas10) {
+    public void setSubTotalGravadas10(BigDecimal subTotalGravadas10) {
         this.subTotalGravadas10 = subTotalGravadas10;
     }
 
-    public long getSubTotalGravadas5() {
+    public BigDecimal getSubTotalGravadas5() {
         return subTotalGravadas5;
     }
 
-    public void setSubTotalGravadas5(long subTotalGravadas5) {
+    public void setSubTotalGravadas5(BigDecimal subTotalGravadas5) {
         this.subTotalGravadas5 = subTotalGravadas5;
     }
 
-    public long getSubTotal() {
+    public BigDecimal getSubTotal() {
         return subTotal;
     }
 
-    public void setSubTotal(long subTotal) {
+    public void setSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
     }
 
-    public long getTotalIva() {
+    public BigDecimal getTotalIva() {
         return totalIva;
     }
 
-    public void setTotalIva(long totalIva) {
+    public void setTotalIva(BigDecimal totalIva) {
         this.totalIva = totalIva;
     }
 
-    public long getTotalPagado() {
+    public BigDecimal getTotalPagado() {
         return totalPagado;
     }
 
-    public void setTotalPagado(long totalPagado) {
+    public void setTotalPagado(BigDecimal totalPagado) {
         this.totalPagado = totalPagado;
     }
 
@@ -186,48 +199,27 @@ public class Factura implements Serializable, WithId<Integer> {
         this.descuento = descuento;
     }
 
-    public char getSaldado() {
+    public Character getSaldado() {
         return saldado;
     }
 
-    public void setSaldado(char saldado) {
+    public void setSaldado(Character saldado) {
         this.saldado = saldado;
     }
 
     @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (int) id;
-        hash += (getNumero() != null ? getNumero().hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Integer)) {
-            return false;
-        }
-        Integer other = (Integer) object;
-        if (this.id != other) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Factura[" + id + " ]";
+        return "py.com.bej.orm.entities.Factura[ id=" + id + " ]";
     }
 
     @Override
     public void setId(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.id = id;
     }
 
     @Override
     public Integer getId() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.id;
     }
 
     @Override
@@ -256,13 +248,6 @@ public class Factura implements Serializable, WithId<Integer> {
     }
 
     /**
-     * @return the transaccions
-     */
-    public List<Transaccion> getTransaccions() {
-        return transaccions;
-    }
-
-    /**
      * @return the numero
      */
     public String getNumero() {
@@ -274,5 +259,75 @@ public class Factura implements Serializable, WithId<Integer> {
      */
     public void setNumero(String numero) {
         this.numero = numero;
+    }
+
+    /**
+     * @return the netoSinIva5
+     */
+    public BigDecimal getNetoSinIva5() {
+        return netoSinIva5;
+    }
+
+    /**
+     * @param netoSinIva5 the netoSinIva5 to set
+     */
+    public void setNetoSinIva5(BigDecimal netoSinIva5) {
+        this.netoSinIva5 = netoSinIva5;
+    }
+
+    /**
+     * @return the netoSinIva10
+     */
+    public BigDecimal getNetoSinIva10() {
+        return netoSinIva10;
+    }
+
+    /**
+     * @param netoSinIva10 the netoSinIva10 to set
+     */
+    public void setNetoSinIva10(BigDecimal netoSinIva10) {
+        this.netoSinIva10 = netoSinIva10;
+    }
+
+    /**
+     * @return the totalIva5
+     */
+    public BigDecimal getTotalIva5() {
+        return totalIva5;
+    }
+
+    /**
+     * @param totalIva5 the totalIva5 to set
+     */
+    public void setTotalIva5(BigDecimal totalIva5) {
+        this.totalIva5 = totalIva5;
+    }
+
+    /**
+     * @return the totalIva10
+     */
+    public BigDecimal getTotalIva10() {
+        return totalIva10;
+    }
+
+    /**
+     * @param totalIva10 the totalIva10 to set
+     */
+    public void setTotalIva10(BigDecimal totalIva10) {
+        this.totalIva10 = totalIva10;
+    }
+
+    /**
+     * @return the transaccion
+     */
+    public Transaccion getTransaccion() {
+        return transaccion;
+    }
+
+    /**
+     * @param transaccion the transaccion to set
+     */
+    public void setTransaccion(Transaccion transaccion) {
+        this.transaccion = transaccion;
     }
 }

@@ -4,22 +4,22 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
 
@@ -28,46 +28,39 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Moto", catalog = "bejdb", schema = "")
+@Table(name = "Moto", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Moto.findAll", query = "SELECT m FROM Moto m"),
-    @NamedQuery(name = "Moto.findByCodigo", query = "SELECT m FROM Moto m WHERE m.codigo = :codigo"),
-    @NamedQuery(name = "Moto.findByCodigoFabrica", query = "SELECT m FROM Moto m WHERE m.codigoFabrica = :codigoFabrica"),
-    @NamedQuery(name = "Moto.findByMarca", query = "SELECT m FROM Moto m WHERE m.marca = :marca"),
-    @NamedQuery(name = "Moto.findByModelo", query = "SELECT m FROM Moto m WHERE m.modelo = :modelo"),
-    @NamedQuery(name = "Moto.findByColor", query = "SELECT m FROM Moto m WHERE m.color = :color"),
-    @NamedQuery(name = "Moto.findByFabricante", query = "SELECT m FROM Moto m WHERE m.fabricante = :fabricante"),
-    @NamedQuery(name = "Moto.findByCategoria", query = "SELECT m FROM Moto m WHERE m.categoria = :categoria")})
-public class Moto implements Serializable, WithId<String> {
+public class Moto extends WithId<String> {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @Column(name = "codigo", nullable = false, length = 14)
+    @NotNull(message = "Codigo: Ingrese un valor")
+    @Size(min = 6, max = 20, message = "Codigo: Ingrese un valor entre 6 a 20 caracteres")
     private String codigo;
+    @NotNull(message = "Codigo Fabrica: Ingrese un valor")
+    @Size(min = 6, max = 20, message = "Codigo Fabrica: Ingrese de 6 a 20 caracteres")
     @Basic(optional = false)
     @Column(name = "codigo_fabrica", nullable = false, length = 20)
     private String codigoFabrica;
     @Basic(optional = false)
-    @NotNull
+    @NotNull(message = "Marca: Ingrese un valor")
+    @Size(min = 6, max = 20, message = "Marca: Ingrese de 6 a 20 caracteres")
     @Column(name = "marca", nullable = false, length = 20)
     private String marca;
     @Basic(optional = false)
-    @NotNull
+    @NotNull(message = "Modelo: Ingrese un valor")
     @Column(name = "modelo", nullable = false, length = 20)
     private String modelo;
     @Basic(optional = false)
-    @NotNull
+    @NotNull(message = "Color: Ingrese un valor")
     @Column(name = "color", nullable = false, length = 20)
     private String color;
-    @Basic(optional = false)
-    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
     private Persona fabricante;
-    @Basic(optional = false)
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true)
+    @ManyToOne(optional = false)
     private Categoria categoria;
     @Column(name = "activo", length = 1)
     @Basic(optional = false)
@@ -76,10 +69,22 @@ public class Moto implements Serializable, WithId<String> {
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "moto")
+    @OneToMany(mappedBy = "moto", cascade = CascadeType.ALL)
     private List<Motostock> motostocks;
 
     public Moto() {
+        this.categoria = new Categoria();
+        this.fabricante = new Persona();
+    }
+
+    public Moto(String codigo, String codigoFabrica, String marca, String modelo, String color, Persona fabricante, Categoria categoria) {
+        this.codigo = codigo;
+        this.codigoFabrica = codigoFabrica;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.color = color;
+        this.fabricante = fabricante;
+        this.categoria = categoria;
     }
 
     public Moto(String codigo) {

@@ -4,7 +4,6 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -16,8 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -30,41 +27,20 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "credito", catalog = "bejdb", schema = "")
+@Table(name = "credito", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Credito.findAll", query = "SELECT c FROM Credito c"),
-    @NamedQuery(name = "Credito.findById", query = "SELECT c FROM Credito c WHERE c.id = :id"),
-    @NamedQuery(name = "Credito.findByCategoria", query = "SELECT c FROM Credito c WHERE c.categoria = :categoria"),
-    @NamedQuery(name = "Credito.findByTransaccion", query = "SELECT c FROM Credito c WHERE c.transaccion = :transaccion"),
-    @NamedQuery(name = "Credito.findByFechaInicio", query = "SELECT c FROM Credito c WHERE c.fechaInicio = :fechaInicio"),
-    @NamedQuery(name = "Credito.findByFechaFin", query = "SELECT c FROM Credito c WHERE c.fechaFin = :fechaFin"),
-    @NamedQuery(name = "Credito.findBySistemaCredito", query = "SELECT c FROM Credito c WHERE c.sistemaCredito = :sistemaCredito"),
-    @NamedQuery(name = "Credito.findByTan", query = "SELECT c FROM Credito c WHERE c.tan = :tan"),
-    @NamedQuery(name = "Credito.findByTae", query = "SELECT c FROM Credito c WHERE c.tae = :tae"),
-    @NamedQuery(name = "Credito.findByCapital", query = "SELECT c FROM Credito c WHERE c.capital = :capital"),
-    @NamedQuery(name = "Credito.findByAmortizacion", query = "SELECT c FROM Credito c WHERE c.amortizacion = :amortizacion"),
-    @NamedQuery(name = "Credito.findByTotalAmortizadoPagado", query = "SELECT c FROM Credito c WHERE c.totalAmortizadoPagado = :totalAmortizadoPagado"),
-    @NamedQuery(name = "Credito.findByTotalInteresesPagado", query = "SELECT c FROM Credito c WHERE c.totalInteresesPagado = :totalInteresesPagado"),
-    @NamedQuery(name = "Credito.findByTotalInteresesPagadoMulta", query = "SELECT c FROM Credito c WHERE c.totalInteresesPagadoMulta = :totalInteresesPagadoMulta"),
-    @NamedQuery(name = "Credito.findByFechaUltimoPago", query = "SELECT c FROM Credito c WHERE c.fechaUltimoPago = :fechaUltimoPago"),
-    @NamedQuery(name = "Credito.findByCuotasAtrasadas", query = "SELECT c FROM Credito c WHERE c.cuotasAtrasadas = :cuotasAtrasadas"),
-    @NamedQuery(name = "Credito.findByEstado", query = "SELECT c FROM Credito c WHERE c.estado = :estado")})
-public class Credito implements Serializable, WithId<Integer> {
+public class Credito extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @Basic(optional = false)
     @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Categoria categoria;
-    @Basic(optional = false)
     @JoinColumn(name = "transaccion", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Transaccion transaccion;
     @Basic(optional = false)
     @Column(name = "fecha_inicio", nullable = false)
@@ -74,9 +50,8 @@ public class Credito implements Serializable, WithId<Integer> {
     @Column(name = "fecha_fin", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaFin;
-    @Basic(optional = false)
-    @JoinColumn(name = "sistema_credito", nullable = false)
-    @ManyToOne
+    @JoinColumn(name = "sistema_credito", referencedColumnName = "id", insertable = false, updatable = true)
+    @ManyToOne(optional = false)
     private Categoria sistemaCredito;
     @Basic(optional = false)
     @Column(name = "tan", nullable = false)
@@ -109,6 +84,7 @@ public class Credito implements Serializable, WithId<Integer> {
     private Short cuotasAtrasadas;
     @Basic(optional = false)
     @JoinColumn(name = "estado", insertable = false, updatable = true)
+    @ManyToOne(optional = false)
     private Categoria estado;
     @Column(name = "activo", length = 1)
     @Basic(optional = false)

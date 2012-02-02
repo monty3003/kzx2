@@ -16,8 +16,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -30,23 +28,10 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Financiacion", catalog = "bejdb", schema = "")
+@Table(name = "Financiacion", catalog = "bej")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Financiacion.findAll", query = "SELECT f FROM Financiacion f"),
-    @NamedQuery(name = "Financiacion.findById", query = "SELECT f FROM Financiacion f WHERE f.id = :id"),
-    @NamedQuery(name = "Financiacion.findByCredito", query = "SELECT f FROM Financiacion f WHERE f.credito = :credito"),
-    @NamedQuery(name = "Financiacion.findByNumeroCuota", query = "SELECT f FROM Financiacion f WHERE f.numeroCuota = :numeroCuota"),
-    @NamedQuery(name = "Financiacion.findByCapital", query = "SELECT f FROM Financiacion f WHERE f.capital = :capital"),
-    @NamedQuery(name = "Financiacion.findByInteres", query = "SELECT f FROM Financiacion f WHERE f.interes = :interes"),
-    @NamedQuery(name = "Financiacion.findByTotalAPagar", query = "SELECT f FROM Financiacion f WHERE f.totalAPagar = :totalAPagar"),
-    @NamedQuery(name = "Financiacion.findByFechaVencimiento", query = "SELECT f FROM Financiacion f WHERE f.fechaVencimiento = :fechaVencimiento"),
-    @NamedQuery(name = "Financiacion.findByFechaPago", query = "SELECT f FROM Financiacion f WHERE f.fechaPago = :fechaPago"),
-    @NamedQuery(name = "Financiacion.findByInteresMora", query = "SELECT f FROM Financiacion f WHERE f.interesMora = :interesMora"),
-    @NamedQuery(name = "Financiacion.findByTotalPagado", query = "SELECT f FROM Financiacion f WHERE f.totalPagado = :totalPagado")})
-public class Financiacion implements Serializable, WithId<Integer> {
+public class Financiacion extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
