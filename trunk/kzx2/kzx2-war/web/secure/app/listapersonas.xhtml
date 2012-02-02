@@ -14,42 +14,42 @@
             <ui:define name="content">
                 <h:form id="frmBuscar">
                     <fieldset>
-                        <div class="tablaForm">
-                            <div class="fila">
-                                <div class="etiq"><label for="documento">Documento: </label></div>
-                                <div class="cont"><input id="documento" jsfc="h:inputText" value="#{personaBean.documento}" maxlength="11"/>
-                                </div>
-                                <div class="etiq"><label for="nombre">Nombre: </label></div>
-                                <div class="cont"><input id="nombre" name="nombre" jsfc="h:inputText" value="#{personaBean.nombre}" maxlength="50"/>
-                                </div>
-                                <div class="etiq"><label for="fisica">Categoria: </label></div>
-                                <div class="cont"><select id="fisica" name="fisica" jsfc="h:selectOneMenu" value="#{personaBean.fisica}">
+                        <table class="busqueda">
+                            <tr>
+                                <td>
+                                    <label for="documento">Documento: </label>
+                                    <input id="documento" jsfc="h:inputText" value="#{personaBean.persona.documento}" maxlength="11"/>
+                                </td>
+                                <td>
+                                    <label for="nombre">Nombre: </label>
+                                    <input id="nombre" name="nombre" jsfc="h:inputText" value="#{personaBean.persona.nombre}" maxlength="50"/>
+                                </td>
+                                <td>
+                                    <label for="fisica">Categoria: </label>
+                                    <select id="fisica" name="fisica" jsfc="h:selectOneMenu" value="#{personaBean.persona.fisica}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Persona Física" itemValue="S"/>
                                         <f:selectItem itemLabel="Persona Jurídica" itemValue="N"/>
                                     </select>
-                                </div>
-                                <div class="etiq"><label for="direccion1">Direccion: </label></div>
-                                <div class="cont"><input id="direccion1" jsfc="h:inputText" value="#{personaBean.direccion1}" maxlength="50">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for="direccion1">Direccion: </label>
+                                    <input id="direccion1" jsfc="h:inputText" value="#{personaBean.persona.direccion1}" maxlength="50">
                                     </input>
-                                </div>
-                            </div>
-                            <div class="fila">
-                                <div class="etiq"><label for="telefono_fijo">Teléfono Fijo: </label></div>
-                                <div class="cont"><input id="telefono_fijo" name="telefono_fijo" jsfc="h:inputText" value="#{personaBean.telefonoFijo}" maxlength="11"/>
-                                </div>
-                                <div class="etiq"><label for="telefono_movil">Teléfono Movil: </label></div>
-                                <div class="cont"><input id="telefono_movil" name="telefono_movil" jsfc="h:inputText" value="#{personaBean.telefonoMovil}" maxlength="13"/>
-                                </div>
-                                <div class="etiq"><label for="habilitado">Estado: </label></div>
-                                <div class="cont"><select id="habilitado" name="habilitado" jsfc="h:selectOneMenu" value="#{personaBean.habilitado}">
+                                </td>
+                                <td><label for="telefono_movil">Teléfono Movil: </label>
+                                    <input id="telefono_movil" name="telefono_movil" jsfc="h:inputText" value="#{personaBean.persona.telefonoMovil}" maxlength="13"/>
+                                </td>
+                                <td><label for="habilitado">Estado: </label>
+                                    <select id="habilitado" name="habilitado" jsfc="h:selectOneMenu" value="#{personaBean.persona.habilitado}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Habilitado" itemValue="S"/>
                                         <f:selectItem itemLabel="Deshabilitado" itemValue="N"/>
                                     </select>
-                                </div>
-                            </div>
-                        </div>
+                                </td>
+                            </tr>
+                        </table>
                         <div class="botonera">
                             <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{personaBean.buscar}"/>
                             <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{personaBean.todos}"/>
@@ -62,70 +62,87 @@
                     </div>
                     <fieldset>
                         <h:panelGroup rendered="#{not empty personaBean.lista }">
-                            <div class="tablaForm">
-                                <div class="fila">
-                                    <div class="t_head" style="width: 2%;"></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkDocumento"  jsfc="h:commandLink" action="#{personaBean.listar}">Documento
-                                                <f:setPropertyActionListener value="documento" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'documento'}"/></p></div>
-                                    <div class="t_head" style="width: 30%;"><p>
-                                            <a id="lnkNombre"  jsfc="h:commandLink" action="#{personaBean.listar}">Nombre
-                                                <f:setPropertyActionListener value="nombre" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'nombre'}"/></p></div>
-                                    <div class="t_head" style="width: 30%;"><p>
-                                            <a id="lnkDireccion1"  jsfc="h:commandLink" action="#{personaBean.listar}">Direccion
-                                                <f:setPropertyActionListener value="direccion1" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'direccion1'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkTelefono_fijo"  jsfc="h:commandLink" action="#{personaBean.listar}">Telefono Fijo
-                                                <f:setPropertyActionListener value="telefonoFijo" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'telefonoFijo'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkTelefono_movil"  jsfc="h:commandLink" action="#{personaBean.listar}">Telefono Movil
-                                                <f:setPropertyActionListener value="telefonoMovil" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'telefonoMovil'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkEstado"  jsfc="h:commandLink" action="#{personaBean.listar}">Estado
-                                                <f:setPropertyActionListener value="habilitado" target="#{personaBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{personaBean.facade.orden.columna eq 'habilitado'}"/></p></div>
-                                </div>
-                                <ui:repeat var="row" value="#{personaBean.lista}">
-                                    <div class="filaTabla">
-                                        <div class="d" style="width: 2%;"><input type="radio" id="radio" name="radio"
-                                                                                 value="#{row.personaPK.id}:#{row.personaPK.documento}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.personaPK.documento}"/></div>
-                                        <div class="d" style="width: 30%;"><h:outputText value="#{row.nombre}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.direccion1}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.telefonoFijo}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.telefonoMovil}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.habilitado eq 'S'?'Habilitado':'Deshabilitado'}"/></div>
-                                    </div>
-                                </ui:repeat>
-                            </div>
-                            <div class="t_footer">
-                                <h:commandLink action="#{personaBean.anterior}">Anterior</h:commandLink>
-                                &#160;|&#160;#{personaBean.facade.desde + 1}..#{personaBean.facade.ultimo} de #{personaBean.facade.contador}&#160;|&#160;
-                                <h:commandLink action="#{personaBean.siguiente}">Siguiente</h:commandLink>
-                            </div>
+                            <table class="tablaDatos">
+                                <thead>
+                                    <tr>
+                                        <th width="2%"></th>
+                                        <th width="10%"><p>
+                                                <a id="lnkDocumento"  jsfc="h:commandLink" action="#{personaBean.listar}">Documento
+                                                    <f:setPropertyActionListener value="documento" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'documento'}"/></p></th>
+                                        <th width="30%">
+                                            <p>
+                                                <a id="lnkNombre"  jsfc="h:commandLink" action="#{personaBean.listar}">Nombre
+                                                    <f:setPropertyActionListener value="nombre" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'nombre'}"/></p>
+                                        </th>
+                                        <th width="30%">
+                                            <p>
+                                                <a id="lnkDireccion1"  jsfc="h:commandLink" action="#{personaBean.listar}">Direccion
+                                                    <f:setPropertyActionListener value="direccion1" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'direccion1'}"/></p>
+                                        </th>
+                                        <th width="10%">
+                                            <p>
+                                                <a id="lnkTelefono_fijo"  jsfc="h:commandLink" action="#{personaBean.listar}">Telefono Fijo
+                                                    <f:setPropertyActionListener value="telefonoFijo" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'telefonoFijo'}"/></p>
+                                        </th>
+                                        <th width="10%">
+                                            <p>
+                                                <a id="lnkTelefono_movil"  jsfc="h:commandLink" action="#{personaBean.listar}">Telefono Movil
+                                                    <f:setPropertyActionListener value="telefonoMovil" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'telefonoMovil'}"/></p>
+                                        </th>
+                                        <th width="10%">
+                                            <p>
+                                                <a id="lnkEstado"  jsfc="h:commandLink" action="#{personaBean.listar}">Estado
+                                                    <f:setPropertyActionListener value="habilitado" target="#{personaBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="true" target="#{personaBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(personaBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{personaBean.facade.orden.columna eq 'habilitado'}"/></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat var="row" value="#{personaBean.lista}">
+                                        <tr>
+                                            <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                            <td><h:outputText value="#{row.documento}"/></td>
+                                            <td><h:outputText value="#{row.nombre}"/></td>
+                                            <td><h:outputText value="#{row.direccion1}"/></td>
+                                            <td><h:outputText value="#{row.telefonoFijo}"/></td>
+                                            <td><h:outputText value="#{row.telefonoMovil}"/></td>
+                                            <td><h:outputText value="#{row.habilitado eq 'S'?'Habilitado':'Deshabilitado'}"/></td>
+                                        </tr>
+                                    </ui:repeat>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="7">
+                                            <h:commandLink action="#{personaBean.anterior}">Anterior</h:commandLink>
+                                            &#160;|&#160;#{personaBean.facade.desde + 1}..#{personaBean.facade.ultimo} de #{personaBean.facade.contador}&#160;|&#160;
+                                            <h:commandLink action="#{personaBean.siguiente}">Siguiente</h:commandLink>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </h:panelGroup>
                         <div class="botonera">
                             <h:commandButton id="btnNuevo" value="Nuevo" action="#{personaBean.nuevo}" styleClass="submit"/>

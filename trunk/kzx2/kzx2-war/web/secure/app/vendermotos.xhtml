@@ -1,0 +1,388 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Vender Motos</title>
+    </head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+        <ui:define name="content">
+            <h:form id="frm" styleClass="feedbackform">
+                <fieldset>
+                    <h3>Venta Nueva</h3>
+                    <body onload="document.getElementById('frm:comprobante').focus();">
+                        <div class="fila"><label for="comprobante">Nº de Factura:</label>
+                            <div class="cont"><h:inputText id="comprobante" size="20" maxlength="45" value="#{ventaMotosBean.comprobante}">
+                                    <rich:validator/>
+                                </h:inputText><rich:messages for="comprobante"/></div>
+                        </div>
+
+                        <div class="fila"><label for="fechaOperacion">Fecha: </label>
+                            <div class="cont">
+                                <h:selectBooleanCheckbox id="fechaAhora" title="Ahora" value="#{ventaMotosBean.usarFechaAhora}" label="Ahora">
+                                    <f:ajax event="change" render="fechaOperacion"/>
+                                </h:selectBooleanCheckbox>Ahora<br/>
+                                <rich:calendar value="#{ventaMotosBean.fechaOperacion}" id="fechaOperacion"
+                                               locale="en/US" popup="true"
+                                               datePattern="dd/MM/yyyy"
+                                               showApplyButton="true">
+                                    <rich:validator/>
+                                </rich:calendar>
+                                <rich:messages for="fechaOperacion"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="categoria">Categoria: </label>
+                            <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{ventaMotosBean.codigo}">
+                                    <f:selectItems value="#{ventaMotosBean.listaCategoria}"/>
+                                    <f:ajax event="change" render="panelCredito"/>
+                                </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
+                        </div>
+                        <br/><hr/>
+                        <div class="fila">
+                            <label for="comprador">Cliente: </label>
+                            <div class="cont"><select id="comprador" name="comprador" jsfc="h:selectOneMenu" value="#{ventaMotosBean.comprador}">
+                                    <f:selectItems value="#{ventaMotosBean.listaCliente}"/>
+                                </select>&#160;<h:message errorClass="msgError" for="frm:comprador"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteFisica">Categoria: </label>
+                            <div class="cont"><select id="clienteFisica" name="clienteFisica" jsfc="h:selectOneMenu" value="#{ventaMotosBean.clienteFisica}"
+                                                      disabled="#{ventaMotosBean.comprador ne '0'}">
+                                    <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                    <f:selectItem itemLabel="Persona Física" itemValue="S"/>
+                                    <f:selectItem itemLabel="Persona Jurídica" itemValue="N"/>
+                                    <f:ajax event="change" render="frm"/>
+                                </select>&#160;<h:message errorClass="msgError" for="frm:clienteFisica"/></div>
+                        </div>
+                        <h:panelGroup rendered="#{ventaMotosBean.clienteFisica eq 'S'}">
+                            <div class="fila">
+                                <label for="clienteTratamiento">Tratamiento: </label>
+                                <div class="cont"><select id="clienteTratamiento" name="clienteTratamiento" jsfc="h:selectOneMenu" value="#{ventaMotosBean.clienteTratamiento}"
+                                                          disabled="#{ventaMotosBean.comprador ne '0'}">
+                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                        <f:selectItem itemLabel="Señor" itemValue="Señor"/>
+                                        <f:selectItem itemLabel="Señora" itemValue="Señora"/>
+                                        <f:selectItem itemLabel="Señorita" itemValue="Señorita"/>
+                                    </select>&#160;<h:message errorClass="msgError" for="frm:tratamiento"/></div>
+                            </div>
+                        </h:panelGroup>
+                        <div class="fila">
+                            <label for="clienteContacto1">Contacto: </label>
+                            <div class="cont"><h:inputText id="clienteContacto1" size="60" maxlength="45" value="#{ventaMotosBean.clienteContacto}">
+                                    <rich:validator/>
+                                </h:inputText>&#160;<rich:message for="clienteContacto1"/>
+                            </div>
+                        </div>
+                        <h:panelGroup rendered="#{ventaMotosBean.clienteFisica eq 'N'}">
+                            <div class="fila">
+                                <label for="clienteTratamiento2">Organización: </label>
+                                <div class="cont"><select id="clienteTratamiento2" name="clienteTratamiento2" jsfc="h:selectOneMenu" value="#{ventaMotosBean.clienteTratamiento}"
+                                                          disabled="#{ventaMotosBean.comprador ne '0'}">
+                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                        <f:selectItem itemLabel="S.A." itemValue="SA"/>
+                                        <f:selectItem itemLabel="S.R.L." itemValue="SRL"/>
+                                        <f:selectItem itemLabel="S.A.E.C.A." itemValue="SAECA"/>
+                                        <f:selectItem itemLabel="ONG" itemValue="ONG"/>
+                                        <f:selectItem itemLabel="Gobierno" itemValue="GOV"/>
+                                        <f:selectItem itemLabel="Asoc. de Empleados" itemValue="ASO"/>
+                                        <f:selectItem itemLabel="Empresa Unipersonal" itemValue="UNI"/>
+                                    </select>&#160;<h:message errorClass="msgError" for="frm:clienteTratamiento2"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteContacto">Contacto: </label>
+                                <div class="cont"><h:inputText id="clienteContacto" size="60" maxlength="45" value="#{ventaMotosBean.clienteContacto}"
+                                                               validatorMessage="Ingreso incorrecto">
+                                        <f:validateLength minimum="5" maximum="45"/>
+                                        <f:validateRequired />
+                                        <rich:validator/>
+                                    </h:inputText>&#160;<rich:message for="clienteContacto"/>
+                                </div>
+                            </div>
+                        </h:panelGroup>
+                        <div class="fila">
+                            <label for="clienteDocumento">Documento: </label>
+                            <div class="cont"><input id="clienteDocumento" name="clienteDocumento" jsfc="h:inputText" size="20" maxlength="11"
+                                                     value="#{ventaMotosBean.clienteDocumento}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteDocumento"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteNombre">Nombre Completo: </label>
+                            <div class="cont"><input type="text" id="clienteNombre" name="clienteNombre" jsfc="h:inputText" size="60" maxlength="50"
+                                                     value="#{ventaMotosBean.clienteNombre}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteNombre"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteDireccion1">Dirección 1: </label>
+                            <div class="cont"><input type="text" id="clienteDireccion1" name="clienteDireccion1" jsfc="h:inputText" size="60" maxlength="50"
+                                                     value="#{ventaMotosBean.clienteDireccion1}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteDireccion1"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteDireccion2">Dirección 2: </label>
+                            <div class="cont"><input type="text" id="clienteDireccion2" name="clienteDireccion2" jsfc="h:inputText" size="60" maxlength="50"
+                                                     value="#{ventaMotosBean.clienteDireccion2}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteDireccion2"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteTelefonoFijo">Teléfono Fijo: </label>
+                            <div class="cont"><input type="text" id="clienteTelefonoFijo" name="clienteTelefonoFijo" jsfc="h:inputText" size="20" maxlength="11"
+                                                     value="#{ventaMotosBean.clienteTelefonoFijo}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteTelefonoFijo"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteTelefonoMovil">Teléfono Movil: </label>
+                            <div class="cont"><input type="text" id="clienteTelefonoMovil" name="clienteTelefonoMovil" jsfc="h:inputText" size="20" maxlength="13"
+                                                     value="#{ventaMotosBean.clienteTelefonoMovil}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteTelefonoMovil"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="clienteEmail">E-mail: </label>
+                            <div class="cont"><input type="text" id="clienteEmail" name="clienteEmail" jsfc="h:inputText" size="20" maxlength="25"
+                                                     value="#{ventaMotosBean.clienteEmail}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteEmail"/></div>
+                        </div>
+                        <h:panelGroup rendered="#{ventaMotosBean.clienteFisica eq 'S'}">
+                            <div class="fila">
+                                <label for="clienteRuc">RUC: </label>
+                                <div class="cont"><input type="text" id="clienteRuc" name="clienteRuc" jsfc="h:inputText" size="20" maxlength="10"
+                                                         value="#{ventaMotosBean.clienteRuc}" disabled="#{ventaMotosBean.comprador ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:clienteRuc"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteSexo">Sexo: </label>
+                                <div class="cont"><select id="clienteSexo" name="clienteSexo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.clienteSexo}"
+                                                          disabled="#{ventaMotosBean.comprador ne '0'}">
+                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                        <f:selectItem itemLabel="Hombre" itemValue="H"/>
+                                        <f:selectItem itemLabel="Mujer" itemValue="M"/>
+                                    </select>&#160;<h:message errorClass="msgError" for="frm:clienteSexo"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteEstadoCivil">Estado Civil: </label>
+                                <div class="cont"><select id="clienteEstadoCivil" name="clienteEstadoCivil" jsfc="h:selectOneMenu" value="#{ventaMotosBean.clienteEstadoCivil}"
+                                                          disabled="#{ventaMotosBean.comprador ne '0'}">
+                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                        <f:selectItem itemLabel="Soltero" itemValue="S"/>
+                                        <f:selectItem itemLabel="Casado" itemValue="C"/>
+                                        <f:selectItem itemLabel="Viudo" itemValue="V"/>
+                                    </select>&#160;<h:message errorClass="msgError" for="frm:clienteEstadoCivil"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteFechaNacimiento">Fecha de Nacimiento: </label>
+                                <div class="cont"><h:inputText id="clienteFechaNacimiento" size="20" maxlength="10" value="#{ventaMotosBean.clienteFechaNacimiento}"
+                                                               disabled="#{ventaMotosBean.comprador ne '0'}">
+                                    </h:inputText> &#160;<h:message errorClass="msgError" for="frm:clienteFechaNacimiento"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteProfesion">Profesión: </label>
+                                <div class="cont"><input type="text" id="clienteProfesion" jsfc="h:inputText" size="20" maxlength="40" value="#{ventaMotosBean.clienteProfesion}"
+                                                         disabled="#{ventaMotosBean.comprador ne '0'}">
+                                    </input> &#160;<h:message errorClass="msgError" for="frm:clienteProfesion"/></div>
+                            </div>
+                            <div class="fila">
+                                <label for="clienteHijos">Hijos: </label>
+                                <div class="cont"><input type="text" id="clienteHijos" size="10" jsfc="h:inputText" value="#{ventaMotosBean.clienteHijos}"
+                                                         disabled="#{ventaMotosBean.comprador ne '0'}">
+                                    </input> &#160;<h:message errorClass="msgError" for="frm:clienteHijos"/></div>
+                            </div>
+                        </h:panelGroup>
+                        <br/>
+                        <h:panelGroup id="panelCredito">
+                            <h:panelGroup rendered="#{ventaMotosBean.codigo eq '32'}">
+                                <div class="fila">
+                                    <label for="garante">Garante: </label>
+                                    <div class="cont"><select id="garante" name="garante" jsfc="h:selectOneMenu" value="#{ventaMotosBean.garante}">
+                                            <f:selectItems value="#{ventaMotosBean.listaGarante}"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:garante"/></div>
+                                </div>
+
+                                <div class="fila">
+                                    <label for="garanteTratamiento">Tratamiento: </label>
+                                    <div class="cont"><select id="garanteTratamiento" name="garanteTratamiento" jsfc="h:selectOneMenu" value="#{ventaMotosBean.garanteTratamiento}"
+                                                              disabled="#{ventaMotosBean.garante ne '0'}">
+                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                            <f:selectItem itemLabel="Señor" itemValue="Señor"/>
+                                            <f:selectItem itemLabel="Señora" itemValue="Señora"/>
+                                            <f:selectItem itemLabel="Señorita" itemValue="Señorita"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:tratamiento"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteDocumento">Documento: </label>
+                                    <div class="cont"><input id="garanteDocumento" name="garanteDocumento" jsfc="h:inputText" size="20" maxlength="11"
+                                                             value="#{ventaMotosBean.garanteDocumento}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteDocumento"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteNombre">Nombre Completo: </label>
+                                    <div class="cont"><input type="text" id="garanteNombre" name="garanteNombre" jsfc="h:inputText" size="60" maxlength="50"
+                                                             value="#{ventaMotosBean.garanteNombre}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteNombre"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteDireccion1">Dirección 1: </label>
+                                    <div class="cont"><input type="text" id="garanteDireccion1" name="garanteDireccion1" jsfc="h:inputText" size="60" maxlength="50"
+                                                             value="#{ventaMotosBean.garanteDireccion1}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteDireccion1"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteDireccion2">Dirección 2: </label>
+                                    <div class="cont"><input type="text" id="garanteDireccion2" name="garanteDireccion2" jsfc="h:inputText" size="60" maxlength="50"
+                                                             value="#{ventaMotosBean.garanteDireccion2}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteDireccion2"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteTelefonoFijo">Teléfono Fijo: </label>
+                                    <div class="cont"><input type="text" id="garanteTelefonoFijo" name="garanteTelefonoFijo" jsfc="h:inputText" size="20" maxlength="11"
+                                                             value="#{ventaMotosBean.garanteTelefonoFijo}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteTelefonoFijo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteTelefonoMovil">Teléfono Movil: </label>
+                                    <div class="cont"><input type="text" id="garanteTelefonoMovil" name="garanteTelefonoMovil" jsfc="h:inputText" size="20" maxlength="13"
+                                                             value="#{ventaMotosBean.garanteTelefonoMovil}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteTelefonoMovil"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteEmail">E-mail: </label>
+                                    <div class="cont"><input type="text" id="garanteEmail" name="garanteEmail" jsfc="h:inputText" size="25" maxlength="25"
+                                                             value="#{ventaMotosBean.garanteEmail}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteEmail"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteRuc">RUC: </label>
+                                    <div class="cont"><input type="text" id="garanteRuc" name="garanteRuc" jsfc="h:inputText" size="20" maxlength="10"
+                                                             value="#{ventaMotosBean.garanteRuc}" disabled="#{ventaMotosBean.garante ne '0'}"/>&#160;<h:message errorClass="msgError" for="frm:garanteRuc"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteSexo">Sexo: </label>
+                                    <div class="cont"><select id="garanteSexo" name="garanteSexo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.garanteSexo}"
+                                                              disabled="#{ventaMotosBean.garante ne '0'}">
+                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                            <f:selectItem itemLabel="Hombre" itemValue="H"/>
+                                            <f:selectItem itemLabel="Mujer" itemValue="M"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:garanteSexo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteEstadoCivil">Estado Civil: </label>
+                                    <div class="cont"><select id="garanteEstadoCivil" name="garanteEstadoCivil" jsfc="h:selectOneMenu" value="#{ventaMotosBean.garanteEstadoCivil}"
+                                                              disabled="#{ventaMotosBean.garante ne '0'}">
+                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                            <f:selectItem itemLabel="Soltero" itemValue="S"/>
+                                            <f:selectItem itemLabel="Casado" itemValue="C"/>
+                                            <f:selectItem itemLabel="Viudo" itemValue="V"/>
+                                        </select>&#160;<h:message errorClass="msgError" for="frm:garanteEstadoCivil"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteFechaNacimiento">Fecha de Nacimiento: </label>
+                                    <div class="cont"><h:inputText id="garanteFechaNacimiento" size="20" maxlength="10" value="#{ventaMotosBean.garanteFechaNacimiento}"
+                                                                   disabled="#{ventaMotosBean.garante ne '0'}">
+                                        </h:inputText> &#160;<h:message errorClass="msgError" for="frm:garanteFechaNacimiento"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteProfesion">Profesión: </label>
+                                    <div class="cont"><input type="text" id="garanteProfesion" jsfc="h:inputText" size="20" maxlength="40" value="#{ventaMotosBean.garanteProfesion}"
+                                                             disabled="#{ventaMotosBean.garante ne '0'}">
+                                        </input> &#160;<h:message errorClass="msgError" for="frm:garanteProfesion"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="garanteHijos">Hijos: </label>
+                                    <div class="cont"><input type="text" id="garanteHijos" size="10" jsfc="h:inputText" value="#{ventaMotosBean.garanteHijos}"
+                                                             disabled="#{ventaMotosBean.garante ne '0'}">
+                                        </input> &#160;<h:message errorClass="msgError" for="frm:garanteHijos"/></div>
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <hr/>
+                        <div class="fila">
+                            <label for="subTotalExentas">Exentas: </label>
+                            <div class="cont">
+                                <h:inputText styleClass="d_num" id="subTotalExentas" size="20" maxlength="13" value="#{ventaMotosBean.subTotalExentas}">
+                                    <rich:validator/>
+                                    <f:ajax event="blur" render="subTotalExentas"/>
+                                </h:inputText><rich:messages for="subTotalExentas"/>
+                            </div>
+                        </div>
+                        <div class="fila">
+                            <label for="subTotalGravadas10">Gravadas 10%:</label>
+                            <div class="cont">
+                                <h:inputText styleClass="d_num" id="subTotalGravadas10" size="20" maxlength="13" value="#{ventaMotosBean.subTotalGravadas10}">
+                                    <rich:validator/>
+                                    <f:ajax event="blur" render="subTotalGravadas10"/>
+                                </h:inputText><rich:messages for="subTotalGravadas10"/>
+                            </div>
+                        </div>
+                        <div class="fila">
+                            <label for="descuento">Descuento:</label>
+                            <div class="cont"><h:inputText styleClass="d_num" size="20" maxlength="4" id="descuento" value="#{ventaMotosBean.descuento}">
+                                    <rich:validator/>
+                                    <f:ajax event="blur" render="subTotal"/>
+                                    <f:ajax event="blur" render="ToTal"/>
+                                </h:inputText><rich:messages for="descuento"/>
+                            </div>
+                        </div>
+                        <div class="fila">
+                            <label for="subTotal">Sub Total:</label>
+                            <div class="cont"><h:inputText styleClass="d_num" size="20" maxlength="13" id="subTotal" value="#{ventaMotosBean.subtotal}">
+                                    <rich:validator/>
+                                    <f:ajax event="blur" render="ToTal"/>
+                                </h:inputText><rich:messages for="subTotal"/>
+                            </div>
+                        </div>
+                        <div class="fila">
+                            <label for="ToTal">Total:</label>
+                            <div class="cont"><h:outputText id="ToTal" value="#{ventaMotosBean.toTal}">
+                                </h:outputText><rich:messages for="ToTal"/>
+                            </div>
+                        </div>
+                        <h:panelGroup id="panelCategoria">
+                            <h:panelGroup rendered="#{ventaMotosBean.codigo eq '32'}">
+                                <hr/>
+                                <div class="tablaForm">
+                                    <div class="fila">
+                                        <label for="comprobante">Entrega Inicial: </label>
+                                        <div class="cont"><input type="text" id="entregaInicial" name="entregaInicial" jsfc="h:inputText" size="20" maxlength="13"
+                                                                 value="#{ventaMotosBean.entregaInicial}">
+                                                <f:ajax event="blur" render="entregaInicial"/></input><h:message errorClass="msgError" for="frm:entregaInicial"/></div>
+                                        <label for="cuotas">Cuotas: </label>
+                                        <div class="cont"><input type="text" id="cuotas" name="cuotas" jsfc="h:inputText" size="5" maxlength="2"
+                                                                 value="#{ventaMotosBean.cuotas}"/><h:message errorClass="msgError" for="frm:cuotas"/></div>
+                                        <label for="montoCuotaIgual">Monto Cuota: </label>
+                                        <div class="cont"><input type="text" id="montoCuotaIgual" name="montoCuotaIgual" jsfc="h:inputText" size="20" maxlength="13"
+                                                                 value="#{ventaMotosBean.montoCuotaIgual}">
+                                                <f:ajax event="blur" render="montoCuotaIgual"/></input><h:message errorClass="msgError" for="frm:montoCuotaIgual"/></div>
+                                    </div>
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <hr/>
+                        <div class="fila">
+                            <label for="moto">Moto Nº: </label>
+                            <div class="cont"><h:selectOneListbox id="nMoto" value="#{ventaMotosBean.nMoto}">
+                                    <f:selectItems value="#{ventaMotosBean.listaMoto}"/>
+                                    <f:ajax event="blur" render="entregaInicial"/></h:selectOneListbox><h:message errorClass="msgError" for="frm:entregaInicial"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="codigoFabrica">Código Fábrica: </label>
+                            <div class="cont"><h:outputText id="codigoFabrica" value="#{motostockBean.facade.entity.moto.codigoFabrica}"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="marca">Marca: </label>
+                            <div class="cont"><h:outputText id="marca" value="#{motostockBean.facade.entity.moto.marca}"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="modelo">Modelo: </label>
+                            <div class="cont"><h:outputText id="modelo" value="#{motostockBean.facade.entity.moto.modelo}"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="color">Color: </label>
+                            <div class="cont"><h:outputText id="color" value="#{motostockBean.facade.entity.moto.color}"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="fabricante">Fabricante: </label>
+                            <div class="cont"><h:outputText id="fabricante" value="#{motostockBean.facade.entity.moto.fabricante.nombre}"/></div>
+                        </div>
+                        <div class="fila">
+                            <label for="categoria">Categoria: </label>
+                            <div class="cont"><h:outputText id="categoriaMoto" value="#{motostockBean.facade.entity.moto.categoria.descripcion}"/></div>
+                        </div>
+                        <hr/>
+                        <div class="botonera">
+                            <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{ventaMotosBean.guardarNuevo}"/>
+                            <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{ventaMotosBean.cancelar}"/>
+                        </div>
+                    </body>
+                </fieldset>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

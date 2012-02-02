@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='UTF-8'?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -7,14 +6,20 @@
 
     <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/images/moto.png" type="image/x-icon" rel="icon"/>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/images/moto.png" type="image/x-icon" rel="shortcut icon"/>
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/layout.css" rel="stylesheet" type="text/css" />
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/cssLayout.css" rel="stylesheet" type="text/css" />
         <link href="#{facesContext.externalContext.requestContextPath}/resources/css/menu_style.css" rel="stylesheet" type="text/css" />
-        <title>BEJ - MOTOS</title>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/formularios.css" rel="stylesheet" type="text/css" />
+        <script src="#{facesContext.externalContext.requestContextPath}/resources/js/entradas.js" type="text/javascript"></script>
+        <title><h:outputText value="#{loginBean.ubicacion}"/>&nbsp;-&nbsp;BEJ - MOTOS</title>
     </h:head>
 
-    <h:body>
-
+    <h:body onload="javascript:formatInputs(document.forms);">
+        <h:outputStylesheet>
+            .rf-msgs-err{color: red;}
+        </h:outputStylesheet>
         <div id="top" style="height: 20px;">
             <ui:insert name="top">Bej Motos</ui:insert>
         </div>
@@ -38,10 +43,10 @@
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
-                            <li class="top"><a href="#" class="top_link"><span>Ventas</span></a>
+                            <li class="top"><h:commandLink action="#{ventaMotosBean.listar}" styleClass="top_link" accesskey="V"><span>Ventas</span></h:commandLink>
                                 <ul class="sub">
-                                    <li><a href="#">Nuevo</a></li>
-                                    <li><a href="#">Buscar</a></li>
+                                    <li><h:commandLink action="#{ventaMotosBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{ventaMotosBean.listar}" value="Buscar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
@@ -72,7 +77,8 @@
                             <li class="top"><a href="#" class="top_link"><span>Taller</span></a></li>
                             <li class="top"><a href="#" class="top_link"><span>Datos Básicos</span></a>
                                 <ul class="sub">
-                                    <li><h:commandLink action="#{categoriaBean.listar}" value="Categorias"/></li>
+                                    <li><h:commandLink action="#{categoriaBean.listar}" value="Categoria"/></li>
+                                    <li><h:commandLink action="#{ubicacionBean.listar}" value="Ubicacion"/></li>
                                     <li><a href="./../../secure/app/abm/editarCategoria.jsf">Nueva</a></li>
                                     <li><a href="#">Buscar</a></li>
                                 </ul>
@@ -87,7 +93,7 @@
             </ui:insert>
         </div>
         <div id="bottom" style="height: 20px;">
-            Version 0.1.4 Fecha 15/03/2011
+            Version 0.1.5 Fecha 02/02/2012
             <ui:insert name="bottom"></ui:insert>
         </div>
 

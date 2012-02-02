@@ -6,7 +6,7 @@
       xmlns:f="http://java.sun.com/jsf/core">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>Compras de Motos</title>
+        <title></title>
     </head>
     <body>
 
@@ -14,42 +14,49 @@
             <ui:define name="content">
                 <h:form id="frmBuscar">
                     <fieldset>
-                        <div class="tablaForm">
-                            <div class="fila">
-                                <div class="etiq"><label for="id">Nº de Compra: </label></div>
-                                <div class="cont"><input id="id" jsfc="h:inputText" value="#{compraMotosBean.id}" maxlength="11"/>
-                                </div>
-                                <div class="etiq"><label for="factura">Nº de Factura: </label></div>
-                                <div class="cont"><input id="factura" jsfc="h:inputText" name="factura" value="#{compraMotosBean.comprobante}" maxlength="45"/>
-                                </div>
-                                <div class="etiq"><label for="codigo">Categoria: </label></div>
-                                <div class="cont"><select id="codigo" name="codigo" jsfc="h:selectOneMenu" value="#{compraMotosBean.codigo}">
+                        <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                        <table class="busqueda">
+                            <tr>
+                                <td>
+                                    <label for="id">Nº de Compra: </label>
+                                    <input class="d_num" id="id" jsfc="h:inputText" value="#{compraMotosBean.idFiltro}" size="5" maxlength="11"/>
+                                </td>
+                                <td>
+                                    <label for="factura">Nº de Factura: </label>
+                                    <input id="factura" jsfc="h:inputText" name="factura" value="#{compraMotosBean.comprobanteFiltro}" maxlength="45"/>
+                                </td>
+                                <td>
+                                    <label for="codigo">Categoria: </label>
+                                    <select id="codigo" name="codigo" jsfc="h:selectOneMenu" value="#{compraMotosBean.categoriaFiltro}">
                                         <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
                                     </select>
-                                </div>
-                            </div>
-                            <div class="fila">
-                                <div class="etiq"><label for="proveedor">Proveedor: </label></div>
-                                <div class="cont"><select id="proveedor" name="proveedor" jsfc="h:selectOneMenu" value="#{compraMotosBean.vendedor}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="proveedor">Proveedor: </label>
+                                    <select id="proveedor" name="proveedor" jsfc="h:selectOneMenu" value="#{compraMotosBean.vendedorFiltro}">
                                         <f:selectItems value="#{compraMotosBean.listaProveedor}"/>
                                     </select>
-                                </div>
-                                <div class="etiq"><label for="saldado">Saldado: </label></div>
-                                <div class="cont"><select id="saldado" name="saldado" jsfc="h:selectOneMenu" value="#{compraMotosBean.saldado}">
+                                </td>
+                                <td>
+                                    <label for="saldado">Saldado: </label>
+                                    <select id="saldado" name="saldado" jsfc="h:selectOneMenu" value="#{compraMotosBean.compra.saldado}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Si" itemValue="S"/>
                                         <f:selectItem itemLabel="No" itemValue="N"/>
                                     </select>
-                                </div>
-                                <div class="etiq"><label for="anulado">Anulado: </label></div>
-                                <div class="cont"><select id="anulado" name="anulado" jsfc="h:selectOneMenu" value="#{compraMotosBean.anulado}">
+                                </td>
+                                <td>
+                                    <label for="anulado">Anulado: </label>
+                                    <select id="anulado" name="anulado" jsfc="h:selectOneMenu" value="#{compraMotosBean.compra.anulado}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Si" itemValue="S"/>
                                         <f:selectItem itemLabel="No" itemValue="N"/>
                                     </select>
-                                </div>
-                            </div>
-                        </div>
+                                </td>
+                            </tr>
+                        </table>
                         <div class="botonera">
                             <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{compraMotosBean.buscar}"/>
                             <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{compraMotosBean.todos}"/>
@@ -62,90 +69,106 @@
                     </div>
                     <fieldset>
                         <h:panelGroup rendered="#{not empty compraMotosBean.lista }">
-                            <div class="tablaForm">
-                                <div class="fila">
-                                    <div class="t_head" style="width: 2%;"></div>
-                                    <div class="t_head" style="width: 5%;"><p>
-                                            <a id="lnkId"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Nº
-                                                <f:setPropertyActionListener value="id" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'id'}"/></p></div>
-                                    <div class="t_head" style="width: 20%;"><p>
-                                            <a id="lnkNumero"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Factura
-                                                <f:setPropertyActionListener value="comprobante" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'comprobante'}"/></p></div>
-                                    <div class="t_head" style="width: 20%;"><p>
-                                            <a id="lnkCategoria"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Categoría
-                                                <f:setPropertyActionListener value="codigo" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'codigo'}"/></p></div>
-                                    <div class="t_head" style="width: 20%;"><p>
-                                            <a id="lnkProveedor"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Proveedor
-                                                <f:setPropertyActionListener value="vendedor" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'vendedor'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkFechaOperacion"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Fecha
-                                                <f:setPropertyActionListener value="fechaOperacion" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'fechaOperacion'}"/></p></div>
-                                    <div class="t_head" style="width: 15%;"><p>
-                                            <a id="lnkMontoTotal"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Monto Total
-                                                <f:setPropertyActionListener value="totalPagado" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'totalPagado'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkSaldado"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Saldado
-                                                <f:setPropertyActionListener value="saldado" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'saldado'}"/></p></div>
-                                    <div class="t_head" style="width: 10%;"><p>
-                                            <a id="lnkAnulado"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Anulado
-                                                <f:setPropertyActionListener value="anulado" target="#{compraMotosBean.facade.orden.columna}"/>
-                                                <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
-                                            </a>
-                                            <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                          rendered="#{compraMotosBean.facade.orden.columna eq 'anulado'}"/></p></div>
-                                </div>
-                                <ui:repeat var="row" value="#{compraMotosBean.lista}">
-                                    <div class="filaTabla">
-                                        <div class="d" style="width: 2%;"><input type="radio" id="radio" name="radio"
-                                                                                 value="#{row.id}"/></div>
-                                        <div class="d" style="width: 8%;"><h:outputText value="#{row.id}"/></div>
-                                        <div class="d" style="width: 20%;"><h:outputText value="#{row.comprobante}"/></div>
-                                        <div class="d" style="width: 20%;"><h:outputText value="#{row.codigo.descripcion}"/></div>
-                                        <div class="d" style="width: 30%;"><h:outputText value="#{row.vendedor.nombre}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.fechaOperacion}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy-HH:mm:s" timeZone="GMT-3"/>
-                                            </h:outputText></div>
-                                        <div class="d num_out" style="width: 10%;"><h:outputText value="#{row.totalPagado}">
-                                                <f:convertNumber pattern="#,##0.00"/>
-                                            </h:outputText></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.saldado eq 'S'?'Si':'No'}"/></div>
-                                        <div class="d" style="width: 10%;"><h:outputText value="#{row.anulado eq 'S'?'Si':'No'}"/></div>
-                                    </div>
-                                </ui:repeat>
-                            </div>
-                            <div class="t_footer">
-                                <h:commandLink action="#{compraMotosBean.anterior}">Anterior</h:commandLink>
-                                &#160;|&#160;#{compraMotosBean.desde + 1}..#{compraMotosBean.facade.ultimo} de #{compraMotosBean.facade.contador}&#160;|&#160;
-                                <h:commandLink action="#{compraMotosBean.siguiente}">Siguiente</h:commandLink>
-                            </div>
+                            <table class="tablaDatos">
+                                <thead>
+                                    <tr>
+                                        <th width="2%"></th>
+                                        <th width="15%"><p>
+                                                <a id="lnkId"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Nº
+                                                    <f:setPropertyActionListener value="id" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'id'}"/></p></th>
+                                        <th width="20%"><p>
+                                                <a id="lnkNumero"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Factura
+                                                    <f:setPropertyActionListener value="factura.numero" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'comprobante'}"/></p>
+                                        </th>
+                                        <th width="20%"><p>
+                                                <a id="lnkCategoria"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Categoría
+                                                    <f:setPropertyActionListener value="codigo" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'codigo'}"/></p>
+                                        </th>
+                                        <th width="20%">
+                                            <p>
+                                                <a id="lnkProveedor"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Proveedor
+                                                    <f:setPropertyActionListener value="vendedor" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'vendedor'}"/></p>
+                                        </th>
+                                        <th width="10%"><p>
+                                                <a id="lnkFechaOperacion"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Fecha
+                                                    <f:setPropertyActionListener value="fechaOperacion" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'fechaOperacion'}"/></p>
+                                        </th>
+                                        <th width="15%"><p>
+                                                <a id="lnkMontoTotal"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Monto Total
+                                                    <f:setPropertyActionListener value="totalPagado" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'totalPagado'}"/></p>
+                                        </th>
+                                        <th width="10%"><p>
+                                                <a id="lnkSaldado"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Saldado
+                                                    <f:setPropertyActionListener value="saldado" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'saldado'}"/></p>                                            
+                                        </th>
+                                        <th width="10%"><p>
+                                                <a id="lnkAnulado"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Anulado
+                                                    <f:setPropertyActionListener value="anulado" target="#{compraMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
+                                                </a>
+                                                <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                              rendered="#{compraMotosBean.facade.orden.columna eq 'anulado'}"/></p>                                            
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat var="row" value="#{compraMotosBean.lista}">
+                                        <tr>
+                                            <td><input type="radio" id="radio" name="radio"
+                                                       value="#{row.id}"/></td>
+                                            <td><h:outputText value="#{row.id}"/></td>
+                                            <td><h:outputText value="#{row.factura.numero}"/></td>
+                                            <td><h:outputText value="#{row.codigo.descripcion}"/></td>
+                                            <td><h:outputText value="#{row.vendedor.nombre}"/></td>
+                                            <td><h:outputText value="#{row.fechaOperacion}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy-HH:mm:s" timeZone="GMT-3"/>
+                                                </h:outputText></td>
+                                            <td><h:outputText value="#{row.totalPagado}">
+                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                </h:outputText></td>
+                                            <td><h:outputText value="#{row.saldado eq 'S'?'Si':'No'}"/></td>
+                                            <td><h:outputText value="#{row.anulado eq 'S'?'Si':'No'}"/></td>
+                                        </tr>
+                                    </ui:repeat>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9">
+                                            <h:commandLink action="#{compraMotosBean.anterior}">Anterior</h:commandLink>
+                                            &#160;|&#160;#{compraMotosBean.desde + 1}..#{compraMotosBean.facade.ultimo} de #{compraMotosBean.facade.contador}&#160;|&#160;
+                                            <h:commandLink action="#{compraMotosBean.siguiente}">Siguiente</h:commandLink>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </h:panelGroup>
                         <div class="botonera">
                             <h:commandButton id="btnNuevo" value="Nuevo" action="#{compraMotosBean.nuevo}" styleClass="submit"/>

@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>BEJ - MOTOS</title>
@@ -16,32 +17,35 @@
                 <h:form id="frm">
                     <div>
                         <fieldset>
-                            <legend>Persona Nueva</legend>
+                            <h3>Persona Nueva</h3>
                             <div class="tablaForm">
                                 <div class="fila">
-                                    <div class="etiq"><label for="fisica">Categoria: </label></div>
-                                    <div class="cont"><select id="fisica" name="fisica" jsfc="h:selectOneMenu" value="#{personaBean.fisica}">
+                                    <label for="fisica">Categoria: </label>
+                                    <div class="cont"><h:selectOneMenu id="fisica" value="#{personaBean.facade.entity}">
                                             <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                             <f:selectItem itemLabel="Persona Física" itemValue="S"/>
                                             <f:selectItem itemLabel="Persona Jurídica" itemValue="N"/>
                                             <f:ajax event="change" render="frm"/>
-                                        </select>&#160;<h:message errorClass="msgError" for="frm:fisica"/></div>
+                                            <rich:validator/>
+                                        </h:selectOneMenu>&#160;<rich:messages for="frm:fisica"/></div>
                                 </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="tratamiento">Tratamiento: </label></div>
-                                        <div class="cont"><select id="tratamiento" name="tratamiento" jsfc="h:selectOneMenu" value="#{personaBean.tratamiento}">
+                                <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
+                                    <div class="fila">
+                                        <label for="tratamiento">Tratamiento: </label>
+                                        <div class="cont"><h:selectOneMenu id="tratamiento" value="#{personaBean.tratamiento}">
                                                 <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                                 <f:selectItem itemLabel="Señor" itemValue="Señor"/>
                                                 <f:selectItem itemLabel="Señora" itemValue="Señora"/>
                                                 <f:selectItem itemLabel="Señorita" itemValue="Señorita"/>
-                                            </select>&#160;<h:message errorClass="msgError" for="frm:tratamiento"/></div>
-                                    </h:panelGroup>
-                                </div>
+                                                <rich:validator/>
+                                            </h:selectOneMenu>&#160;<rich:messages for="frm:tratamiento"/></div>
+                                    </div>
+                                </h:panelGroup>
+
                                 <h:panelGroup rendered="#{personaBean.fisica eq 'N'}">
                                     <div class="fila">
-                                        <div class="etiq"><label for="tratamiento2">Organización: </label></div>
-                                        <div class="cont"><select id="tratamiento2" name="tratamiento2" jsfc="h:selectOneMenu" value="#{personaBean.tratamiento}">
+                                        <label for="tratamiento2">Organización: </label>
+                                        <div class="cont"><h:selectOneMenu id="tratamiento2" value="#{personaBean.tratamiento}">
                                                 <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                                 <f:selectItem itemLabel="S.A." itemValue="SA"/>
                                                 <f:selectItem itemLabel="S.R.L." itemValue="SRL"/>
@@ -49,109 +53,106 @@
                                                 <f:selectItem itemLabel="ONG" itemValue="ONG"/>
                                                 <f:selectItem itemLabel="Gobierno" itemValue="GOV"/>
                                                 <f:selectItem itemLabel="Asoc. de Empleados" itemValue="ASO"/>
-                                                 <f:selectItem itemLabel="Empresa Unipersonal" itemValue="UNI"/>
-                                            </select>&#160;<h:message errorClass="msgError" for="frm:tratamiento2"/></div>
+                                                <f:selectItem itemLabel="Empresa Unipersonal" itemValue="UNI"/>
+                                                <rich:validator/>
+                                            </h:selectOneMenu>>&#160;<rich:messages for="frm:tratamiento2"/></div>
                                     </div>
                                     <div class="fila">
-                                        <div class="etiq"><label for="contacto">Contacto: </label></div>
-                                        <div class="cont"><input type="text" id="contacto" name="contacto" jsfc="h:inputText" size="60" maxlength="45"
-                                                                 value="#{personaBean.contacto}"/>&#160;<h:message errorClass="msgError" for="frm:contacto"/></div>
+                                        <label for="contacto">Contacto: </label>
+                                        <div class="cont"><h:inputText id="contacto" size="60" maxlength="45"
+                                                                       value="#{personaBean.contacto}"/>&#160;<rich:messages for="frm:contacto"/></div>
                                     </div>
                                 </h:panelGroup>
                                 <div class="fila">
-                                    <div class="etiq"><label for="documento">Documento: </label></div>
+                                    <label for="documento">Documento: </label>
                                     <div class="cont"><input id="documento" name="documento" jsfc="h:inputText" size="20" maxlength="11"
-                                                             value="#{personaBean.documento}"/>&#160;<h:message errorClass="msgError" for="frm:documento"/></div>
+                                                             value="#{personaBean.documento}"/>&#160;<rich:messages for="frm:documento"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="nombre">Nombre Completo: </label></div>
+                                    <label for="nombre">Nombre Completo: </label>
                                     <div class="cont"><input type="text" id="nombre" name="nombre" jsfc="h:inputText" size="60" maxlength="50"
-                                                             value="#{personaBean.nombre}"/>&#160;<h:message errorClass="msgError" for="frm:nombre"/></div>
+                                                             value="#{personaBean.nombre}"/>&#160;<rich:messages for="frm:nombre"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="direccion1">Dirección 1: </label></div>
+                                    <label for="direccion1">Dirección 1: </label>
                                     <div class="cont"><input type="text" id="direccion1" name="direccion1" jsfc="h:inputText" size="60" maxlength="50"
-                                                             value="#{personaBean.direccion1}"/>&#160;<h:message errorClass="msgError" for="frm:direccion1"/></div>
+                                                             value="#{personaBean.direccion1}"/>&#160;<rich:messages for="frm:direccion1"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="direccion2">Dirección 2: </label></div>
+                                    <label for="direccion2">Dirección 2: </label>
                                     <div class="cont"><input type="text" id="direccion2" name="direccion2" jsfc="h:inputText" size="60" maxlength="50"
-                                                             value="#{personaBean.direccion2}"/>&#160;<h:message errorClass="msgError" for="frm:direccion2"/></div>
+                                                             value="#{personaBean.direccion2}"/>&#160;<rich:messages for="frm:direccion2"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="telefonoFijo">Teléfono Fijo: </label></div>
+                                    <label for="telefonoFijo">Teléfono Fijo: </label>
                                     <div class="cont"><input type="text" id="telefonoFijo" name="telefonoFijo" jsfc="h:inputText" size="20" maxlength="11"
-                                                             value="#{personaBean.telefonoFijo}"/>&#160;<h:message errorClass="msgError" for="frm:telefonoFijo"/></div>
+                                                             value="#{personaBean.telefonoFijo}"/>&#160;<rich:messages for="frm:telefonoFijo"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="telefonoMovil">Teléfono Movil: </label></div>
+                                    <label for="telefonoMovil">Teléfono Movil: </label>
                                     <div class="cont"><input type="text" id="telefonoMovil" name="telefonoMovil" jsfc="h:inputText" size="20" maxlength="13"
-                                                             value="#{personaBean.telefonoMovil}"/>&#160;<h:message errorClass="msgError" for="frm:telefonoMovil"/></div>
+                                                             value="#{personaBean.telefonoMovil}"/>&#160;<rich:messages for="frm:telefonoMovil"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="email">E-mail: </label></div>
+                                    <label for="email">E-mail: </label>
                                     <div class="cont"><input type="text" id="email" name="email" jsfc="h:inputText" size="20" maxlength="25"
-                                                             value="#{personaBean.email}"/>&#160;<h:message errorClass="msgError" for="frm:email"/></div>
+                                                             value="#{personaBean.email}"/>&#160;<rich:messages for="frm:email"/></div>
                                 </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="ruc">RUC: </label></div>
+                                <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
+                                    <div class="fila">
+                                        <label for="ruc">RUC: </label>
                                         <div class="cont"><input type="text" id="ruc" name="ruc" jsfc="h:inputText" size="20" maxlength="10"
-                                                                 value="#{personaBean.ruc}"/>&#160;<h:message errorClass="msgError" for="frm:ruc"/></div>
-                                    </h:panelGroup>
-                                </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="sexo">Sexo: </label></div>
+                                                                 value="#{personaBean.ruc}"/>&#160;<rich:messages for="frm:ruc"/></div>
+                                    </div>
+                                    <div class="fila">
+                                        <label for="sexo">Sexo: </label>
                                         <div class="cont"><select id="sexo" name="sexo" jsfc="h:selectOneMenu" value="#{personaBean.sexo}">
                                                 <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                                 <f:selectItem itemLabel="Hombre" itemValue="H"/>
                                                 <f:selectItem itemLabel="Mujer" itemValue="M"/>
-                                            </select>&#160;<h:message errorClass="msgError" for="frm:sexo"/></div>
-                                    </h:panelGroup>
-                                </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="estadoCivil">Estado Civil: </label></div>
+                                            </select>&#160;<rich:messages for="frm:sexo"/></div>
+                                    </div>
+                                    <div class="fila">
+                                        <label for="estadoCivil">Estado Civil: </label>
                                         <div class="cont"><select id="estadoCivil" name="estadoCivil" jsfc="h:selectOneMenu" value="#{personaBean.estadoCivil}">
                                                 <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                                 <f:selectItem itemLabel="Soltero" itemValue="S"/>
                                                 <f:selectItem itemLabel="Casado" itemValue="C"/>
                                                 <f:selectItem itemLabel="Viudo" itemValue="V"/>
-                                            </select>&#160;<h:message errorClass="msgError" for="frm:estadoCivil"/></div>
-                                    </h:panelGroup>
-                                </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
+                                            </select>&#160;<rich:messages for="frm:estadoCivil"/></div>
+                                    </div>
+                                    <div class="fila">
                                         <div class="etiq"><label for="fechaNacimiento">Fecha de Nacimiento: </label></div>
-                                        <div class="cont"><h:inputText id="fechaNacimiento" size="20" maxlength="10" value="#{personaBean.fechaNacimiento}">
-                                            </h:inputText> &#160;<h:message errorClass="msgError" for="frm:fechaNacimiento"/></div>
-                                    </h:panelGroup>
-                                </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="profesion">Profesión: </label></div>
+                                        <div class="cont">
+                                            <rich:calendar value="#{personaBean.fechaNacimiento}" id="fechaNacimiento" enableManualInput="true"
+                                                           popup="true" datePattern="dd/MM/yyyy"
+                                                           resetTimeOnDateSelect="true">
+                                                <rich:validator/>
+                                            </rich:calendar>
+                                            &#160;<rich:messages for="frm:fechaNacimiento"/></div>
+                                    </div>
+                                    <div class="fila">
+                                        <label for="profesion">Profesión: </label>
                                         <div class="cont"><input type="text" id="profesion" jsfc="h:inputText" size="20" maxlength="40" value="#{personaBean.profesion}">
-                                            </input> &#160;<h:message errorClass="msgError" for="frm:profesion"/></div>
-                                    </h:panelGroup>
-                                </div>
-                                <div class="fila">
-                                    <h:panelGroup rendered="#{personaBean.fisica eq 'S'}">
-                                        <div class="etiq"><label for="hijos">Hijos: </label></div>
+                                            </input> &#160;<rich:messages for="frm:profesion"/></div>
+                                    </div>
+                                    <div class="fila">
+                                        <label for="hijos">Hijos: </label>
                                         <div class="cont"><input type="text" id="hijos" size="10" jsfc="h:inputText" value="#{personaBean.hijos}">
-                                            </input> &#160;<h:message errorClass="msgError" for="frm:hijos"/></div>
-                                    </h:panelGroup>
-                                </div>
+                                            </input> &#160;<rich:messages for="frm:hijos"/></div>
+                                    </div>
+                                </h:panelGroup>
                                 <div class="fila">
-                                    <div class="etiq"><label for="categoria">Rol: </label></div>
+                                    <label for="categoria">Rol: </label>
                                     <div class="cont"><select id="categoria" name="categoria" jsfc="h:selectOneMenu" value="#{personaBean.categoria}">
                                             <f:selectItems value="#{personaBean.listaCategoria}"/>
-                                        </select>&#160;<h:message errorClass="msgError" for="frm:categoria"/></div>
+                                        </select>&#160;<rich:messages for="frm:categoria"/></div>
                                 </div>
                             </div>
-                            <div class="botonera">
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{personaBean.guardarNuevo}"/>
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{personaBean.cancelar}"/>
+                            <div class="botonera"><p>
+                                    <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{personaBean.guardarNuevo}"/>
+                                    <input class="submit" type="submit" jsfc="h:commandButton" value="Cancelar" action="#{personaBean.cancelar}"/>
+                                </p>
                             </div>
                         </fieldset>
                     </div>

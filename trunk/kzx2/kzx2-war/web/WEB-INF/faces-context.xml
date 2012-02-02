@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : faces-context.xml
+    Created on : January 5, 2012, 5:00 PM
+    Author     : Diego_M
+    Description:
+        Purpose of the document follows.
+-->
+
+<faces-config
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+    http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+    version="2.0">
+     <application>
+	  <resource-bundle>
+		<base-name>py.com.bej.bundle.bundle</base-name>
+		<var>msg</var>
+	   </resource-bundle>
+     </application>
+</faces-config>

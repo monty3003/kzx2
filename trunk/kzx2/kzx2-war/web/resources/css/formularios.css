@@ -1,0 +1,51 @@
+/* 
+    Document   : fornularios
+    Created on : Jun 3, 2011, 8:47:03 PM
+    Author     : Diego_M
+    Description:
+        Hoja de estilo para los formularios de carga de datos y transacciones
+*/
+
+/*Credits: Dynamic Drive CSS Library */
+/*URL: http://www.dynamicdrive.com/style/ */
+
+.feedbackform{
+padding: 5px;
+}
+
+div.fieldwrapper{ /*field row DIV (includes two columns- Styled label column and 'thefield' column)*/
+width: 550px; /*width of form rows*/
+overflow: hidden;
+padding: 5px 0;
+}
+
+div.fieldwrapper label.styled{ /* label elements that should be styled (left column within fieldwrapper DIV) */
+float: left;
+width: 150px; /*width of label (left column)*/
+text-transform: uppercase;
+border-bottom: 1px solid red;
+margin-right: 15px; /*spacing with right column*/
+}
+
+div.fieldwrapper div.thefield{ /* DIV that wraps around the actual form fields (right column within fieldwrapper DIV) */
+float: left;
+margin-bottom: 10px; /* space following the field */
+}
+
+div.fieldwrapper div.thefield input[type="text"]{ /* style for INPUT type="text" fields. Has no effect in IE7 or below! */
+width: 250px;
+}
+
+div.fieldwrapper div.thefield textarea{ /* style for TEXTAREA fields. */
+width: 300px;
+height: 150px;
+}
+
+div.buttonsdiv{ /*div that wraps around the submit/reset buttons*/
+margin-top: 5px; /*space above buttonsdiv*/
+}
+
+div.buttonsdiv input{ /* style for INPUT fields within 'buttonsdiv'. Assumed to be form buttons. */
+width: 80px;
+background: #e1dfe0;
+}
