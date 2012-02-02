@@ -6,14 +6,10 @@ package py.com.bej.web.beans.view;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -37,7 +33,7 @@ import py.com.bej.orm.utils.Orden;
  */
 @ManagedBean
 @SessionScoped
-public class MotostockBean extends AbstractPageBean {
+public class MotostockBean extends AbstractPageBean<Motostock> {
 
     @EJB
     private UbicacionFacade ubicacionFacade;
@@ -47,6 +43,7 @@ public class MotostockBean extends AbstractPageBean {
     private TransaccionFacade transaccionFacade;
     @EJB
     private MotostockFacade facade;
+    private Motostock stock;
     private List<Moto> listaMotos;
     private List<SelectItem> listaMoto;
     private List<Transaccion> listaCompras;
@@ -71,75 +68,9 @@ public class MotostockBean extends AbstractPageBean {
     }
 
     @Override
-    void deEntity() {
-        setFormatNumero(NumberFormat.getInstance(Locale.US));
-        this.id = getFacade().getEntity().getId().toString();
-        this.moto = getFacade().getEntity().getMoto().getCodigo();
-        this.motor = getFacade().getEntity().getMotor();
-        this.chasis = getFacade().getEntity().getChasis();
-        this.compra = getFacade().getEntity().getCompra().getId();
-        if (facade.getEntity().getVenta() != null) {
-            this.venta = getFacade().getEntity().getVenta().getId();
-        }
-        this.costo = getFacade().getEntity().getCosto().toString();
-        if (getFacade().getEntity().getPrecioVenta() != null) {
-            this.precioVenta = getFormatNumero().format(getFacade().getEntity().getPrecioVenta());
-        }
-        this.ubicacion = getFacade().getEntity().getUbicacion().getId();
-    }
-
-    @Override
-    void deCampos() {
-        try {
-            setFormatFechaHora(new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault()));
-            if (this.moto != null && !this.moto.equals("X")) {
-                getFacade().getEntity().setMoto(new Moto(moto));
-            }
-            if (this.id != null && !this.id.equals("")) {
-                getFacade().getEntity().setId(new Integer(this.id.trim()));
-            }
-            if (this.motor != null && !this.motor.trim().equals("")) {
-                getFacade().getEntity().setMotor(motor.trim());
-            }
-            if (this.chasis != null && !this.chasis.trim().equals("")) {
-                getFacade().getEntity().setChasis(chasis.trim());
-            }
-            if (this.compra != null && !this.compra.equals(-1)) {
-                getFacade().getEntity().setCompra(new Transaccion(this.compra));
-            }
-            if (this.venta != null && !this.venta.equals(-1)) {
-                getFacade().getEntity().setVenta(new Transaccion(this.venta));
-            }
-            if (this.costo != null && !this.costo.trim().equals("")) {
-                getFacade().getEntity().setCosto(BigDecimal.valueOf(getFormatNumero().parse(this.costo).longValue()));
-            }
-            if (this.precioVenta != null && !this.precioVenta.trim().equals("")) {
-                getFacade().getEntity().setPrecioVenta(BigDecimal.valueOf(getFormatNumero().parse(this.precioVenta).longValue()));
-            }
-            if (this.ubicacion != null && !this.ubicacion.equals(-1)) {
-                getFacade().getEntity().setUbicacion(new Ubicacion(this.ubicacion));
-            }
-        } catch (ParseException ex) {
-            Logger.getLogger(CompraMotosBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    void limpiarCampos() {
-        this.id = null;
-        this.moto = null;
-        this.motor = null;
-        this.chasis = null;
-        this.compra = null;
-        this.venta = null;
-        this.costo = null;
-        this.precioVenta = null;
-        this.ubicacion = null;
-    }
-
-    @Override
     public String listar() {
-        limpiarCampos();
+        stock = new Motostock();
+        getFacade().setEntity(stock);
         setNav("listamotostock");
         setDesde(0);
         setMax(10);
@@ -175,7 +106,7 @@ public class MotostockBean extends AbstractPageBean {
     @Override
     List<Motostock> filtrar() {
         facade.setEntity(new Motostock());
-        deCampos();
+        getFacade().setEntity(stock);
         getFacade().setRango(new Integer[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
@@ -225,7 +156,7 @@ public class MotostockBean extends AbstractPageBean {
             }
         }
         facade.setEntity(new Motostock());
-        deCampos();
+        getFacade().setEntity(stock);
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
@@ -236,7 +167,8 @@ public class MotostockBean extends AbstractPageBean {
 
     @Override
     public String nuevo() {
-        limpiarCampos();
+        stock = new Motostock();
+        getFacade().setEntity(stock);
         setFormatNumero(NumberFormat.getInstance(Locale.US));
         listaMoto = new ArrayList<SelectItem>();
         listaMoto.add(new SelectItem("X", "-SELECCIONAR-"));
@@ -257,12 +189,11 @@ public class MotostockBean extends AbstractPageBean {
         xid = ((String) request.getParameter("radio"));
         if (xid != null) {
             try {
-                getFacade().setEntity(getFacade().find(new Integer(xid)));
+                getFacade().find(new Integer(xid));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-            deEntity();
             listaMoto = new ArrayList<SelectItem>();
             listaCompra = new ArrayList<SelectItem>();
             listaVenta = new ArrayList<SelectItem>();
@@ -277,10 +208,10 @@ public class MotostockBean extends AbstractPageBean {
     }
 
     @Override
-    public String guardarNuevo() {
-        boolean validado = validarNuevo();
+    public String guardar() {
+        boolean validado = validar();
         if (validado) {
-            deCampos();
+            getFacade().setEntity(stock);
             getFacade().create();
             //Actualizar datos de la compra
             Transaccion t = getTransaccionFacade().find(getFacade().getEntity().getCompra().getId());
@@ -296,7 +227,7 @@ public class MotostockBean extends AbstractPageBean {
     }
 
     @Override
-    boolean validarNuevo() {
+    boolean validar() {
         setFormatNumero(NumberFormat.getInstance(Locale.US));
         if (this.moto.trim().equals("X")) {
             setErrorMessage("frm:moto", "Seleccione un valor");
@@ -354,19 +285,6 @@ public class MotostockBean extends AbstractPageBean {
             res = false;
         }
         return res;
-    }
-
-    @Override
-    public String guardarModificar() {
-        boolean validado = validarNuevo();
-        if (validado) {
-            deCampos();
-            getFacade().guardar();
-            setInfoMessage(null, facade.ex2);
-            return this.listar();
-        } else {
-            return null;
-        }
     }
 
     public void buscarModelo() {
@@ -542,7 +460,8 @@ public class MotostockBean extends AbstractPageBean {
 
     @Override
     public String todos() {
-        limpiarCampos();
+        stock = new Motostock();
+        getFacade().setEntity(stock);
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
@@ -620,8 +539,22 @@ public class MotostockBean extends AbstractPageBean {
         return listaMoto;
     }
 
+    /**
+     * @return the stock
+     */
+    public Motostock getStock() {
+        return stock;
+    }
+
+    /**
+     * @param stock the stock to set
+     */
+    public void setStock(Motostock stock) {
+        this.stock = stock;
+    }
+
     @Override
-    boolean validarModificar() {
+    void limpiarCampos() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

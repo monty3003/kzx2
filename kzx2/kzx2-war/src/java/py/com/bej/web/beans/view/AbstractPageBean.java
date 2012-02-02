@@ -4,39 +4,42 @@
  */
 package py.com.bej.web.beans.view;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConfiguracionEnum;
+import py.com.bej.web.servlets.security.LoginBean;
 
 /**
  *
  * @author diego
  */
-public abstract class AbstractPageBean {
+public abstract class AbstractPageBean<T extends WithId> implements Serializable {
 
-    private Integer desde;
-    private Integer max;
+    private static final long serialVersionUID = 1L;
+    private Integer desde = Integer.parseInt(ConfiguracionEnum.PAG_DESDE.getSymbol());
+    private Integer max = Integer.parseInt(ConfiguracionEnum.PAG_MAX.getSymbol());
     private Integer total;
     private String nav;
     private Boolean valido;
     private DateFormat formatFechaHora;
     private NumberFormat formatNumero;
     private Calendar ahora;
+    private Boolean agregar;
     private Boolean modificar;
-    private List lista;
-
-    abstract void deEntity();
-
-    abstract void deCampos();
+    private List<T> lista;
+    private Boolean activo;
 
     abstract void limpiarCampos();
 
     public abstract String listar();
 
-    abstract List filtrar();
+    abstract List<T> filtrar();
 
     abstract void obtenerListas();
 
@@ -46,13 +49,9 @@ public abstract class AbstractPageBean {
 
     public abstract String modificar();
 
-    abstract boolean validarNuevo();
+    abstract boolean validar();
 
-    abstract boolean validarModificar();
-
-    public abstract String guardarNuevo();
-
-    public abstract String guardarModificar();
+    public abstract String guardar();
 
     public abstract String cancelar();
 
@@ -199,14 +198,42 @@ public abstract class AbstractPageBean {
     /**
      * @return the lista
      */
-    public List getLista() {
+    public List<T> getLista() {
         return lista;
     }
 
     /**
      * @param lista the lista to set
      */
-    public void setLista(List lista) {
+    public void setLista(List<T> lista) {
         this.lista = lista;
+    }
+
+    /**
+     * @return the agregar
+     */
+    public Boolean getAgregar() {
+        return agregar;
+    }
+
+    /**
+     * @param agregar the agregar to set
+     */
+    public void setAgregar(Boolean agregar) {
+        this.agregar = agregar;
+    }
+
+    /**
+     * @return the activo
+     */
+    public Boolean getActivo() {
+        return activo;
+    }
+
+    /**
+     * @param activo the activo to set
+     */
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
     }
 }

@@ -28,7 +28,7 @@ public class JsfUtils {
                 if (o instanceof String) {
                     items.add(new SelectItem("X", "SELECCIONAR"));
                 } else {
-                    items.add(new SelectItem(-1, "SELECCIONAR"));
+                    items.add(new SelectItem(new Integer(-1), "SELECCIONAR"));
                     i++;
                 }
             }
