@@ -58,7 +58,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
         cq.where(cb.between(r.get("id"), inicio, fin));
         TypedQuery<Categoria> q = getEm().createQuery(cq);
         res = q.getResultList();
-        return res;
+        return new ArrayList<Categoria>(res);
     }
 
     @Override

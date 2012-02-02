@@ -73,12 +73,11 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
         BigDecimal interesAnualEfectivo = new BigDecimal(credito.getTae());
         BigDecimal interesAnualNeto = new BigDecimal(credito.getTan());
         BigDecimal cuotaNeta = credito.getTransaccion().getMontoCuotaIgual();
-        //credito.getCapital().multiply(interesAnualNeto.divide(new BigDecimal(12), 4, RoundingMode.HALF_UP)).add(credito.getCapital());
         BigDecimal totalAPagar = cuotaNeta.setScale(-2, RoundingMode.HALF_DOWN);
         BigDecimal ajusteRedondeo = totalAPagar.subtract(cuotaNeta);
         GregorianCalendar fecha = new GregorianCalendar();
         fecha.setTime(credito.getFechaInicio());
-        for (short i = 0; i <= credito.getAmortizacion(); i++) {
+        for (short i = 0; i < credito.getAmortizacion(); i++) {
             Financiacion f = new Financiacion();
             f.setCredito(credito);
             f.setNumeroCuota((short) (i + 1));
@@ -87,10 +86,11 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
             f.setAjusteRedondeo(ajusteRedondeo);
             fecha.add(Calendar.DAY_OF_MONTH, 30);
             f.setFechaVencimiento(fecha.getTime());
-            if (credito.getCategoria().getId().equals(40)) {
+            if (credito.getCategoria().getId().equals(60)) {
                 f.setCapital(credito.getCapital());
+                f.setInteres(BigDecimal.ZERO);
             } else {
-                if (credito.getSistemaCredito().getId().equals(42)) {
+                if (credito.getSistemaCredito().getId().equals(44)) {
                     BigDecimal x = BigDecimal.ONE.add(interesAnualEfectivo);
                     BigDecimal y = x.pow(contarCuotas, MathContext.DECIMAL64);
                     BigDecimal z = y.subtract(BigDecimal.ONE);

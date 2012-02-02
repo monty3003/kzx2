@@ -19,8 +19,6 @@ import py.com.bej.orm.entities.Ubicacion;
 @Stateless
 public class UbicacionFacade extends AbstractFacade<Ubicacion> {
 
-    private Ubicacion c = new Ubicacion();
-
     public UbicacionFacade() {
         super(Ubicacion.class);
     }
@@ -72,7 +70,7 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     @Override
     public void guardar() {
         try {
-            getEm().merge(c);
+            getEm().merge(getEntity());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -81,15 +79,15 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     @Override
     public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (c.getId() != null) {
+        if (getEntity().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "id");
             criteria.add(cb.equal(r.get("id"), p));
         }
-        if (c.getDescripcion() != null) {
+        if (getEntity().getDescripcion() != null) {
             criteria.add(cb.like(cb.lower(
                     r.get("descripcion")), "%"
-                    + c.getDescripcion().toLowerCase() + "%"));
+                    + getEntity().getDescripcion().toLowerCase() + "%"));
         }
         return criteria;
     }
@@ -97,12 +95,16 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     @Override
     public TypedQuery<Ubicacion> setearConsulta() {
         TypedQuery<Ubicacion> q = getEm().createQuery(cq);
-        if (c.getId() != null) {
-            q.setParameter("id", c.getId());
+        if (getEntity().getId() != null) {
+            q.setParameter("id", getEntity().getId());
         }
-        if (c.getDescripcion() != null) {
-            q.setParameter("descripcion", c.getDescripcion());
+        if (getEntity().getDescripcion() != null) {
+            q.setParameter("descripcion", getEntity().getDescripcion());
         }
         return q;
+    }
+
+    public Ubicacion findByDescripcion(String descripcion) throws Exception {
+        return (Ubicacion) getEm().createQuery("select u from Ubicacion u where u.descripcion =?").setParameter(1, descripcion).getSingleResult();
     }
 }

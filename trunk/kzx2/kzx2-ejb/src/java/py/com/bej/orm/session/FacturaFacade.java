@@ -10,21 +10,21 @@ import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import py.com.bej.orm.entities.Moto;
+import py.com.bej.orm.entities.Factura;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Stateless
-public class MotoFacade extends AbstractFacade<Moto> {
+public class FacturaFacade extends AbstractFacade<Factura> {
 
-    public MotoFacade() {
-        super(Moto.class);
+    public FacturaFacade() {
+        super(Factura.class);
     }
 
     @Override
-    public List<Moto> findRange() {
+    public List<Factura> findRange() {
         inicio();
         List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
@@ -41,19 +41,13 @@ public class MotoFacade extends AbstractFacade<Moto> {
                 } else {
                     cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
-            } else if (getOrden().getColumna().equals("fabricante")) {
-                if (getOrden().getAsc()) {
-                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("nombre")));
-                } else {
-                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("nombre")));
-                }
             } else if (getOrden().getAsc()) {
                 cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
             } else {
                 cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
             }
         }
-        TypedQuery<Moto> q = setearConsulta();
+        TypedQuery<Factura> q = setearConsulta();
         if (getContador() == null) {
             setContador(q.getResultList().size());
         }
@@ -65,7 +59,7 @@ public class MotoFacade extends AbstractFacade<Moto> {
     }
 
     @Override
-    public List<Moto> anterior() {
+    public List<Factura> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
             getRango()[0] = 0;
@@ -74,7 +68,7 @@ public class MotoFacade extends AbstractFacade<Moto> {
     }
 
     @Override
-    public List<Moto> siguiente() {
+    public List<Factura> siguiente() {
         getRango()[0] += getRango()[1];
         if (getRango()[0] > getContador()) {
             getRango()[0] = getContador() - 1;
@@ -94,35 +88,15 @@ public class MotoFacade extends AbstractFacade<Moto> {
     @Override
     public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (getEntity().getCodigo() != null) {
+        if (getEntity().getNumero() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get("codigo")), "%"
-                    + getEntity().getCodigo().toLowerCase() + "%"));
+                    r.get("numero")), "%"
+                    + getEntity().getNumero().toLowerCase() + "%"));
         }
-        if (getEntity().getCodigoFabrica() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("codigoFabrica")), "%"
-                    + getEntity().getCodigoFabrica().toLowerCase() + "%"));
-        }
-        if (getEntity().getMarca() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("marca")), "%"
-                    + getEntity().getMarca().toLowerCase() + "%"));
-        }
-        if (getEntity().getModelo() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("modelo")), "%"
-                    + getEntity().getModelo().toLowerCase() + "%"));
-        }
-        if (getEntity().getColor() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("color")), "%"
-                    + getEntity().getColor().toLowerCase() + "%"));
-        }
-        if (getEntity().getFabricante().getId() != null) {
-            ParameterExpression<Integer> p =
-                    cb.parameter(Integer.class, "fabricante.id");
-            criteria.add(cb.equal(r.get("fabricante").get("id"), p));
+        if (getEntity().getSaldado() != ' ') {
+            ParameterExpression<Character> p =
+                    cb.parameter(Character.class, "saldado");
+            criteria.add(cb.equal(r.get("saldado"), p));
         }
         if (getEntity().getCategoria().getId() != null) {
             ParameterExpression<Integer> p =
@@ -134,25 +108,13 @@ public class MotoFacade extends AbstractFacade<Moto> {
     }
 
     @Override
-    public TypedQuery<Moto> setearConsulta() {
-        TypedQuery<Moto> q = getEm().createQuery(cq);
-        if (getEntity().getCodigo() != null) {
-            q.setParameter("codigo", getEntity().getCodigo());
+    public TypedQuery<Factura> setearConsulta() {
+        TypedQuery<Factura> q = getEm().createQuery(cq);
+        if (getEntity().getNumero() != null) {
+            q.setParameter("numero", getEntity().getNumero());
         }
-        if (getEntity().getCodigoFabrica() != null) {
-            q.setParameter("codigoFabrica", getEntity().getCodigoFabrica());
-        }
-        if (getEntity().getMarca() != null) {
-            q.setParameter("marca", getEntity().getMarca());
-        }
-        if (getEntity().getModelo() != null) {
-            q.setParameter("modelo", getEntity().getModelo());
-        }
-        if (getEntity().getColor() != null) {
-            q.setParameter("color", getEntity().getColor());
-        }
-        if (getEntity().getFabricante() != null) {
-            q.setParameter("fabricante", getEntity().getFabricante().getId());
+        if (getEntity().getSaldado() != null) {
+            q.setParameter("saldado", getEntity().getSaldado());
         }
         if (getEntity().getCategoria() != null) {
             q.setParameter("categoria", getEntity().getCategoria().getId());

@@ -4,6 +4,7 @@
  */
 package py.com.bej.orm.session;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,13 +16,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
+import py.com.bej.orm.interfaces.WithId;
 import py.com.bej.orm.utils.Orden;
 
 /**
  *
  * @author diego
  */
-public abstract class AbstractFacade<T> {
+public abstract class AbstractFacade<T extends WithId> {
 
     @PersistenceContext(unitName = "kzx2-ejbPU")
     private EntityManager em;
@@ -45,6 +47,7 @@ public abstract class AbstractFacade<T> {
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
+        this.orden = new Orden(entityClass.getDeclaredFields()[1].getName(), Boolean.TRUE);
     }
 
     protected EntityManager getEm() {
@@ -56,6 +59,7 @@ public abstract class AbstractFacade<T> {
     }
 
     public void edit(T entity) {
+        entity.setUltimaModificacion(new Date());
         getEm().merge(entity);
     }
 
@@ -100,6 +104,8 @@ public abstract class AbstractFacade<T> {
     }
 
     public void create() {
+        entity.setActivo('S');
+        entity.setUltimaModificacion(new Date());
         getEm().persist(entity);
     }
 
