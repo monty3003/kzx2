@@ -6,6 +6,8 @@ package py.com.bej.orm.session;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
@@ -18,8 +20,6 @@ import py.com.bej.orm.entities.Persona;
  */
 @Stateless
 public class PersonaFacade extends AbstractFacade<Persona> {
-
-    private Persona c = new Persona();
 
     public PersonaFacade() {
         super(Persona.class);
@@ -43,19 +43,13 @@ public class PersonaFacade extends AbstractFacade<Persona> {
                 } else {
                     cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("id")));
                 }
-            } else if (getOrden().getColumna().equals("id") || getOrden().getColumna().equals("documento")) {
-                if (getOrden().getAsc()) {
-                    cq.orderBy(cb.asc(r.get("personaPK").get(getOrden().getColumna())));
-                } else {
-                    cq.orderBy(cb.desc(r.get("personaPK").get(getOrden().getColumna())));
-                }
             } else if (getOrden().getAsc()) {
                 cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
             } else {
                 cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
             }
         }
-         TypedQuery<Persona> q = setearConsulta();
+        TypedQuery<Persona> q = setearConsulta();
         if (getContador() == null) {
             setContador(q.getResultList().size());
         }
@@ -77,7 +71,7 @@ public class PersonaFacade extends AbstractFacade<Persona> {
 
     @Override
     public List<Persona> siguiente() {
-         getRango()[0] += getRango()[1];
+        getRango()[0] += getRango()[1];
         if (getRango()[0] > getContador()) {
             getRango()[0] = getContador() - 1;
         }
@@ -89,7 +83,7 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         try {
             getEm().merge(getEntity());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Logger.getLogger(PersonaFacade.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -97,16 +91,25 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         inicio();
         List<Predicate> criteria = new ArrayList<Predicate>();
         ParameterExpression<Integer> p1 =
-                cb.parameter(Integer.class, "categoria");
+                cb.parameter(Integer.class, "categoria.id");
         ParameterExpression<Character> p2 =
                 cb.parameter(Character.class, "habilitado");
         List<Persona> res = new ArrayList<Persona>();
-        criteria.add(cb.equal(r.get("categoria"), p1));
+        criteria.add(cb.equal(r.get("categoria").get("id"), p1));
         criteria.add(cb.equal(r.get("habilitado"), p2));
         cq.where(cb.and(criteria.toArray(new Predicate[0])));
         TypedQuery<Persona> q = getEm().createQuery(cq);
-        q.setParameter("categoria", categoria);
+        q.setParameter("categoria.id", categoria);
         q.setParameter("habilitado", 'S');
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Persona> findBetween(Integer inicio, Integer fin) {
+        List<Persona> res = new ArrayList<Persona>();
+        inicio();
+        cq.where(cb.between(r.get("categoria.id"), inicio, fin));
+        TypedQuery<Persona> q = getEm().createQuery(cq);
         res = q.getResultList();
         return res;
     }
@@ -116,9 +119,9 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         ParameterExpression<Integer> p1 =
                 cb.parameter(Integer.class, "id");
         Persona res = null;
-        cq.where(cb.equal(r.get("personaPK").get("id"), p1));
+        cq.where(cb.equal(r.get("id"), p1));
         TypedQuery<Persona> q = getEm().createQuery(cq);
-        q.setParameter("id", getEntity().getPersonaPK().getId());
+        q.setParameter("id", getEntity().getId());
         try {
             res = q.getSingleResult();
         } catch (Exception e) {
@@ -132,7 +135,7 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         ParameterExpression<String> p1 =
                 cb.parameter(String.class, "documento");
         Persona res = null;
-        cq.where(cb.equal(r.get("personaPK").get("documento"), p1));
+        cq.where(cb.equal(r.get("documento"), p1));
         TypedQuery<Persona> q = getEm().createQuery(cq);
         q.setParameter("documento", documento);
         try {
@@ -150,15 +153,15 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     @Override
     public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (getEntity().getPersonaPK().getId() != null) {
+        if (getEntity().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "id");
             criteria.add(cb.equal(r.get("id"), p));
         }
-        if (getEntity().getPersonaPK().getDocumento() != null) {
+        if (getEntity().getDocumento() != null) {
             criteria.add(cb.like(cb.lower(
-                    r.get("personaPK").get("documento")), "%"
-                    + getEntity().getPersonaPK().getDocumento() + "%"));
+                    r.get("documento")), "%"
+                    + getEntity().getDocumento() + "%"));
         }
         if (getEntity().getNombre() != null) {
             criteria.add(cb.like(cb.lower(
@@ -195,10 +198,10 @@ public class PersonaFacade extends AbstractFacade<Persona> {
                     cb.parameter(Character.class, "fisica");
             criteria.add(cb.equal(r.get("fisica"), p));
         }
-        if (getEntity().getCategoria() != null) {
+        if (getEntity().getCategoria().getId() != null) {
             ParameterExpression<Integer> p =
-                    cb.parameter(Integer.class, "categoria");
-            criteria.add(cb.equal(r.get("categoria"), p));
+                    cb.parameter(Integer.class, "categoria.id");
+            criteria.add(cb.equal(r.get("categoria").get("id"), p));
         }
         return criteria;
     }
@@ -206,11 +209,11 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     @Override
     public TypedQuery<Persona> setearConsulta() {
         TypedQuery<Persona> q = getEm().createQuery(cq);
-        if (getEntity().getPersonaPK().getId() != null) {
-            q.setParameter("id", getEntity().getPersonaPK().getId());
+        if (getEntity().getId() != null) {
+            q.setParameter("id", getEntity().getId());
         }
-        if (getEntity().getPersonaPK().getDocumento() != null) {
-            q.setParameter("documento", getEntity().getPersonaPK().getDocumento());
+        if (getEntity().getDocumento() != null) {
+            q.setParameter("documento", getEntity().getDocumento());
         }
         if (getEntity().getNombre() != null) {
             q.setParameter("nombre", getEntity().getNombre());
@@ -234,7 +237,7 @@ public class PersonaFacade extends AbstractFacade<Persona> {
             q.setParameter("fisica", getEntity().getFisica());
         }
         if (getEntity().getCategoria() != null) {
-            q.setParameter("categoria", getEntity().getCategoria());
+            q.setParameter("categoria.id", getEntity().getCategoria());
         }
         return q;
     }

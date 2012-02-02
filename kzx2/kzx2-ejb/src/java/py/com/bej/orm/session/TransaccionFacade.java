@@ -9,14 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import javax.transaction.UserTransaction;
 import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Transaccion;
 
@@ -27,6 +24,8 @@ import py.com.bej.orm.entities.Transaccion;
 @Stateless
 public class TransaccionFacade extends AbstractFacade<Transaccion> {
 
+    @EJB
+    private CreditoFacade creditoFacade;
     @EJB
     private MotostockFacade motostockFacade;
 
@@ -113,6 +112,11 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
                 motostockFacade.persist(m);
                 res++;
             }
+            getEm().flush();
+            if (getEntity().getCodigo().getId().equals(32)) {
+                creditoFacade = new CreditoFacade();
+                creditoFacade.abrirCredito(getEntity());
+            }
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", e);
             throw new RuntimeException(e);
@@ -159,24 +163,28 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
             criteria.add(cb.equal(r.get("id"), p));
         }
         if (getEntity().getCodigo() != null) {
-            ParameterExpression<Integer> p =
+            ParameterExpression<Integer> p1 =
                     cb.parameter(Integer.class, "codigo");
-            criteria.add(cb.equal(r.get("codigo").get("id"), p));
+            if (getEntity().getCodigoMax() != null) {
+                ParameterExpression<Integer> p2 =
+                        cb.parameter(Integer.class, "codigoMax");
+                criteria.add(cb.between(r.get("codigo").get("id"), p1, p2));
+            }
         }
-        if (getEntity().getComprobante() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("comprobante")), "%"
-                    + getEntity().getComprobante().toLowerCase() + "%"));
-        }
-        if (getEntity().getComprador() != null) {
+//        if (getEntity().getComprobante().getNumero() != null) {
+//            criteria.add(cb.like(cb.lower(
+//                    r.get("comprobante").get("numero")), "%"
+//                    + getEntity().getComprobante().getNumero().toLowerCase() + "%"));
+//        }
+        if (getEntity().getComprador().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "comprador");
-            criteria.add(cb.equal(r.get("comprador").get("personaPK").get("id"), p));
+            criteria.add(cb.equal(r.get("comprador").get("id"), p));
         }
-        if (getEntity().getVendedor() != null) {
+        if (getEntity().getVendedor().getId() != null) {
             ParameterExpression<Integer> p =
                     cb.parameter(Integer.class, "vendedor");
-            criteria.add(cb.equal(r.get("vendedor").get("personaPK").get("id"), p));
+            criteria.add(cb.equal(r.get("vendedor").get("id"), p));
         }
         if (getEntity().getAnulado() != null) {
             ParameterExpression<Character> p =
@@ -200,14 +208,17 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
         if (getEntity().getCodigo() != null) {
             q.setParameter("codigo", getEntity().getCodigo().getId());
         }
-        if (getEntity().getComprobante() != null) {
-            q.setParameter("comprobante", getEntity().getComprobante());
+        if (getEntity().getCodigoMax() != null) {
+            q.setParameter("codigoMax", getEntity().getCodigoMax().getId());
         }
+//        if (getEntity().getComprobante() != null) {
+//            q.setParameter("comprobante", getEntity().getComprobante());
+//        }
         if (getEntity().getVendedor() != null) {
-            q.setParameter("vendedor", getEntity().getVendedor().getPersonaPK().getId());
+            q.setParameter("vendedor", getEntity().getVendedor().getId());
         }
         if (getEntity().getComprador() != null) {
-            q.setParameter("comprador", getEntity().getComprador().getPersonaPK().getId());
+            q.setParameter("comprador", getEntity().getComprador().getId());
         }
         if (getEntity().getAnulado() != null) {
             q.setParameter("anulado", getEntity().getAnulado());
