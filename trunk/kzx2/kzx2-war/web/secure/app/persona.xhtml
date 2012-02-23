@@ -11,7 +11,7 @@ and open the template in the editor.
       xmlns:rich="http://richfaces.org/rich">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>Motos</title>
+        <title>Personas</title>
     </head>
     <body>
 
@@ -20,7 +20,7 @@ and open the template in the editor.
             <ui:define name="content">
                 <h:form id="frm">
                     <h:panelGroup rendered="#{personaBean.agregar eq true or personaBean.modificar eq true}">
-                        <h5><h:outputText value="#{personaBean.titulo}"/></h5>
+                        <h5><h:outputText value="#{loginBean.ubicacion}"/></h5>
                         <fieldset>
                             <div class="tablaForm">
                                 <div class="fila">
