@@ -33,7 +33,9 @@ public class JsfUtils {
                 }
             }
             for (WithId x : entities) {
-
+                if (x.getActivo() == null) {
+                    int xx = 0;
+                }
                 if (x.getActivo().equals('S')) {
                     items.add(new SelectItem(x.getId(), x.getlabel()));
                 }
