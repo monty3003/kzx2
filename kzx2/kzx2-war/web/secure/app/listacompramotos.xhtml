@@ -41,7 +41,7 @@
                                 </td>
                                 <td>
                                     <label for="saldado">Saldado: </label>
-                                    <select id="saldado" name="saldado" jsfc="h:selectOneMenu" value="#{compraMotosBean.compra.saldado}">
+                                    <select id="saldado" name="saldado" jsfc="h:selectOneMenu" value="#{compraMotosBean.saldadoFiltro}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Si" itemValue="S"/>
                                         <f:selectItem itemLabel="No" itemValue="N"/>
@@ -49,7 +49,7 @@
                                 </td>
                                 <td>
                                     <label for="anulado">Anulado: </label>
-                                    <select id="anulado" name="anulado" jsfc="h:selectOneMenu" value="#{compraMotosBean.compra.anulado}">
+                                    <select id="anulado" name="anulado" jsfc="h:selectOneMenu" value="#{compraMotosBean.anuladoFiltro}">
                                         <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
                                         <f:selectItem itemLabel="Si" itemValue="S"/>
                                         <f:selectItem itemLabel="No" itemValue="N"/>

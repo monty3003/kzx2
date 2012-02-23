@@ -20,7 +20,7 @@ and open the template in the editor.
             <ui:define name="content">
                 <h:form id="frm">
                     <h:panelGroup rendered="#{motoBean.agregar eq true or motoBean.modificar eq true}">
-                        <h5><h:outputText value="#{motoBean.titulo}"/></h5>
+                        <h5><h:outputText value="#{loginBean.ubicacion}"/></h5>
                         <fieldset>
                             <div class="tablaForm">
                                 <div class="fila">
@@ -50,13 +50,13 @@ and open the template in the editor.
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="fabricante">Fabricante: </label></div>
-                                    <div class="cont"><h:selectOneMenu id="fabricante" value="#{motoBean.moto.fabricante.id}">
+                                    <div class="cont"><h:selectOneMenu id="fabricante" value="#{motoBean.fabricante}">
                                             <f:selectItems value="#{motoBean.listaPersona}"/>
                                         </h:selectOneMenu>&#160;<rich:message for="frm:fabricante"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="categoria">Categoría: </label></div>
-                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{motoBean.moto.categoria.id}">
+                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{motoBean.categoria}">
                                             <f:selectItems value="#{motoBean.listaCategoria}"/>
                                         </h:selectOneMenu>&#160;<rich:message for="frm:categoria"/></div>
                                 </div>
