@@ -10,9 +10,12 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -28,18 +31,30 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import py.com.bej.base.prod.entity.Vmpagomotos;
+import py.com.bej.base.prod.entity.Vmplanmoto;
+import py.com.bej.base.prod.entity.Vmventamotos;
+import py.com.bej.base.prod.session.PlanMotosProduccionFacade;
+import py.com.bej.base.prod.session.VentaMotosProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
+import py.com.bej.orm.entities.Credito;
+import py.com.bej.orm.entities.Factura;
+import py.com.bej.orm.entities.Financiacion;
 import py.com.bej.orm.entities.Motostock;
+import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.Transaccion;
-import py.com.bej.orm.entities.Ubicacion;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.MotostockFacade;
 import py.com.bej.orm.session.PersonaFacade;
 import py.com.bej.orm.session.TransaccionFacade;
 import py.com.bej.orm.session.UbicacionFacade;
+import py.com.bej.orm.utils.CategoriaEnum;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Orden;
+import py.com.bej.web.servlets.security.LoginBean;
+import py.com.bej.web.utils.JsfUtils;
 
 /**
  *
@@ -49,9 +64,10 @@ import py.com.bej.orm.utils.Orden;
 @SessionScoped
 public class VentaMotosBean extends AbstractPageBean<Transaccion> {
 
-    /** Creates a new instance of VentaMotosBean */
-    public VentaMotosBean() {
-    }
+    @EJB
+    private PlanMotosProduccionFacade planMotosProduccionFacade;
+    @EJB
+    private VentaMotosProduccionFacade ventaMotosProduccionFacade;
     @EJB
     private MotoFacade motoFacade;
     @EJB
@@ -68,16 +84,20 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private String id;
     private DateFormat formatFechaHora;
     private NumberFormat formatNumero;
-    private List<Categoria> listaCategorias;
     private List<SelectItem> listaCategoria;
-    private List<Persona> listaClientes;
     private List<SelectItem> listaCliente;
     private List<SelectItem> listaGarante;
-    private List<Motostock> listaMotos;
     private List<SelectItem> listaMoto;
-    private List<Ubicacion> listaUbicaciones;
     private List<SelectItem> listaUbicacion;
     private Motostock motoVendida;
+    //Campos de busqueda
+    private String idFiltro;
+    private String comprobanteFiltro;
+    private Integer categoriaFiltro;
+    private Integer compradorFiltro;
+    private Character saldadoFiltro;
+    private Character anuladoFiltro;
+    private Character activoFiltro;
     @Digits(fraction = 0, integer = 20, message = "Ingrese un valor positivo")
     @NotNull(message = "Ingrese un valor")
     @Min(value = 1, message = "Ingrese un valor positivo igual o mayor a 1")
@@ -101,7 +121,6 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     @NotNull(message = "Seleccione un valor")
     @Min(value = 1, message = "Seleccione un valor")
     private Integer comprador;
-    private Character anulado;
     @Digits(fraction = 0, integer = 7, message = "Ingrese un valor positivo")
     @NotNull(message = "Ingrese un valor")
     @Min(value = 1, message = "Ingrese un valor positivo igual o mayor a 1")
@@ -133,7 +152,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     @NotNull(message = "Ingrese un valor")
     @Min(value = 1, message = "Ingrese un valor positivo igual o mayor a 1")
     @Max(value = Long.MAX_VALUE, message = "Ingrese un monto real")
-    private String toTal;
+    private String total;
     private String totalDescuento;
     private String totalPagado;
     private String entregaInicial;
@@ -141,7 +160,9 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private String cantidadItems;
     private String montoCuotaIgual;
     private String descuento;
-    private Character saldado;
+    private Boolean saldado;
+    private Boolean anulado;
+    private Boolean activo;
     private Boolean usarFechaAhora = false;
     private Boolean usarFechaEntregaAhora = false;
     //Calculos Ajax
@@ -152,7 +173,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private BigDecimal totalIva5X;
     private BigDecimal totalIva10X;
     private BigDecimal totalIvaX;
-    private BigDecimal toTalX;
+    private BigDecimal totalX;
     private BigDecimal descuentoX;
     private BigDecimal totalDescuentoX;
     private BigDecimal totalPagadoX;
@@ -200,6 +221,51 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private Integer garanteCategoria;
     //Credito
     private Integer garante;
+
+    /** Creates a new instance of VentaMotosBean */
+    public VentaMotosBean() {
+    }
+
+    @Override
+    void limpiarCampos() {
+        setAgregar(Boolean.FALSE);
+        setModificar(Boolean.FALSE);
+        //Campos de busqueda
+        this.idFiltro = null;
+        this.comprobanteFiltro = null;
+        this.categoriaFiltro = null;
+        this.compradorFiltro = null;
+        this.saldadoFiltro = null;
+        this.setAnuladoFiltro(null);
+        //Transaccion de Compra
+        this.cantidad = null;
+        this.fechaOperacion = null;
+        this.fechaEntrega = null;
+        this.comprador = null;
+        this.subTotalExentas = null;
+        this.subTotalGravadas10 = null;
+        this.subTotalGravadas5 = null;
+        this.subtotal = null;
+        this.totalIva5 = null;
+        this.totalIva10 = null;
+        this.totalIva = null;
+        this.total = null;
+        this.totalDescuento = null;
+        this.totalPagado = null;
+        this.entregaInicial = null;
+        this.cuotas = null;
+        this.cantidadItems = null;
+        this.montoCuotaIgual = null;
+        this.usarFechaAhora = false;
+        this.usarFechaEntregaAhora = false;
+        //Calculos Ajax
+        this.subTotalGravadas10X = null;
+        this.subTotalGravadas5X = null;
+        this.subtotalX = null;
+        this.totalX = null;
+        this.descuentoX = null;
+        this.totalDescuentoX = null;
+    }
 
     /**
      * @return the facade
@@ -264,6 +330,9 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     @Override
     public String listar() {
         setNav("listaventamotos");
+        setAgregar(Boolean.FALSE);
+        setModificar(Boolean.FALSE);
+        LoginBean.getInstance().setUbicacion("Venta de Motos");
         setDesde(0);
         setMax(10);
         if (getFacade().getOrden() == null) {
@@ -273,26 +342,37 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         if (getLista().isEmpty()) {
             setErrorMessage(null, getFacade().r0);
         }
-        listaCategoria = new ArrayList<SelectItem>();
-        listaCategoria.add(new SelectItem(-1, "-SELECCIONAR-"));
-        listaCliente = new ArrayList<SelectItem>();
-        getListaCliente().add(new SelectItem(-1, "-SELECCIONAR-"));
-        listaGarante = new ArrayList<SelectItem>();
-        getListaGarante().add(new SelectItem(-1, "-SELECCIONAR-"));
-        listaUbicacion = new ArrayList<SelectItem>();
-        listaUbicacion.add(new SelectItem(-1, "-SELECCIONAR-"));
-        listaMoto = new ArrayList<SelectItem>();
-        listaMoto.add(new SelectItem('X', "-SELECCIONAR-"));
         obtenerListas();
         return getNav();
     }
 
     @Override
     List filtrar() {
-        facade.setEntity(new Transaccion());
-        getFacade().setEntity(venta);
-        facade.getEntity().setCodigo(new Categoria(11));
-//        facade.getEntity().setCodigoMax(20);
+        Transaccion t = new Transaccion();
+        if (idFiltro != null && !idFiltro.trim().equals("")) {
+            t.setId(Integer.valueOf(idFiltro));
+        }
+        if (comprobanteFiltro != null && !comprobanteFiltro.trim().equals("")) {
+            t.setFactura(new Factura(comprobanteFiltro));
+        }
+        if (categoriaFiltro != null && !categoriaFiltro.equals(-1)) {
+            t.setCodigo(new Categoria(categoriaFiltro));
+        }
+        if (compradorFiltro != null && !compradorFiltro.equals(-1)) {
+            t.setComprador(new Persona(compradorFiltro));
+        }
+        if (saldadoFiltro != null && !saldadoFiltro.equals('X')) {
+            t.setSaldado(saldadoFiltro);
+        }
+        if (anuladoFiltro != null && !anuladoFiltro.equals('X')) {
+            t.setAnulado(anuladoFiltro);
+        }
+        if (activoFiltro != null && !activoFiltro.equals('X')) {
+            t.setActivo(activoFiltro);
+        }
+        facade.setEntity(t);
+        getFacade().getEntity().setCodigo(new Categoria(CategoriaEnum.VENTA_DESDE.getSymbol()));
+        getFacade().getEntity().setCodigoMax(new Categoria(CategoriaEnum.VENTA_HASTA.getSymbol()));
         getFacade().setRango(new Integer[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
@@ -300,43 +380,15 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
 
     @Override
     void obtenerListas() {
-        listaCategorias = getCategoriaFacade().findBetween(20, 29);
-        if (!listaCategorias.isEmpty()) {
-            Iterator<Categoria> it = listaCategorias.iterator();
-            do {
-                Categoria x = it.next();
-                listaCategoria.add(new SelectItem(x.getId(), x.getDescripcion()));
-            } while (it.hasNext());
-
-        }
-
-        listaClientes = getPersonaFacade().findBetween(10, 19);
-        if (!listaClientes.isEmpty()) {
-            Iterator<Persona> it = listaClientes.iterator();
-            do {
-                Persona x = it.next();
-                getListaCliente().add(new SelectItem(x.getId(), x.getNombre()));
-            } while (it.hasNext());
-
-        }
-
-        listaUbicaciones = getUbicacionFacade().findAll();
-        if (!listaUbicaciones.isEmpty()) {
-            Iterator<Ubicacion> it = listaUbicaciones.iterator();
-            do {
-                Ubicacion x = it.next();
-                listaUbicacion.add(new SelectItem(x.getId(), x.getDescripcion()));
-            } while (it.hasNext());
-
-        }
+        listaCategoria = JsfUtils.getSelectItems(getCategoriaFacade().findBetween(CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol()), !getModificar());
+        listaCliente = JsfUtils.getSelectItems(getPersonaFacade().findBetween(CategoriaEnum.CLIENTE_PF.getSymbol(), CategoriaEnum.CLIENTE_PJ.getSymbol()), !getModificar());
+        listaUbicacion = JsfUtils.getSelectItems(getUbicacionFacade().findAll(), !getModificar());
     }
 
     @Override
     public String buscar() {
-        facade.setEntity(new Transaccion());
         getFacade().setEntity(venta);
         getFacade().setContador(null);
-//        getFacade().getEntity().setCodigoMax(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
             setErrorMessage(null, getFacade().c0);
@@ -346,50 +398,36 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
 
     @Override
     public String nuevo() {
-        venta = new Transaccion(); getFacade().setEntity(venta);
-        facade.setEntity(new Transaccion());
-        facade.getEntity().setCodigo(new Categoria());
-        facade.getEntity().setComprador(new Persona());
-        listaMoto = new ArrayList<SelectItem>();
-        listaMoto.add(new SelectItem("-1", "-SELECCIONAR-"));
-        listaCategoria = new ArrayList<SelectItem>();
-        listaCategoria.add(new SelectItem("-1", "-SELECCIONAR-"));
-        listaCliente = new ArrayList<SelectItem>();
-        listaCliente.add(new SelectItem(-1, "-SELECCIONAR-"));
-        listaCliente.add(new SelectItem(0, "cargar nuevo..."));
-        listaUbicacion = new ArrayList<SelectItem>();
-        listaUbicacion.add(new SelectItem("-1", "-SELECCIONAR-"));
+        LoginBean.getInstance().setUbicacion("Venta Nueva");
+        limpiarCampos();
+        venta = new Transaccion();
         obtenerListas();
-        listaMotos = getMotostockFacade().findAll();
-        if (!listaMotos.isEmpty()) {
-            Iterator<Motostock> it = listaMotos.iterator();
-            do {
-                Motostock x = it.next();
-                if (x.getVenta() == null) {
-                    listaMoto.add(new SelectItem(x.getId(), x.getId() + "-" + x.getMoto().getModelo()));
-                }
-            } while (it.hasNext());
-        }
-        vendedor = 6;
-        return "vendermotos";
+        listaMoto = JsfUtils.getSelectItems(getMotoFacade().findAll(), !getModificar());
+        vendedor = 1;
+        return "comprarmotos";
     }
 
     @Override
     public String modificar() {
         //recuperar la seleccion
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        setId((String) request.getParameter("radio"));
-        if (getId() != null) {
+        idFiltro = (String) request.getParameter("radio");
+        if (idFiltro != null) {
             try {
-               venta = facade.find(new Integer(getId()));
+                venta = facade.find(new Integer(idFiltro));
+                anulado = venta.getAnulado().equals('S') ? Boolean.TRUE : Boolean.FALSE;
+                saldado = venta.getSaldado().equals('S') ? Boolean.TRUE : Boolean.FALSE;
+                activo = venta.getActivo().equals('S') ? Boolean.TRUE : Boolean.FALSE;
             } catch (Exception e) {
                 Logger.getLogger(VentaMotosBean.class.getName()).log(Level.SEVERE, null, e);
                 return null;
             }
-                        listaCategoria = new ArrayList<SelectItem>();
-            listaCliente = new ArrayList<SelectItem>();
+            setModificar(Boolean.TRUE);
+            setAgregar(Boolean.FALSE);
             obtenerListas();
-            return "modificarcompramoto";
+            listaMoto = JsfUtils.getSelectItems(getMotoFacade().findAll(), getModificar());
+            LoginBean.getInstance().setUbicacion("Modificar Venta");
+            return "vendermotos";
         } else {
             setErrorMessage(null, facade.sel);
             return null;
@@ -405,7 +443,8 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             facade.getEntity().setSaldado('N');
             facade.getEntity().setAnulado('N');
             setInfoMessage(null, getFacade().ex1);
-            venta = new Transaccion(); getFacade().setEntity(venta);
+            venta = new Transaccion();
+            getFacade().setEntity(venta);
             return this.listar();
         } else {
             return null;
@@ -549,9 +588,249 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         return res;
     }
 
+    public String importar() {
+
+        return "importarVenta";
+    }
+
+    public String migrarVentas() {
+        int totalMigrado = 0;
+        //Venta
+        Transaccion t;
+        Integer idProduccion;
+        Categoria codigoProduccion = null;
+        Factura facturaProduccion = null;
+        String numero;
+        Categoria categoriaFactura;
+        Date fechaOperacionProduccion;
+        Date fechaEntregaProduccion;
+        Persona compradorProduccion;
+        Persona vendedorProduccion = getPersonaFacade().findByDocumento(ConfiguracionEnum.PROPIETARIO.getSymbol());
+        Character anuladoProduccion;
+        BigDecimal subTotalExentasProduccion = BigDecimal.ZERO;
+        BigDecimal subTotalGravadas10Produccion = BigDecimal.ZERO;
+        BigDecimal subTotalGravadas5Produccion = BigDecimal.ZERO;
+        BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal totalIva5Produccion = BigDecimal.ZERO;
+        BigDecimal totalIva10Produccion = BigDecimal.ZERO;
+        BigDecimal totalIvaProduccion = BigDecimal.ZERO;
+        Float descuentoProduccion = Float.valueOf("0.0");
+        BigDecimal totalProduccion;
+        BigDecimal totalDescuentoProduccion = BigDecimal.ZERO;
+        BigDecimal totalPagadoProduccion;
+        Short cuotasProduccion;
+        Short cantidadItemsProduccion = 1;
+        Character activo = 'S';
+        Character saldadoProduccion;
+        Date fechaUltimoPagoProduccion = new Date();
+        Date ultimaModificacion = new Date();
+        //Desarrollo
+        List<Transaccion> lista = new ArrayList<Transaccion>();
+        Credito credito = null;
+        //Produccion
+        List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
+        ventaMotosProduccionFacade = new VentaMotosProduccionFacade();
+        listaVentasProduccion = ventaMotosProduccionFacade.findByIdCompraOrdenado();
+        Financiacion financiacionProduccion;
+        List<Vmpagomotos> pagosProduccion;
+        if (!listaVentasProduccion.isEmpty()) {
+            for (Vmventamotos c : listaVentasProduccion) {
+                idProduccion = c.getIdVenta();
+                LOGGER.log(Level.INFO, "==============================================================");
+                LOGGER.log(Level.INFO, "La venta Nro. {0}", id);
+                fechaOperacionProduccion = c.getFechaVenta() == null ? new Date() : c.getFechaVenta();
+                fechaEntregaProduccion = c.getFechaEntrega() == null ? new Date() : c.getFechaEntrega();
+                //Buscar Cliente
+                String codCliente = null;
+                if (c.getCedulaRuc() == null) {
+                    codCliente = "1275758-6";
+                } else {
+                    codCliente = c.getCedulaRuc().trim();
+                }
+                //Montos
+                if (c.getPrecioMoto() != null && c.getPrecioMoto() > 0) {
+                    totalPagadoProduccion = BigDecimal.valueOf(c.getPrecioMoto());
+                } else {
+                    totalPagadoProduccion = BigDecimal.TEN;
+                }
+                BigDecimal entregaInicialProduccion = BigDecimal.valueOf(c.getEntregaMoto());
+                totalProduccion = totalPagadoProduccion;
+                subTotalGravadas10Produccion = totalPagadoProduccion.multiply(BigDecimal.valueOf(0.02)).setScale(Integer.valueOf(ConfiguracionEnum.MONEDA_DECIMALES.getSymbol()));
+                subTotalExentasProduccion = totalPagadoProduccion.subtract(subTotalGravadas10Produccion);
+                totalIva10Produccion = subTotalGravadas10Produccion.multiply(BigDecimal.valueOf(0.1));
+                BigDecimal montoCuotaIgualProduccion = BigDecimal.ZERO;
+                //Saldado
+                if (c.getSalAcMoto() > 0) {
+                    saldadoProduccion = 'N';
+                } else {
+                    saldadoProduccion = 'S';
+                }
+                //Factura
+                facturaProduccion = new Factura();
+                facturaProduccion.setSaldado(saldadoProduccion);
+                facturaProduccion.setSubTotalExentas(subTotalExentasProduccion);
+                facturaProduccion.setSubTotalGravadas10(subTotalGravadas10Produccion);
+                facturaProduccion.setSubTotalGravadas5(subTotalGravadas5Produccion);
+                facturaProduccion.setNetoSinIva5(totalIva5Produccion);
+                facturaProduccion.setNetoSinIva10(subTotalGravadas10Produccion.subtract(totalIva10Produccion));
+                facturaProduccion.setTotalIva5(totalIva5Produccion);
+                facturaProduccion.setTotalIva10(totalIva10Produccion);
+                facturaProduccion.setTotalIva(totalIva10Produccion);
+                facturaProduccion.setTotalPagado(totalPagadoProduccion);
+                facturaProduccion.setDescuento(descuentoProduccion);
+                facturaProduccion.setValidoHasta(ultimaModificacion);
+                facturaProduccion.setActivo('S');
+                facturaProduccion.setUltimaModificacion(ultimaModificacion);
+                //Contado o Credito
+                if (c.getIdTransaccion() == 1) {
+                    //Venta a Contado
+                    categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCO.getSymbol());
+                    facturaProduccion.setCategoria(categoriaFactura);
+                    cuotasProduccion = 0;
+                } else {
+                    //Venta Credito
+                    planMotosProduccionFacade = new PlanMotosProduccionFacade();
+                    List<Vmplanmoto> listaCuotasProduccion = new ArrayList<Vmplanmoto>();
+                    List<Pago> listaPagosProduccion = new ArrayList<Pago>();
+                    montoCuotaIgualProduccion = BigDecimal.valueOf(c.getMontoCuotas());
+                    BigDecimal capitalProduccion = BigDecimal.valueOf(c.getSaldoMoto());
+                    cuotasProduccion = Short.valueOf("" + c.getNumeroCuotas());
+                    BigDecimal creditoTotalProduccion = BigDecimal.valueOf(montoCuotaIgualProduccion.intValue() * cuotasProduccion);
+                    List<Financiacion> listaCuotasDesarrollo = new ArrayList<Financiacion>();
+                    categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR.getSymbol());
+                    facturaProduccion.setCategoria(categoriaFactura);
+                    BigDecimal interes = BigDecimal.valueOf(0.26F);
+
+
+                    credito = new Credito(null, new Categoria(CategoriaEnum.S_PER.getSymbol()), null,
+                            c.getFechaVenta(), null, new Categoria(CategoriaEnum.S_ESP.getSymbol()), 0.0F, 0.0F,
+                            capitalProduccion, cuotasProduccion, creditoTotalProduccion, BigDecimal.ZERO,
+                            BigDecimal.ZERO, BigDecimal.ZERO, fechaUltimoPagoProduccion, new Short("0"),
+                            new Categoria(CategoriaEnum.ABIERTO.getSymbol()), 'S', new Date());
+
+                    //FINANCIACION
+                    //Buscar Cuotas
+                    listaCuotasProduccion = (List<Vmplanmoto>) c.getVmplanmotoCollection();
+                    if (!listaCuotasProduccion.isEmpty()) {
+                        BigDecimal totalPagadoHastaAhora = BigDecimal.ZERO;
+                        pagosProduccion = new ArrayList<Vmpagomotos>();
+                        for (Vmplanmoto p : listaCuotasProduccion) {
+                            financiacionProduccion = new Financiacion(null, credito, Short.valueOf("" + p.getCuotaNumero()),
+                                    credito.getCapital(), credito.getCapital().multiply(interes),
+                                    BigDecimal.valueOf(c.getMontoCuotas()), credito.getCreditoTotal(),
+                                    null, p.getFechaPago(), BigDecimal.valueOf(p.getMontoInteresMensual()),
+                                    montoCuotaIgualProduccion, 'S', new Date());
+                            totalPagadoHastaAhora = totalPagadoHastaAhora.add(montoCuotaIgualProduccion);
+                            if (p.getCuotaNumero() == listaCuotasProduccion.size()) {
+                                credito.setFechaFin(p.getFechaVencimiento());
+                            }
+                            //Buscar Pagos
+                            pagosProduccion = (List<Vmpagomotos>) c.getVmpagomotosCollection();
+                            if (!pagosProduccion.isEmpty()) {
+                                Pago pg;
+                                boolean esPagoParcial = false;
+                                String cadenaParcial = "parcial";
+                                for (Vmpagomotos pago : pagosProduccion) {
+                                    if (pago.getConcepto().contains(cadenaParcial)) {
+                                        esPagoParcial = true;
+                                    }
+                                    pg = new Pago(null, pago.getFechaPago(),
+                                            financiacionProduccion, BigDecimal.valueOf(pago.getMontoEntrega()),
+                                            esPagoParcial, pago.getAnulado() ? 'N' : 'S', new Date());
+                                    listaPagosProduccion.add(pg);
+                                }
+                            }
+                            financiacionProduccion.setPagos(listaPagosProduccion);
+                            listaCuotasDesarrollo.add(financiacionProduccion);
+                        }
+                    }
+                }
+
+                compradorProduccion = getPersonaFacade().findByDocumento(codCliente);
+                anuladoFiltro = c.getAnulado() ? 'S' : 'N';
+
+                //Factura
+                numero = "" + c.getIdVenta();
+                if (numero != null && !numero.equals("null") && numero.length() < 7) {
+                    switch (numero.length()) {
+                        case 1:
+                            numero = "000000" + numero;
+                            break;
+                        case 2:
+                            numero = "00000" + numero;
+                            break;
+                        case 3:
+                            numero = "0000" + numero;
+                            break;
+                        case 4:
+                            numero = "000" + numero;
+                            break;
+                        case 5:
+                            numero = "00" + numero;
+                            break;
+                        case 6:
+                            numero = "0" + numero;
+                            break;
+                    }
+                    numero = "001-001-" + numero;
+                } else if (numero == null || numero.equals("null")) {
+                    Random r = new Random(1L);
+                    int randomNumber = r.nextInt();
+                    String nro = "" + (1000000 + (randomNumber < 0 ? (randomNumber * -1) : randomNumber));
+                    numero = "001-001-" + nro.substring(0, 7);
+                } else if (numero.length() == 7) {
+                    numero = "001-001-" + numero;
+                } else {
+                    numero = "001-001-" + numero.substring(0, 7);
+                }
+                //Numero de Factura
+                facturaProduccion.setNumero(numero);
+                //Fecha de Vencimiento
+                Calendar ahora = GregorianCalendar.getInstance();
+                ahora.add(Calendar.YEAR, 1);
+                //Juntar todo
+                t = new Transaccion(c.getIdVenta(), categoriaFactura, facturaProduccion, fechaOperacionProduccion, fechaEntregaProduccion, vendedorProduccion,
+                        compradorProduccion, anuladoFiltro, subTotalExentasProduccion, subTotalGravadas10Produccion, subTotalGravadas5Produccion,
+                        totalIva5Produccion, totalIva10Produccion, subTotal, totalIva5Produccion, totalIva10Produccion, totalIvaProduccion,
+                        descuentoProduccion, totalProduccion, totalDescuentoProduccion, totalPagadoProduccion, entregaInicialProduccion,
+                        cuotasProduccion, montoCuotaIgualProduccion, saldadoProduccion, cantidadItemsProduccion, activo, new Date());
+                if (credito != null) {
+                    t.setCreditosTransaccion(Arrays.asList(credito));
+                }
+            }
+            try {
+                totalMigrado = getFacade().cargaMasiva(lista);
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+            }
+            //Asignar Venta a Motos
+            Motostock motoDesarrollo;
+            try {
+                LOGGER.log(Level.INFO, "ASIGNACION DE VENTA A LAS MOTOS GUARDADAS");
+                LOGGER.log(Level.INFO, "=============================================================");
+                for (Vmventamotos ventaProduccion : listaVentasProduccion) {
+                    motoDesarrollo = getMotostockFacade().findByNumeroAnterior(ventaProduccion.getIdMoto().getIdMoto());
+                    LOGGER.log(Level.INFO, "La Moto es la Nro. {0}", motoDesarrollo.getId());
+                    motoDesarrollo.setVenta(getFacade().findByIdAnterior(ventaProduccion.getIdVenta()));
+                    LOGGER.log(Level.INFO, "Se la va a asiganr la venta Nro. {0}", motoDesarrollo.getVenta().getId());
+                    getMotostockFacade().setEntity(motoDesarrollo);
+                    getMotostockFacade().guardar();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(VentaMotosBean.class.getName()).log(Level.SEVERE, "Excepcion al intentar asignar ventas al stock", ex);
+            }
+            setInfoMessage(null, "Total de registros importados: " + totalMigrado);
+        }
+
+
+        return "listacompramotos";
+    }
+
     @Override
     public String todos() {
-        venta = new Transaccion(); getFacade().setEntity(venta);
+        limpiarCampos();
+        venta = new Transaccion();
+        getFacade().setEntity(venta);
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
@@ -563,7 +842,8 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
 
     @Override
     public String cancelar() {
-        venta = new Transaccion(); getFacade().setEntity(venta);
+        venta = new Transaccion();
+        getFacade().setEntity(venta);
         return this.listar();
     }
 
@@ -613,14 +893,14 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         } else {
             totalDescuentoX = BigDecimal.ZERO;
         }
-        toTalX = subtotalX.subtract(totalDescuentoX);
+        totalX = subtotalX.subtract(totalDescuentoX);
         //Pasar Datos
         totalIva5 = totalIva5X.toString();
         totalIva10 = totalIva10X.toString();
         subtotal = subtotalX.toString();
         totalDescuento = BigDecimal.ZERO.toString();
         descuento = totalDescuento;
-        toTal = toTalX.toString();
+        total = totalX.toString();
         return res;
     }
 
@@ -1040,14 +1320,14 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     /**
      * @return the anulado
      */
-    public Character getAnulado() {
+    public Boolean getAnulado() {
         return anulado;
     }
 
     /**
      * @param anulado the anulado to set
      */
-    public void setAnulado(Character anulado) {
+    public void setAnulado(Boolean anulado) {
         this.anulado = anulado;
     }
 
@@ -1176,14 +1456,14 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     /**
      * @return the saldado
      */
-    public Character getSaldado() {
+    public Boolean getSaldado() {
         return saldado;
     }
 
     /**
      * @param saldado the saldado to set
      */
-    public void setSaldado(Character saldado) {
+    public void setSaldado(Boolean saldado) {
         this.saldado = saldado;
     }
 
@@ -1241,18 +1521,18 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     public String getToTal() {
         Number n = null;
         try {
-            n = new BigDecimal(toTal.trim());
-            toTal = formatNumero.format(n.doubleValue());
+            n = new BigDecimal(total.trim());
+            total = formatNumero.format(n.doubleValue());
         } finally {
-            return toTal;
+            return total;
         }
     }
 
     /**
      * @param toTal the toTal to set
      */
-    public void setToTal(String toTal) {
-        this.toTal = toTal;
+    public void setTotal(String total) {
+        this.total = total;
     }
 
     /**
@@ -1315,20 +1595,6 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
      */
     public void setTotalIva10(String totalIva10) {
         this.totalIva10 = totalIva10;
-    }
-
-    /**
-     * @return the listaClientees
-     */
-    public List<Persona> getlistaClientes() {
-        return listaClientes;
-    }
-
-    /**
-     * @param listaClientees the listaClientees to set
-     */
-    public void setlistaClientes(List<Persona> listaClientes) {
-        this.listaClientes = listaClientes;
     }
 
     /**
@@ -1956,8 +2222,59 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         this.venta = venta;
     }
 
-    @Override
-    void limpiarCampos() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Character getActivoFiltro() {
+        return activoFiltro;
+    }
+
+    public void setActivoFiltro(Character activoFiltro) {
+        this.activoFiltro = activoFiltro;
+    }
+
+    public Character getAnuladoFiltro() {
+        return anuladoFiltro;
+    }
+
+    public void setAnuladoFiltro(Character anuladoFiltro) {
+        this.anuladoFiltro = anuladoFiltro;
+    }
+
+    public Integer getCategoriaFiltro() {
+        return categoriaFiltro;
+    }
+
+    public void setCategoriaFiltro(Integer categoriaFiltro) {
+        this.categoriaFiltro = categoriaFiltro;
+    }
+
+    public String getComprobanteFiltro() {
+        return comprobanteFiltro;
+    }
+
+    public void setComprobanteFiltro(String comprobanteFiltro) {
+        this.comprobanteFiltro = comprobanteFiltro;
+    }
+
+    public Character getSaldadoFiltro() {
+        return saldadoFiltro;
+    }
+
+    public void setSaldadoFiltro(Character saldadoFiltro) {
+        this.saldadoFiltro = saldadoFiltro;
+    }
+
+    public Integer getCompradorFiltro() {
+        return compradorFiltro;
+    }
+
+    public void setCompradorFiltro(Integer compradorFiltro) {
+        this.compradorFiltro = compradorFiltro;
+    }
+
+    public String getIdFiltro() {
+        return idFiltro;
+    }
+
+    public void setIdFiltro(String idFiltro) {
+        this.idFiltro = idFiltro;
     }
 }

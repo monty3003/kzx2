@@ -4,6 +4,8 @@
  */
 package py.com.bej.web.beans.view;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +15,8 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
+import py.com.bej.base.prod.entity.Vmmotos;
+import py.com.bej.base.prod.session.MotosProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Persona;
@@ -31,6 +35,8 @@ import py.com.bej.web.utils.JsfUtils;
 public class MotoBean extends AbstractPageBean<Moto> {
 
     @EJB
+    private MotosProduccionFacade motosProduccionFacade;
+    @EJB
     private CategoriaFacade categoriaFacade;
     @EJB
     private PersonaFacade personaFacade;
@@ -42,12 +48,12 @@ public class MotoBean extends AbstractPageBean<Moto> {
     private List<SelectItem> listaPersona;
     //Campos de busqueda
     private String codigo;
-    private Integer categoria;
+    private String categoria;
     private String codigoFabrica;
     private String marca;
     private String modelo;
     private String color;
-    private Integer fabricante;
+    private String fabricante;
 
     /** Creates a new instance of MotoBean */
     public MotoBean() {
@@ -74,6 +80,13 @@ public class MotoBean extends AbstractPageBean<Moto> {
             this.facade = new MotoFacade();
         }
         return facade;
+    }
+
+    public MotosProduccionFacade getMotosProduccionFacade() {
+        if (this.motosProduccionFacade == null) {
+            this.motosProduccionFacade = new MotosProduccionFacade();
+        }
+        return motosProduccionFacade;
     }
 
     /**
@@ -114,7 +127,16 @@ public class MotoBean extends AbstractPageBean<Moto> {
 
     @Override
     List filtrar() {
-        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color, new Persona(fabricante), new Categoria(categoria)));
+        Persona fab = new Persona();
+        Categoria cat = new Categoria();
+        if (fabricante != null && !fabricante.equals("-1")) {
+            fab = new Persona(fabricante);
+        }
+        if (categoria != null && !categoria.equals("-1")) {
+            cat = new Categoria(Integer.valueOf(categoria));
+        }
+        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color,
+                fab, cat));
         getFacade().setRango(new Integer[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
@@ -128,13 +150,147 @@ public class MotoBean extends AbstractPageBean<Moto> {
 
     @Override
     public String buscar() {
-        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color, new Persona(fabricante), new Categoria(categoria)));
+        Persona fab = new Persona();
+        Categoria cat = new Categoria();
+        if (fabricante != null && !fabricante.equals("-1")) {
+            fab = new Persona(fabricante);
+        }
+        if (categoria != null && !categoria.equals("-1")) {
+            cat = new Categoria(Integer.valueOf(categoria));
+        }
+        if (codigo.equals("")) {
+            codigo = null;
+        }
+        if (codigoFabrica.equals("")) {
+            codigoFabrica = null;
+        }
+        if (marca.equals("")) {
+            marca = null;
+        }
+        if (modelo.equals("")) {
+            modelo = null;
+        }
+        if (color.equals("")) {
+            color = null;
+        }
+        getFacade().setEntity(new Moto(codigo, codigoFabrica, marca, modelo, color, fab, cat));
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
             setErrorMessage(null, getFacade().c0);
         }
         return getNav();
+    }
+
+    public String importar() {
+
+        return "importarMoto";
+    }
+
+    public String migrarMotos() throws Exception {
+        String res = null;
+        int total = 0;
+        //Produccion
+        motosProduccionFacade = new MotosProduccionFacade();
+        List<Vmmotos> listaMotosEnProduccion = null;
+        //Desarrollo
+        Categoria categoriaProduccion = null;
+        //MIGRAR
+        listaMotosEnProduccion = motosProduccionFacade.findAll();
+        if (!listaMotosEnProduccion.isEmpty()) {
+            Moto m = null;
+            List<Moto> lista = new ArrayList<Moto>();
+            String codigoProduccion = null;
+            String codigoFabricaProduccion = null;
+            String marcaProduccion = null;
+            String modeloProduccion = null;
+            String colorProduccion = null;
+            Persona fabricanteProduccion = null;
+            Character activoProduccion = null;
+            categoriaProduccion = getCategoriaFacade().find(30);
+
+            for (Vmmotos v : listaMotosEnProduccion) {
+                //Codigo
+                if (v.getCodMoto().trim().length() < 6) {
+                    codigoProduccion = v.getCodMoto() + "X";
+                } else if (v.getCodMoto().trim().length() > 20) {
+                    codigoProduccion = v.getCodMoto().trim().substring(0, 19);
+                } else {
+                    codigoProduccion = v.getCodMoto().trim().toUpperCase();
+                }
+                codigoFabricaProduccion = codigoProduccion;
+                //Marca
+                if (v.getMarca() == null || v.getMarca().trim().equals("")) {
+                    if (v.getCodMoto().trim().equals("HPDLX65R")) {
+                        marcaProduccion = "HERO PUCH";
+                    } else {
+                        marcaProduccion = "Sin Marca";
+                    }
+                } else if (v.getMarca().trim().length() < 6) {
+                    if (v.getMarca().trim().equalsIgnoreCase("MS")
+                            || v.getMarca().trim().equalsIgnoreCase("MOROSTAR")
+                            || v.getMarca().trim().equalsIgnoreCase("STAR")) {
+                        marcaProduccion = "MOTOSTAR";
+                    } else {
+                        marcaProduccion = v.getMarca().toUpperCase() + "X";
+                    }
+                } else if (v.getMarca().trim().length() > 20) {
+                    marcaProduccion = v.getMarca().trim().toUpperCase().substring(0, 19);
+                } else {
+                    marcaProduccion = v.getMarca().trim().toUpperCase();
+                }
+                //Fabricante
+                activoProduccion = 'N';
+                if (marcaProduccion.equals("MOTOSTAR")) {
+                    fabricanteProduccion = getPersonaFacade().findByDocumento("80002740-0");
+                    activoProduccion = 'S';
+                } else if (marcaProduccion.equals("LEOPARD") || marcaProduccion.equals("MARUTI") || marcaProduccion.equals("MONTANA")) {
+                    fabricanteProduccion = getPersonaFacade().findByDocumento("80001307-7");
+                } else if (marcaProduccion.equals("KENTON") || marcaProduccion.equals("MAGNUM") || marcaProduccion.equals("HERO PUCH")
+                        || marcaProduccion.equals("HUSQVARNA")) {
+                    fabricanteProduccion = getPersonaFacade().findByDocumento("80013744-2");
+                } else if (marcaProduccion.equals("PRISSA")) {
+                    fabricanteProduccion = getPersonaFacade().findByDocumento("PLUA-996530");
+                } else {
+                    fabricanteProduccion = getPersonaFacade().findByDocumento("80020496-4");
+                }
+                //Modelo
+                if (v.getModelo() == null) {
+                    modeloProduccion = "Sin Modelo";
+                } else if (v.getModelo().trim().length() > 20) {
+                    modeloProduccion = v.getModelo().trim().substring(0, 19).toUpperCase();
+                } else {
+                    modeloProduccion = v.getModelo().trim().toUpperCase();
+                }
+                //Color
+                if (v.getColor() == null) {
+                    colorProduccion = "Sin Color";
+                } else if (v.getColor().trim().length() > 20) {
+                    colorProduccion = v.getColor().trim().substring(0, 19).toUpperCase();
+                } else {
+                    colorProduccion = v.getColor().trim().toUpperCase();
+                }
+                //Fabricante
+                if (codigoProduccion.trim().equals("MSSK150MAXANA")) {
+                    int c = 0;
+                }
+                m = new Moto(codigoProduccion, codigoFabricaProduccion, marcaProduccion, modeloProduccion, colorProduccion, fabricanteProduccion, categoriaProduccion);
+                m.setActivo(activoProduccion);
+                m.setUltimaModificacion(new Date());
+                lista.add(m);
+                total++;
+            }
+            try {
+                total = getFacade().cargaMasiva(lista);
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+            }
+            setInfoMessage(null, "Total de registros importados: " + total);
+        }
+
+
+        return todos();
+
     }
 
     @Override
@@ -153,8 +309,8 @@ public class MotoBean extends AbstractPageBean<Moto> {
         this.setCodigo((String) request.getParameter("radio"));
         if (this.getCodigo() != null) {
             try {
-                setMoto(facade.find(this.getCodigo()));
-                setActivo(getMoto().getActivo().equals('S') ? Boolean.TRUE : Boolean.FALSE);
+                moto = facade.find(this.getCodigo());
+                setActivo(moto.getActivo().equals('S') ? Boolean.TRUE : Boolean.FALSE);
             } catch (Exception e) {
                 Logger.getLogger(UbicacionBean.class.getName()).log(Level.SEVERE, null, e);
                 return null;
@@ -162,8 +318,9 @@ public class MotoBean extends AbstractPageBean<Moto> {
             setAgregar(Boolean.FALSE);
             setModificar(Boolean.TRUE);
             obtenerListas();
-            setFabricante(facade.getEntity().getCategoria().getId());
-            setCategoria(facade.getEntity().getCategoria().getId());
+            categoria = String.valueOf(moto.getCategoria().getId());
+            fabricante = String.valueOf(moto.getCategoria().getId());
+            setCategoria(String.valueOf(moto.getCategoria().getId()));
             return "moto";
         } else {
             setErrorMessage(null, facade.sel);
@@ -178,7 +335,7 @@ public class MotoBean extends AbstractPageBean<Moto> {
             return false;
         } else {
             Moto existe = null;
-            existe = facade.find(getCodigo().trim());
+            existe = getFacade().find(codigo.trim());
             if (existe != null && facade.getEntity() == null) {
                 setErrorMessage("frm:codigo", "Ya existe una moto con este código");
                 return false;
@@ -201,11 +358,11 @@ public class MotoBean extends AbstractPageBean<Moto> {
             setErrorMessage("frm:color", "Ingrese un valor");
             res = false;
         }
-        if (getMoto().getFabricante() == null) {
+        if (fabricante == null || fabricante.equals("-1")) {
             setErrorMessage("frm:fabricante", "Seleccione un valor");
             res = false;
         }
-        if (getMoto().getCategoria() == null) {
+        if (categoria == null || categoria.equals("-1")) {
             setErrorMessage("frm:categoria", "Seleccione un valor");
             res = false;
         }
@@ -216,6 +373,8 @@ public class MotoBean extends AbstractPageBean<Moto> {
     public String guardar() {
         boolean validado = validar();
         if (validado) {
+            moto.getCategoria().setId(Integer.valueOf(categoria));
+            moto.getFabricante().setId(Integer.valueOf(fabricante));
             getFacade().setEntity(moto);
             if (getModificar()) {
                 getFacade().getEntity().setActivo(getActivo() ? 'S' : 'N');
@@ -335,28 +494,28 @@ public class MotoBean extends AbstractPageBean<Moto> {
     /**
      * @return the fabricante
      */
-    public Integer getFabricante() {
+    public String getFabricante() {
         return fabricante;
     }
 
     /**
      * @param fabricante the fabricante to set
      */
-    public void setFabricante(Integer fabricante) {
+    public void setFabricante(String fabricante) {
         this.fabricante = fabricante;
     }
 
     /**
      * @return the categoria
      */
-    public Integer getCategoria() {
+    public String getCategoria() {
         return categoria;
     }
 
     /**
      * @param categoria the categoria to set
      */
-    public void setCategoria(Integer categoria) {
+    public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
 
