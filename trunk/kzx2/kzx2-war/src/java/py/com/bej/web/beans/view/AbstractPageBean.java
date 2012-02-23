@@ -9,11 +9,11 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import py.com.bej.orm.interfaces.WithId;
 import py.com.bej.orm.utils.ConfiguracionEnum;
-import py.com.bej.web.servlets.security.LoginBean;
 
 /**
  *
@@ -22,6 +22,8 @@ import py.com.bej.web.servlets.security.LoginBean;
 public abstract class AbstractPageBean<T extends WithId> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    public static String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
+    public static String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
     private Integer desde = Integer.parseInt(ConfiguracionEnum.PAG_DESDE.getSymbol());
     private Integer max = Integer.parseInt(ConfiguracionEnum.PAG_MAX.getSymbol());
     private Integer total;
@@ -34,6 +36,7 @@ public abstract class AbstractPageBean<T extends WithId> implements Serializable
     private Boolean modificar;
     private List<T> lista;
     private Boolean activo;
+    public final static Logger LOGGER = Logger.getLogger(AbstractPageBean.class.getName());
 
     abstract void limpiarCampos();
 
