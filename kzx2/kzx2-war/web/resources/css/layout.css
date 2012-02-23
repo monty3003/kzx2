@@ -200,7 +200,7 @@ input:focus {
 }
 
 /*--------------TABLAS DE BUSQUEDA-----------------*/
-.busqueda{width: 80%;}
+.busqueda{width: 100%;clear: both;}
 .busqueda label{margin-right: 15px;}
 .busqueda td{text-align: right; padding: 5px;}
 
