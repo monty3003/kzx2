@@ -1,44 +1,62 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>MAIN - BEJ - MOTOS</title>
     </head>
-    <body>
+    <h:body>
         <ui:composition template="./../../resources/template/facesTemplate.xhtml">
 
             <ui:define name="top">
                 logo
             </ui:define>
             <ui:define name="content">
-                <div style="width: 25%; max-height: 100%; float: left; margin: auto; padding-right: 5px;">
-                    <fieldset>
-                        <div style="height: 450px;"></div>
-                    </fieldset> </div>
-                <div style="width: 55%; max-height: 70%; float: left; margin: auto; padding:0px 5px 5px 5px;">
-                    <fieldset>
-                        <div style="height: 300px;"></div>
-                    </fieldset> </div>
-                <div style="width: 18%; max-height: 50%; float: left; margin: auto; padding-left: 5px;">
-                    <fieldset>
-                        <div style="height: 200px;"></div>
-                    </fieldset> </div>
-                <div style="width: 18%; max-height: 50%; float: left; margin: auto; padding-left: 5px;">
-                    <fieldset>
-                        <div style="height: 200px;"></div>
-                    </fieldset> </div>
-                <div style="width: 100%; max-height: 20%; float: left; margin: auto; clear: both;">
-                    <fieldset>
-                        <div style="height: 200px;"></div>
-                    </fieldset> </div>
+                <h:form>
+                    <div style="width: 25%; max-height: 100%; float: left; margin: auto; padding-right: 5px;">
+                        <fieldset>
+                            <div style="height: 450px;"></div>
+                        </fieldset> </div>
+                    <div style="width: 55%; max-height: 70%; float: left; margin: auto; padding:0px 5px 5px 5px;">
+                        <fieldset>
+                            <div style="height: 300px;"></div>
+                        </fieldset> </div>
+                    <div style="width: 18%; max-height: 50%; float: left; margin: auto; padding-left: 5px;">
+                        <fieldset>
+                            <div style="height: 200px;">
+                                <h3><h:outputText value="#{loginBean.userName}"/></h3>
+                                <table class="tablaDatos">
+                                    <tr>
+                                        <th>Conectado desde las</th>
+                                        <td align="rigth"><h:outputText value="#{loginBean.loginDesde}"><f:convertDateTime pattern="HH:mm:ss" timeZone="#{loginBean.timeZone}"/></h:outputText></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Usuarios Conectados</th>
+                                        <td align="rigth"><h:outputText value="#{loginBean.usuariosConectados()}"/></td>
+                                    </tr>
+                                </table>
+                                <div class="botonera">
+                                    <h:commandLink value="Cambiar Password" action="#{loginBean.cambiarPasswordDesdeMain()}"/>
+                                </div>
+                            </div>
+                        </fieldset> </div>
+                    <div style="width: 18%; max-height: 50%; float: left; margin: auto; padding-left: 5px;">
+                        <fieldset>
+                            <div style="height: 200px;"></div>
+                        </fieldset> </div>
+                    <div style="width: 100%; max-height: 20%; float: left; margin: auto; clear: both;">
+                        <fieldset>
+                            <div style="height: 200px;"></div>
+                        </fieldset> </div>
+                </h:form>
             </ui:define>
-
             <ui:define name="bottom">
             </ui:define>
 
         </ui:composition>
 
 
-    </body>
+    </h:body>
 </html>

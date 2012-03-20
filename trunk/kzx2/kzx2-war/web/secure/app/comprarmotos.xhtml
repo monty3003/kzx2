@@ -13,11 +13,11 @@
     <ui:composition template="./../../resources/template/facesTemplate.xhtml">
 
         <ui:define name="content">
-            <h:form id="frm">
-                <div>
-                    <fieldset>
-                        <h3>Compra Nueva</h3>
-                        <h:body>
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="comprobante">Nº de Factura: </label></div>
@@ -155,7 +155,7 @@
                             </div>
                             <h:panelGroup id="tablaMotos">
                                 <h:panelGroup rendered="#{compraMotosBean.compra.cantidadItems gt 0}">
-                                    <div style="margin: 0px auto; width: 80%;">
+                                    <div style="margin: 0px auto; width: 90%;">
                                         <table class="tablaGrilla">
                                             <thead>
                                                 <tr>
@@ -163,6 +163,7 @@
                                                     <td>Chasis</td>
                                                     <td>Precio de Costo</td>
                                                     <td>Ubicación</td>
+                                                    <td>Plan</td>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -184,8 +185,16 @@
                                                             </h:inputText><rich:message for="frm:costo"/>
                                                         </td>
                                                         <td>
-                                                            <h:selectOneMenu id="ubicacion" value="#{m.ubicacion.id}">
-                                                                <f:selectItems value="#{compraMotosBean.listaUbicacion}"/></h:selectOneMenu><rich:messages for="frm:ubicacion"/>
+                                                            <h:selectOneMenu id="ubicacion" value="#{m.ubicacion.id}" converter="selectItemConverter">
+                                                                <f:selectItems value="#{compraMotosBean.listaUbicacion}"/>
+                                                                <f:ajax render="@this"/>
+                                                            </h:selectOneMenu><rich:messages for="frm:ubicacion"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:selectOneMenu id="plan" value="#{m.plan.id}" converter="selectItemConverter">
+                                                                <f:selectItems value="#{compraMotosBean.listaPlan}"/>
+                                                                <f:ajax render="@this"/>
+                                                            </h:selectOneMenu><rich:messages for="frm:plan"/>
                                                         </td>
                                                     </tr>
                                                 </ui:repeat>
@@ -212,10 +221,10 @@
                                 <h:commandButton styleClass="submit" value="Guardar" action="#{compraMotosBean.guardar}"/>
                                 <h:commandButton styleClass="submit" value="Cancelar" action="#{compraMotosBean.cancelar}" immediate="true"/>
                             </div>
-                        </h:body>
-                    </fieldset>
-                </div>
-            </h:form>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
         </ui:define>
     </ui:composition>
 </html>

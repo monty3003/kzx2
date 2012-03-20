@@ -6,9 +6,7 @@ and open the template in the editor.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:rich="http://richfaces.org/rich">
+      xmlns:h="http://java.sun.com/jsf/html">
     <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Personas</title>
@@ -22,15 +20,14 @@ and open the template in the editor.
                     <fieldset>
                         <div class="tablaForm">
                             <div class="fila">
-                                <div class="etiq">Importar registro de Clientes desde el Sistema Anterior</div>
-                                <h:commandButton value="Importar" action="#{personaBean.migrarClientes()}"/>
+                                <div class="etiq">Importar registro de Proveedores desde el Sistema Anterior</div>
+                                <h:commandButton value="Importar" action="#{clienteMigraBean.migrarProveedores()}"/>
                             </div>
                             <div class="fila">
-                                <div class="etiq">Importar registro de Proveedores desde el Sistema Anterior</div>
-                                <h:commandButton value="Importar" action="#{personaBean.migrarProveedores()}"/>
+                                <div class="etiq">Importar registro de Clientes desde el Sistema Anterior</div>
+                                <h:commandButton value="Importar" action="#{clienteMigraBean.migrarClientes()}"/>
                             </div>
                         </div>
-                        
                     </fieldset>           
                 </h:form>
             </ui:define>
