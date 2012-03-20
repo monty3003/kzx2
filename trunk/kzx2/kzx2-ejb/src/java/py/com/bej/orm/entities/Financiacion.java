@@ -4,11 +4,8 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +13,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -34,32 +30,24 @@ public class Financiacion extends WithId<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "credito", referencedColumnName = "id", insertable = false, updatable = true)
-    @ManyToOne
+    @JoinColumn(name = "credito", referencedColumnName = "id", nullable = false)
+    @ManyToOne(optional = false)
     private Credito credito;
-    @Basic(optional = false)
     @Column(name = "numero_cuota", nullable = false)
     private short numeroCuota;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Basic(optional = false)
     @Column(name = "capital", nullable = false, precision = 11, scale = 2)
     private BigDecimal capital;
-    @Basic(optional = false)
     @Column(name = "interes", nullable = false, precision = 11, scale = 2)
     private BigDecimal interes;
-    @Basic(optional = false)
     @Column(name = "cuota_neta", nullable = false, precision = 11, scale = 2)
     private BigDecimal cuotaNeta;
-    @Basic(optional = false)
     @Column(name = "total_a_pagar", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalAPagar;
-    @Basic(optional = false)
     @Column(name = "ajuste_redondeo", nullable = false, precision = 11, scale = 2)
     private BigDecimal ajusteRedondeo;
-    @Basic(optional = false)
     @Column(name = "fecha_vencimiento", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaVencimiento;
@@ -68,22 +56,18 @@ public class Financiacion extends WithId<Integer> {
     private Date fechaPago;
     @Column(name = "interes_mora", precision = 11, scale = 2)
     private BigDecimal interesMora;
-    @Column(name = "total_pagado", precision = 11, scale = 2)
+    @Column(name = "total_pagado", precision = 11, scale = 2, nullable = true)
     private BigDecimal totalPagado;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "financiacion")
-    private List<Pago> pagos;
 
     public Financiacion() {
     }
 
-    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal cuotaNeta, BigDecimal totalAPagar, BigDecimal ajusteRedondeo, Date fechaPago, BigDecimal interesMora, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
+    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal cuotaNeta, BigDecimal totalAPagar, BigDecimal ajusteRedondeo, Date fechaPago, Date fechaVencimiento, BigDecimal interesMora, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.credito = credito;
         this.numeroCuota = numeroCuota;
@@ -93,6 +77,7 @@ public class Financiacion extends WithId<Integer> {
         this.totalAPagar = totalAPagar;
         this.ajusteRedondeo = ajusteRedondeo;
         this.fechaPago = fechaPago;
+        this.fechaVencimiento = fechaVencimiento;
         this.interesMora = interesMora;
         this.totalPagado = totalPagado;
         this.activo = activo;
@@ -229,15 +214,6 @@ public class Financiacion extends WithId<Integer> {
     @Override
     public String getlabel() {
         return this.id + " " + this.credito.getlabel();
-
-
-    }
-
-    /**
-     * @return the pagos
-     */
-    public List<Pago> getPagos() {
-        return pagos;
     }
 
     /**

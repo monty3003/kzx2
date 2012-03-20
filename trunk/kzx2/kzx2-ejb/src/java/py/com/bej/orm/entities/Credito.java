@@ -7,7 +7,7 @@ package py.com.bej.orm.entities;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,47 +33,40 @@ public class Credito extends WithId<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = false, updatable = true)
+    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoria;
-    @JoinColumn(name = "transaccion", referencedColumnName = "id", insertable = false, updatable = true)
+    @JoinColumn(name = "transaccion", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Transaccion transaccion;
-    @Basic(optional = false)
     @Column(name = "fecha_inicio", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaInicio;
-    @Basic(optional = false)
     @Column(name = "fecha_fin", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaFin;
-    @JoinColumn(name = "sistema_credito", referencedColumnName = "id", insertable = false, updatable = true)
+    @JoinColumn(name = "sistema_credito", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria sistemaCredito;
-    @Basic(optional = false)
     @Column(name = "tan", nullable = false)
     private float tan;
-    @Basic(optional = false)
     @Column(name = "tae", nullable = false)
     private float tae;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Basic(optional = false)
     @Column(name = "capital", nullable = false, precision = 11, scale = 2)
     private BigDecimal capital;
-    @Basic(optional = false)
     @Column(name = "amortizacion", nullable = false)
     private short amortizacion;
-    @Basic(optional = false)
     @Column(name = "credito_total", nullable = false)
     private BigDecimal creditoTotal;
-    @Basic(optional = false)
-    @Column(name = "total_amortizado_pagado", nullable = false, precision = 11, scale = 2)
+    @JoinColumn(name = "garante", referencedColumnName = "id", nullable = true)
+    @ManyToOne(optional = true)
+    private Persona garante;
+    @Column(name = "total_amortizado_pagado", precision = 11, scale = 2)
     private BigDecimal totalAmortizadoPagado;
-    @Basic(optional = false)
-    @Column(name = "total_intereses_pagado", nullable = false, precision = 11, scale = 2)
+    @Column(name = "total_intereses_pagado", precision = 11, scale = 2)
     private BigDecimal totalInteresesPagado;
     @Column(name = "total_intereses_pagado_multa", precision = 11, scale = 2)
     private BigDecimal totalInteresesPagadoMulta;
@@ -82,21 +75,23 @@ public class Credito extends WithId<Integer> {
     private Date fechaUltimoPago;
     @Column(name = "cuotas_atrasadas")
     private Short cuotasAtrasadas;
-    @Basic(optional = false)
-    @JoinColumn(name = "estado", insertable = false, updatable = true)
+    @JoinColumn(name = "estado", nullable = false)
     @ManyToOne(optional = false)
     private Categoria estado;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "credito")
+    @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL)
     private List<Financiacion> financiacions;
 
     public Credito() {
+        this.categoria = new Categoria();
+        this.estado = new Categoria();
+        this.sistemaCredito = new Categoria();
+        this.transaccion = new Transaccion();
+        this.garante = new Persona();
     }
 
     public Credito(Integer id) {
@@ -324,5 +319,23 @@ public class Credito extends WithId<Integer> {
      */
     public void setCreditoTotal(BigDecimal creditoTotal) {
         this.creditoTotal = creditoTotal;
+    }
+
+    /**
+     * @param financiacions the financiacions to set
+     */
+    public void setFinanciacions(List<Financiacion> financiacions) {
+        for (Financiacion fn : financiacions) {
+            fn.setCredito(this);
+        }
+        this.financiacions = financiacions;
+    }
+
+    public Persona getGarante() {
+        return garante;
+    }
+
+    public void setGarante(Persona garante) {
+        this.garante = garante;
     }
 }

@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,12 +18,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -43,55 +38,39 @@ public class Factura extends WithId<Integer> {
     @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{7}$", message = "Ingrese un valor con el formato ###-###-#######")
     @Column(name = "numero", nullable = false, length = 45)
     private String numero;
-    @NotNull(message = "Ingrese una fecha de vencimiento")
-    @Future(message = "Ingrese una fecha de vencimiento válida")
-    @Column(name = "valido_hasta", nullable = false)
+    @Column(name = "valido_hasta", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date validoHasta;
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoria;
-    @Basic(optional = false)
     @Column(name = "sub_total_exentas", nullable = false)
     private BigDecimal subTotalExentas;
-    @Basic(optional = false)
     @Column(name = "sub_total_gravadas_10", nullable = false)
     private BigDecimal subTotalGravadas10;
-    @Basic(optional = false)
     @Column(name = "sub_total_gravadas_5", nullable = false)
     private BigDecimal subTotalGravadas5;
-    @Basic(optional = false)
     @Column(name = "neto_sin_iva_5", nullable = false)
     private BigDecimal netoSinIva5;
-    @Basic(optional = false)
     @Column(name = "neto_sin_iva_10", nullable = false)
     private BigDecimal netoSinIva10;
-    @Basic(optional = false)
     @Column(name = "total_iva_5", nullable = false)
     private BigDecimal totalIva5;
-    @Basic(optional = false)
     @Column(name = "total_iva_10", nullable = false)
     private BigDecimal totalIva10;
-    @Basic(optional = false)
     @Column(name = "sub_total", nullable = false)
     private BigDecimal subTotal;
-    @Basic(optional = false)
     @Column(name = "total_iva", nullable = false)
     private BigDecimal totalIva;
-    @Basic(optional = false)
     @Column(name = "total_pagado", nullable = false)
     private BigDecimal totalPagado;
-    @Basic(optional = false)
     @Column(name = "descuento", nullable = false)
     private float descuento;
-    @Basic(optional = false)
     @Column(name = "saldado", nullable = false)
     private Character saldado;
     @Column(name = "activo", length = 1)
-    @Basic(optional = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
     @OneToOne(optional = false, mappedBy = "factura", cascade = CascadeType.ALL)

@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,20 +33,16 @@ public class Ubicacion extends WithId<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
     @NotEmpty(message = "Ingrese un valor")
     @Size(min = 4, max = 45, message = "Ingrese una descripcion valida")
-    @Basic(optional = false)
     @Column(name = "descripcion", nullable = false, length = 45, unique = true)
     private String descripcion;
     @NotNull(message = "Ingrese un valor")
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "ubicacion", cascade = CascadeType.ALL)

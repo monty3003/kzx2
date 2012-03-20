@@ -4,10 +4,8 @@
  */
 package py.com.bej.orm.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,28 +29,23 @@ import py.com.bej.orm.interfaces.WithId;
 public class Pago extends WithId<Integer> {
 
     @Id
-    @Basic(optional = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @Basic(optional = false)
     @Column(name = "fecha", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fecha;
-    @JoinColumn(name = "financiacion", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "credito", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
-    private Financiacion financiacion;
+    private Credito credito;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Basic(optional = false)
     @Column(name = "total_pagado", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalPagado;
-    @Basic(optional = false)
     @Column(name = "es_pago_parcial", nullable = false)
     private Boolean esPagoParcial;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
 
@@ -61,6 +54,16 @@ public class Pago extends WithId<Integer> {
 
     public Pago(Integer id) {
         this.id = id;
+    }
+
+    public Pago(Integer id, Date fecha, Credito credito, BigDecimal totalPagado, Boolean esPagoParcial, Character activo, Date ultimaModificacion) {
+        this.id = id;
+        this.fecha = fecha;
+        this.credito = credito;
+        this.totalPagado = totalPagado;
+        this.esPagoParcial = esPagoParcial;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
     }
 
     @Override
@@ -81,12 +84,12 @@ public class Pago extends WithId<Integer> {
         this.fecha = fecha;
     }
 
-    public Financiacion getFinanciacion() {
-        return financiacion;
+    public Credito getCredito() {
+        return credito;
     }
 
-    public void setFinanciacion(Financiacion financiacion) {
-        this.financiacion = financiacion;
+    public void setCredito(Credito credito) {
+        this.credito = credito;
     }
 
     public BigDecimal getTotalPagado() {
@@ -152,6 +155,6 @@ public class Pago extends WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.id + " " + this.financiacion.getCredito().getlabel();
+        return this.id + " " + this.getCredito().getlabel();
     }
 }
