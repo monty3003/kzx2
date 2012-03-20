@@ -5,14 +5,12 @@
 package py.com.bej.web.beans.view;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -22,21 +20,17 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
-import py.com.bej.base.prod.entity.Vmcompras;
-import py.com.bej.base.prod.entity.Vmmotostock;
-import py.com.bej.base.prod.session.ComprasProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
-import py.com.bej.orm.entities.Factura;
+import py.com.bej.orm.entities.Credito;
 import py.com.bej.orm.entities.Motostock;
-import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.Transaccion;
-import py.com.bej.orm.entities.Ubicacion;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.CreditoFacade;
 import py.com.bej.orm.session.FacturaFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.MotostockFacade;
 import py.com.bej.orm.session.PersonaFacade;
+import py.com.bej.orm.session.PlanFacade;
 import py.com.bej.orm.session.TransaccionFacade;
 import py.com.bej.orm.session.UbicacionFacade;
 import py.com.bej.orm.utils.CategoriaEnum;
@@ -54,7 +48,7 @@ import py.com.bej.web.utils.JsfUtils;
 public class CompraMotosBean extends AbstractPageBean<Transaccion> {
 
     @EJB
-    private ComprasProduccionFacade comprasProduccionFacade;
+    private PlanFacade planFacade;
     @EJB
     private FacturaFacade facturaFacade;
     @EJB
@@ -78,6 +72,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
     private List<SelectItem> listaProveedor;
     private List<SelectItem> listaMoto;
     private List<SelectItem> listaUbicacion;
+    private List<SelectItem> listaPlan;
     //Campos de busqueda
     private String idFiltro;
     private String comprobanteFiltro;
@@ -114,9 +109,6 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
     private BigDecimal totalX;
     private BigDecimal descuentoX;
     private BigDecimal totalDescuentoX;
-    //Formateador
-    private String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
-    private String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
 
     /** Creates a new instance of CompraMotosBean */
     public CompraMotosBean() {
@@ -126,6 +118,8 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
     void limpiarCampos() {
         setAgregar(Boolean.FALSE);
         setModificar(Boolean.FALSE);
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
         //Campos de busqueda
         this.idFiltro = null;
         this.comprobanteFiltro = null;
@@ -161,6 +155,13 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
         this.totalX = null;
         this.descuentoX = null;
         this.totalDescuentoX = null;
+    }
+
+    public PlanFacade getPlanFacade() {
+        if (planFacade == null) {
+            planFacade = new PlanFacade();
+        }
+        return planFacade;
     }
 
     /**
@@ -249,8 +250,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
         setAgregar(Boolean.FALSE);
         setModificar(Boolean.FALSE);
         LoginBean.getInstance().setUbicacion("Compras de Motos");
-        setDesde(0);
-        setMax(10);
+
         if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
         }
@@ -267,7 +267,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
         facade.setEntity(new Transaccion());
         getFacade().getEntity().setCodigo(new Categoria(CategoriaEnum.COMPRA_DESDE.getSymbol()));
         getFacade().getEntity().setCodigoMax(new Categoria(CategoriaEnum.COMPRA_HASTA.getSymbol()));
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
@@ -277,6 +277,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
         listaCategoria = JsfUtils.getSelectItems(getCategoriaFacade().findBetween(CategoriaEnum.COMPRA_DESDE.getSymbol(), CategoriaEnum.COMPRA_HASTA.getSymbol()), !getModificar());
         listaProveedor = JsfUtils.getSelectItems(getPersonaFacade().findByPersona(CategoriaEnum.PROVEEDOR.getSymbol()), !getModificar());
         listaUbicacion = JsfUtils.getSelectItems(getUbicacionFacade().findAll(), !getModificar());
+        listaPlan = JsfUtils.getSelectItems(getPlanFacade().findAll(), !getModificar());
     }
 
     @Override
@@ -288,168 +289,6 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
             setErrorMessage(null, getFacade().c0);
         }
         return getNav();
-    }
-
-    public String importar() {
-
-        return "importarCompra";
-    }
-
-    public String migrarCompras() {
-        int totalMigrado = 0;
-        //variables
-        Transaccion t;
-        Integer id;
-        Categoria codigo;
-        Factura factura;
-        String numero;
-        Categoria categoriaFactura;
-        Date fechaOperacionProduccion;
-        Date fechaEntregaProduccion;
-        Persona vendedor;
-        Persona compradorProduccion = getPersonaFacade().findByDocumento(ConfiguracionEnum.PROPIETARIO.getSymbol());
-        Character anulado;
-        BigDecimal subTotalExentasProduccion = BigDecimal.ZERO;
-        BigDecimal subTotalGravadas10Produccion = BigDecimal.ZERO;
-        BigDecimal subTotalGravadas5Produccion = BigDecimal.ZERO;
-        BigDecimal subTotal;
-        BigDecimal totalIva5Produccion = BigDecimal.ZERO;
-        BigDecimal totalIva10Produccion = BigDecimal.ZERO;
-        BigDecimal totalIvaProduccion;
-        Float descuento = Float.valueOf("0.0");
-        BigDecimal totalProduccion;
-        BigDecimal totalDescuentoProduccion = BigDecimal.ZERO;
-        BigDecimal totalPagadoProduccion;
-        BigDecimal entregaInicialProduccion = BigDecimal.ZERO;
-        Short cuotasProduccion;
-        BigDecimal montoCuotaIgualProduccion = BigDecimal.ZERO;
-        Short cantidadItemsProduccion = 1;
-        Character activo = 'S';
-        Date ultimaModificacion = new Date();
-        //Desarrollo
-        List<Transaccion> lista = new ArrayList<Transaccion>();
-        List<Motostock> listaStock;
-        //Produccion
-        List<Vmcompras> listaComprasProduccion = new ArrayList<Vmcompras>();
-        comprasProduccionFacade = new ComprasProduccionFacade();
-        listaComprasProduccion = comprasProduccionFacade.findByIdCompraOrdenado();
-        List<Vmmotostock> listaStockProduccion;
-        if (!listaComprasProduccion.isEmpty()) {
-            for (Vmcompras c : listaComprasProduccion) {
-                id = c.getIdCompras();
-                LOGGER.log(Level.INFO, "==============================================================");
-                LOGGER.log(Level.INFO, "La venta Nro. {0}", id);
-                fechaOperacionProduccion = c.getFecha() == null ? new Date() : c.getFecha();
-                fechaEntregaProduccion = c.getFecha() == null ? new Date() : c.getFecha();
-                //Buscar Proveedor con RUC nuevo
-                String prov = null;
-                if (c.getCodProveedor() == null) {
-                    prov = "80001307-7";
-                } else {
-                    if (c.getCodProveedor().trim().equals("ALEA634530T")) {
-                        prov = "80002740-0";
-                    } else if (c.getCodProveedor().trim().equals("CHAA9583400")) {
-                        prov = "80013744-2";
-                    } else if (c.getCodProveedor().trim().equals("MFEB998270M")) {
-                        prov = "80020496-4";
-                    } else if (c.getCodProveedor().trim().equals("REIB796460N")) {
-                        prov = "80001307-7";
-                    } else {
-                        prov = c.getCodProveedor().trim();
-                    }
-                }
-                vendedor = getPersonaFacade().findByDocumento(prov);
-                anulado = c.getAnulado() ? 'S' : 'N';
-                if (c.getSubTotal() != null && c.getSubTotal() > 1000) {
-                    subTotal = new BigDecimal(c.getSubTotal());
-                } else {
-                    subTotal = BigDecimal.valueOf(1000);
-                }
-                totalIvaProduccion = new BigDecimal(c.getIvaCf());
-                if (c.getMontoTotal() != null && c.getMontoTotal() > 1000) {
-                    totalProduccion = new BigDecimal(c.getMontoTotal());
-                } else {
-                    totalProduccion = BigDecimal.valueOf(1000);
-                }
-                totalPagadoProduccion = totalProduccion;
-                cuotasProduccion = c.getCuotas() == null ? Short.valueOf("0") : c.getCuotas();
-                if (c.getCuotas() != null && c.getCuotas() > 0) {
-                    //Compra a Credito
-                    codigo = getCategoriaFacade().find(CategoriaEnum.COMPRA_MCR.getSymbol());
-                    categoriaFactura = getCategoriaFacade().find(CategoriaEnum.FACTURA_COMPRA_MCR.getSymbol());
-                } else {
-                    codigo = getCategoriaFacade().find(CategoriaEnum.COMPRA_MCO.getSymbol());
-                    categoriaFactura = getCategoriaFacade().find(CategoriaEnum.FACTURA_COMPRA_MCO.getSymbol());
-                }
-                //Factura
-                numero = "" + c.getNumeroFactura();
-                if (numero != null && !numero.equals("null") && numero.length() < 7) {
-                    switch (numero.length()) {
-                        case 1:
-                            numero = "000000" + numero;
-                            break;
-                        case 2:
-                            numero = "00000" + numero;
-                            break;
-                        case 3:
-                            numero = "0000" + numero;
-                            break;
-                        case 4:
-                            numero = "000" + numero;
-                            break;
-                        case 5:
-                            numero = "00" + numero;
-                            break;
-                        case 6:
-                            numero = "0" + numero;
-                            break;
-                    }
-                    numero = "001-001-" + numero;
-                } else if (numero == null || numero.equals("null")) {
-                    Random r = new Random(1L);
-                    int randomNumber = r.nextInt();
-                    String nro = "" + (1000000 + (randomNumber < 0 ? (randomNumber * -1) : randomNumber));
-                    numero = "001-001-" + nro.substring(0, 7);
-                } else if (numero.length() == 7) {
-                    numero = "001-001-" + numero;
-                } else {
-                    numero = "001-001-" + numero.substring(0, 7);
-                }
-
-                //Fecha de Vencimiento
-                Calendar ahora = GregorianCalendar.getInstance();
-                ahora.add(Calendar.YEAR, 1);
-                //Factura
-                factura = new Factura(null, numero, null, ahora.getTime(), categoriaFactura,
-                        subTotalExentasProduccion, subTotalGravadas10Produccion, subTotalGravadas5Produccion, totalIva5Produccion,
-                        totalIva10Produccion, totalIva5Produccion, totalIva10Produccion, subTotal, totalIvaProduccion, totalPagadoProduccion,
-                        descuento, anulado, activo, ultimaModificacion);
-                //Juntar todo
-                t = new Transaccion(id, codigo, factura, fechaOperacionProduccion, fechaEntregaProduccion, vendedor, compradorProduccion,
-                        anulado, subTotalExentasProduccion, subTotalGravadas10Produccion, subTotalGravadas5Produccion, totalIva5Produccion, totalIva10Produccion,
-                        subTotal, totalIva5Produccion, totalIva10Produccion, totalIvaProduccion, descuento, totalProduccion, totalDescuentoProduccion, totalPagadoProduccion,
-                        entregaInicialProduccion, cuotasProduccion, montoCuotaIgualProduccion, anulado, cantidadItemsProduccion, activo, ultimaModificacion);
-                getFacade().setEntity(t);
-                getFacade().create();
-                if (t.getIdAnterior().equals(27)) {
-                    Transaccion tx = new Transaccion(28, codigo, factura, fechaOperacionProduccion, fechaEntregaProduccion, vendedor, compradorProduccion,
-                            anulado, subTotalExentasProduccion, subTotalGravadas10Produccion, subTotalGravadas5Produccion, totalIva5Produccion, totalIva10Produccion,
-                            subTotal, totalIva5Produccion, totalIva10Produccion, totalIvaProduccion, descuento, totalProduccion, totalDescuentoProduccion, totalPagadoProduccion,
-                            entregaInicialProduccion, cuotasProduccion, montoCuotaIgualProduccion, 'S', cantidadItemsProduccion, 'N', ultimaModificacion);
-                    getFacade().create(tx);
-                }
-
-            }
-//            try {
-//                totalMigrado = getFacade().cargaMasiva(lista);
-//            } catch (Exception ex) {
-//                LOGGER.log(Level.SEVERE, ex.getMessage());
-//            }
-            setInfoMessage(null, "Total de registros importados: " + totalMigrado);
-        }
-
-
-        return "listacompramotos";
     }
 
     @Override
@@ -522,6 +361,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
             compra.getFactura().setUltimaModificacion(new Date());
             compra.getFactura().setDescuento(compra.getDescuento() == null ? 0 : compra.getDescuento());
             compra.getFactura().setSaldado(saldado ? 'S' : 'N');
+            compra.setUsuarioModificacion(LoginBean.getInstance().getUsuario());
             if (getModificar()) {
                 compra.setAnulado(anuladoFiltro ? 'S' : 'N');
                 compra.setSaldado(saldadoFiltro ? 'S' : 'N');
@@ -530,11 +370,15 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
                 facade.guardar();
                 setInfoMessage(null, facade.ex2);
             } else {
+                compra.setUsuarioCreacion((LoginBean.getInstance().getUsuario()));
+                compra.setFechaCreacion(new Date());
                 compra.setComprador(getPersonaFacade().find(new Integer(comprador)));
                 compra.setAnulado('N');
                 compra.setActivo('S');
                 compra.setSaldado(saldado ? 'S' : 'N');
                 compra.setUltimaModificacion(new Date());
+
+                //Stock
                 BigDecimal precio[] = new BigDecimal[2];
                 for (Motostock m : compra.getMotostocksCompra()) {
                     m.setActivo('S');
@@ -546,30 +390,23 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
                 }
                 getFacade().setEntity(compra);
                 getFacade().create();
-//                ArrayList<Motostock> motosNuevas = new ArrayList<Motostock>(compra.getMotostocksCompra());
-//                compra.setMotostocksCompra(null);
-//                for (Motostock m : motosNuevas) {
-//                    m.setPrecioVenta(BigDecimal.ZERO.setScale(2));
-//                    m.setCompra(compra);
-//                    getMotostockFacade().setEntity(m);
-//                    getMotostockFacade().create();
-//                }
+                //Credito
+                if (compra.getCodigo().getId().equals(CategoriaEnum.COMPRA_MCR.getSymbol())) {
+                    Credito credito = new Credito();
+                    credito.setCategoria(new Categoria(CategoriaEnum.S_ESP.getSymbol()));
+                    credito.setCapital(compra.getTotal().subtract(compra.getEntregaInicial(), MathContext.UNLIMITED));
+                    credito.setCreditoTotal(credito.getCapital());
+                    credito.setTan(1F);
+                    credito.setTae(1F);
+                    try {
+                        getCreditoFacade().abrirCredito(compra, credito);
+                    } catch (Exception ex) {
+                        Logger.getLogger(CompraMotosBean.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
                 setNav("listacompramotos");
                 setInfoMessage(null, facade.ex1);
             }
-
-//                List<Motostock> lm = new ArrayList<Motostock>();
-//                Motostock m;
-//                for (Pojo p : listaMotosNuevas) {
-//                    m = new Motostock(null, new Moto(p.getModelo()), null, p.getChasis(),
-//                            null, null, BigDecimal.valueOf(formatNumero.parse(p.getPrecio()).longValue()), null,
-//                            new Ubicacion(new Integer(p.getUbicacion())), 'S', new Date());
-//                    lm.add(m);
-//                }
-//                int r = facade.guardarCompra(lm);
-//                setInfoMessage(null, getFacade().ex1);
-//                compra = new Transaccion();
-//                getFacade().setEntity(compra);
             return this.todos();
         } else {
             return null;
@@ -614,6 +451,12 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
                     res = false;
                     break;
                 }
+                if (compra.getMotostocksCompra().get(i).getPlan().getId() == null
+                        || compra.getMotostocksCompra().get(i).getPlan().getId() < 0) {
+                    setErrorMessage("frm:plan", "Moto " + i++ + ": Seleccione un plan");
+                    res = false;
+                    break;
+                }
                 if (compra.getMotostocksCompra().get(i).getMoto().getCodigo() == null
                         || compra.getMotostocksCompra().get(i).getMoto().getCodigo().trim().equals("X")) {
                     setErrorMessage("frm:modelo", "Moto " + i++ + ": Seleccione un modelo");
@@ -636,7 +479,7 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
-        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         getFacade().setOrden(new Orden("id", false));
         this.filtrar();
         return getNav();
@@ -749,6 +592,10 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
      */
     public void setIdFiltro(String idFiltro) {
         this.idFiltro = idFiltro;
+    }
+
+    public List<SelectItem> getListaPlan() {
+        return listaPlan;
     }
 
     /**
@@ -1204,20 +1051,6 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
      */
     public void setCompra(Transaccion compra) {
         this.compra = compra;
-    }
-
-    /**
-     * @return the monedaPattern
-     */
-    public String getMonedaPattern() {
-        return monedaPattern;
-    }
-
-    /**
-     * @return the numberPattern
-     */
-    public String getNumberPattern() {
-        return numberPattern;
     }
 
     /**

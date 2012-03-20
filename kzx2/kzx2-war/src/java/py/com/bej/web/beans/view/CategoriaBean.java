@@ -14,6 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.session.CategoriaFacade;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Orden;
 
 /**
@@ -59,8 +60,8 @@ public class CategoriaBean extends AbstractPageBean<Categoria> {
         limpiarCampos();
         setNav("categoria");
         categoria = new Categoria();
-        setDesde(0);
-        setMax(10);
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
         setValido(true);
         if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
@@ -75,7 +76,7 @@ public class CategoriaBean extends AbstractPageBean<Categoria> {
     @Override
     List filtrar() {
         getFacade().setEntity(categoria);
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
@@ -203,7 +204,7 @@ public class CategoriaBean extends AbstractPageBean<Categoria> {
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
-        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setRango(new Long[]{0L, 10L});
         getFacade().setOrden(new Orden("id", false));
         this.filtrar();
         return getNav();

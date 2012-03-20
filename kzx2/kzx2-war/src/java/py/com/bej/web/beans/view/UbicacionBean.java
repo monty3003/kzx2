@@ -15,6 +15,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Ubicacion;
 import py.com.bej.orm.session.UbicacionFacade;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Orden;
 
 /**
@@ -49,6 +50,8 @@ public class UbicacionBean extends AbstractPageBean<Ubicacion> {
     void limpiarCampos() {
         setModificar(Boolean.FALSE);
         setAgregar(Boolean.FALSE);
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
         this.id = null;
         this.descripcion = null;
     }
@@ -58,8 +61,6 @@ public class UbicacionBean extends AbstractPageBean<Ubicacion> {
         limpiarCampos();
         ubicacion = new Ubicacion();
         setNav("ubicacion");
-        setDesde(0);
-        setMax(10);
         setValido(true);
         if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
@@ -74,7 +75,7 @@ public class UbicacionBean extends AbstractPageBean<Ubicacion> {
     @Override
     List filtrar() {
         getFacade().setEntity(ubicacion);
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
@@ -190,7 +191,7 @@ public class UbicacionBean extends AbstractPageBean<Ubicacion> {
         getFacade().setContador(null);
         getFacade().setUltimo(null);
         this.setValido((Boolean) true);
-        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         getFacade().setOrden(new Orden("id", false));
         this.filtrar();
         return getNav();

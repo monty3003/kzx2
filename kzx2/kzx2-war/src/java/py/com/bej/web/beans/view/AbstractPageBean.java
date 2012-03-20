@@ -22,11 +22,11 @@ import py.com.bej.orm.utils.ConfiguracionEnum;
 public abstract class AbstractPageBean<T extends WithId> implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    public static String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
-    public static String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
-    private Integer desde = Integer.parseInt(ConfiguracionEnum.PAG_DESDE.getSymbol());
-    private Integer max = Integer.parseInt(ConfiguracionEnum.PAG_MAX.getSymbol());
-    private Integer total;
+    private String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
+    private String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
+    private Long desde = Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol());
+    private Long max = Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol());
+    private Long total;
     private String nav;
     private Boolean valido;
     private DateFormat formatFechaHora;
@@ -75,42 +75,42 @@ public abstract class AbstractPageBean<T extends WithId> implements Serializable
     /**
      * @return the desde
      */
-    public Integer getDesde() {
+    public Long getDesde() {
         return desde;
     }
 
     /**
      * @param desde the desde to set
      */
-    public void setDesde(Integer desde) {
+    public void setDesde(Long desde) {
         this.desde = desde;
     }
 
     /**
      * @return the max
      */
-    public Integer getMax() {
+    public Long getMax() {
         return max;
     }
 
     /**
      * @param max the max to set
      */
-    public void setMax(Integer max) {
+    public void setMax(Long max) {
         this.max = max;
     }
 
     /**
      * @return the total
      */
-    public Integer getTotal() {
+    public Long getTotal() {
         return total;
     }
 
     /**
      * @param total the total to set
      */
-    public void setTotal(Integer total) {
+    public void setTotal(Long total) {
         this.total = total;
     }
 
@@ -238,5 +238,13 @@ public abstract class AbstractPageBean<T extends WithId> implements Serializable
      */
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public String getMonedaPattern() {
+        return monedaPattern;
+    }
+
+    public String getNumberPattern() {
+        return numberPattern;
     }
 }

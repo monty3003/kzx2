@@ -45,7 +45,8 @@ public class SessionBean implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        this.getSesionAbierta().remove(se.getSession().getId());
+        SessionBean.getInstance().getSesionAbierta().remove(se.getSession().getId());
+        se.getSession().invalidate();
         LOGGER.log(Level.INFO, "Se ha destruido la sesion {0} ", se.getSession().getId());
     }
     // Add business logic below. (Right-click in editor and choose
