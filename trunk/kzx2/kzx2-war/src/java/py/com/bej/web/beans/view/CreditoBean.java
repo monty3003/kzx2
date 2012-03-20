@@ -25,6 +25,7 @@ import py.com.bej.orm.session.CreditoFacade;
 import py.com.bej.orm.session.FinanciacionFacade;
 import py.com.bej.orm.session.PagoFacade;
 import py.com.bej.orm.session.TransaccionFacade;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Orden;
 
 /**
@@ -116,8 +117,7 @@ public class CreditoBean extends AbstractPageBean<Credito> {
     @Override
     public String listar() {
         setNav("listacreditos");
-        setDesde(0);
-        setMax(10);
+
         if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
         }
@@ -140,8 +140,7 @@ public class CreditoBean extends AbstractPageBean<Credito> {
     @Override
     List filtrar() {
         facade.setEntity(getCredito());
-
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
@@ -526,6 +525,7 @@ public class CreditoBean extends AbstractPageBean<Credito> {
 
     @Override
     void limpiarCampos() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
     }
 }

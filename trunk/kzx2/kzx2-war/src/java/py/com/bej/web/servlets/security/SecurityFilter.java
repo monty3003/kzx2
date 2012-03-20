@@ -5,7 +5,6 @@
 package py.com.bej.web.servlets.security;
 
 import java.io.IOException;
-import javax.faces.context.FacesContext;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -35,7 +34,7 @@ public class SecurityFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        if (SessionBean.getInstance().getSesionAbierta().containsKey(req.getSession().getId())) {
+        if (!req.getSession().isNew() && SessionBean.getInstance().getSesionAbierta().containsKey(req.getSession().getId())) {
             chain.doFilter(request, response);
         } else {
             new HttpServletResponseWrapper((HttpServletResponse) response).sendRedirect(req.getContextPath());
@@ -44,7 +43,5 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void destroy() {
-        HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getELContext();
-        SessionBean.getInstance().getSesionAbierta().remove(req.getSession().getId());
     }
 }

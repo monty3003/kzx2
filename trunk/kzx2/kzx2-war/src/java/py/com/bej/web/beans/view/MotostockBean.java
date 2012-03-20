@@ -7,10 +7,9 @@ package py.com.bej.web.beans.view;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -19,11 +18,8 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
-import py.com.bej.base.prod.entity.Vmmotostock;
-import py.com.bej.base.prod.session.MotostockProduccionFacade;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Motostock;
-import py.com.bej.orm.entities.Plan;
 import py.com.bej.orm.entities.Transaccion;
 import py.com.bej.orm.entities.Ubicacion;
 import py.com.bej.orm.session.MotoFacade;
@@ -44,9 +40,7 @@ import py.com.bej.web.utils.JsfUtils;
 @ManagedBean
 @SessionScoped
 public class MotostockBean extends AbstractPageBean<Motostock> {
-
-    @EJB
-    private MotostockProduccionFacade motostockProduccionFacade;
+    
     @EJB
     private UbicacionFacade ubicacionFacade;
     @EJB
@@ -71,13 +65,18 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
     //Calculos
     private BigDecimal precioBase;
     private BigDecimal precioContado;
+    private BigDecimal precioCosto;
 
     /** Creates a new instance of MotostockBean */
     public MotostockBean() {
     }
-
+    
     @Override
     void limpiarCampos() {
+        setAgregar(Boolean.FALSE);
+        setModificar(Boolean.FALSE);
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
         this.idFiltro = null;
         this.motoFiltro = null;
         this.chasisFiltro = null;
@@ -85,10 +84,13 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         this.ventaFiltro = null;
         this.ubicacionFiltro = null;
         this.activoFiltro = null;
+        this.precioBase = null;
+        this.precioContado = null;
+        this.precioCosto = null;
     }
-
+    
     public static BigDecimal[] calcularPrecios(BigDecimal costo) {
-        Integer redondeo = Integer.valueOf(ConfiguracionEnum.MONEDA_DECIMALES.getSymbol());
+        Integer redondeo = Integer.valueOf(ConfiguracionEnum.INDICE_REDONDEO.getSymbol());
         BigDecimal multiplicador1 = BigDecimal.valueOf(ParametroEnum.AUMENTO1.getValor());
         BigDecimal multiplicador2 = BigDecimal.valueOf(ParametroEnum.AUMENTO2.getValor());
         BigDecimal resultado;
@@ -101,15 +103,29 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         }
         return res;
     }
-
+    
+    public String asignarPrecioGrupal() {
+        LoginBean.getInstance().setUbicacion("Asignar Precios a un Grupo de Motos");
+        motoFiltro = null;
+        precioCosto = null;
+        precioContado = null;
+        precioBase = null;
+        obtenerListaMoto();
+        return "asignarPrecioGrupal";
+    }
+    
+    public void calcularPrecioGrupal() {
+        BigDecimal[] precios = calcularPrecios(precioCosto);
+        precioBase = precios[0];
+        precioContado = precios[1];
+    }
+    
     @Override
     public String listar() {
         setNav("motostock");
         setAgregar(Boolean.FALSE);
         setModificar(Boolean.FALSE);
         LoginBean.getInstance().setUbicacion("Stock de Motos");
-        setDesde(0);
-        setMax(10);
         if (getFacade().getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
         }
@@ -120,116 +136,55 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         obtenerListas();
         return getNav();
     }
-
+    
     @Override
     List<Motostock> filtrar() {
-        facade.setEntity(new Motostock(idFiltro, new Moto(motoFiltro), chasisFiltro, null, null, precioBase, precioBase, precioContado, null, activoFiltro));
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        Moto moto = (motoFiltro == null || motoFiltro.trim().equals("X")) ? new Moto() : new Moto(motoFiltro);
+        Transaccion compra = (compraFiltro == null || compraFiltro.equals("-1")) ? new Transaccion() : new Transaccion(Integer.valueOf(compraFiltro));
+        Transaccion venta = (ventaFiltro == null || ventaFiltro.equals("-1")) ? new Transaccion() : new Transaccion(Integer.valueOf(ventaFiltro));
+        Ubicacion ubicacion = (ubicacionFiltro == null || ubicacionFiltro.equals("-1")) ? new Ubicacion() : new Ubicacion(Integer.valueOf(ubicacionFiltro));
+        getFacade().setEntity(
+                new Motostock(idFiltro, moto,
+                (chasisFiltro != null && !chasisFiltro.trim().equals("") ? chasisFiltro : null),
+                compra, venta, null, null, null, ubicacion,
+                (activoFiltro != null && activoFiltro.equals('X')) ? null : activoFiltro));
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
-
+    
     @Override
     void obtenerListas() {
         listaMoto = JsfUtils.getSelectItems(getMotoFacade().findAll(), !getModificar());
         listaCompra = JsfUtils.getSelectItems(
                 getTransaccionFacade().findByTransaccion(CategoriaEnum.COMPRA_DESDE.getSymbol(), CategoriaEnum.COMPRA_HASTA.getSymbol()), !getModificar());
         listaUbicacion = JsfUtils.getSelectItems(getUbicacionFacade().findAll(), !getModificar());
+        listaVenta = JsfUtils.getSelectItems(getTransaccionFacade().findByTransaccion(CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol()), !getModificar());
     }
-
-    public String importar() {
-
-        return "importarStock";
-    }
-
-    public String migrarStock() throws Exception {
-        int total = 0;
-        motostockProduccionFacade = new MotostockProduccionFacade();
-        List<Vmmotostock> listaStockProduccion = null;
-        listaStockProduccion = motostockProduccionFacade.findByIdMotoOrdenado();
-        if (listaStockProduccion != null && !listaStockProduccion.isEmpty()) {
-            LOGGER.log(Level.INFO, "Hay {0} motos", listaStockProduccion.size());
-            Random r = new Random(100000000L);
-            int contador = 1;
-            try {
-                for (Vmmotostock vmmotostock : listaStockProduccion) {
-                    if (!vmmotostock.getIdMoto().equals(contador)) {
-                        LOGGER.log(Level.INFO, "Se va a agregar una moto en el lugar {0}", contador);
-                        Motostock m = new Motostock(null, new Moto("HPDLX65R"), String.valueOf(r.nextInt()), String.valueOf(r.nextInt()), new Transaccion(1), null, BigDecimal.valueOf(10), BigDecimal.valueOf(10), BigDecimal.valueOf(10), new Ubicacion(1), new Plan(2), 'N', new Date());
-                        getFacade().create(m);
-                        contador++;
-                    }
-                    LOGGER.log(Level.INFO, "     La moto nro {0}", vmmotostock.getIdMoto());
-                    Motostock mst = new Motostock();
-                    if (vmmotostock.getIdMoto() != null && vmmotostock.getIdMoto() > 0) {
-                        mst.setIdAnterior(vmmotostock.getIdMoto());
-                    } else {
-                        mst.setIdAnterior(9999999);
-                    }
-                    if (vmmotostock.getCodigoMoto() != null && !vmmotostock.getCodigoMoto().trim().equals("")) {
-                        mst.setMoto(getMotoFacade().find(vmmotostock.getCodigoMoto().trim()));
-                    } else {
-                        mst.setMoto(getMotoFacade().find("HPDLX65R"));
-                    }
-                    if (vmmotostock.getNumMotor() != null) {
-                        mst.setMotor(vmmotostock.getNumMotor());
-                    }
-                    if (vmmotostock.getNumChasis() != null) {
-                        mst.setChasis(vmmotostock.getNumChasis());
-                    } else {
-                        mst.setChasis("" + r.nextInt());
-                    }
-                    if (vmmotostock.getUbicacion2() != null && !vmmotostock.getUbicacion2().trim().equals("")) {
-                        if (vmmotostock.getUbicacion2().trim().equalsIgnoreCase("DEPOSITO CTRAL.")) {
-                            mst.setUbicacion(getUbicacionFacade().findByDescripcion("DEPOSITO CENTRAL"));
-                        } else {
-                            mst.setUbicacion(getUbicacionFacade().findByDescripcion(vmmotostock.getUbicacion2().trim()));
-                        }
-                    } else {
-                        mst.setUbicacion(new Ubicacion(1));
-                    }
-                    if (vmmotostock.getNComp() == null) {
-                        mst.setCompra(new Transaccion(1));
-                    } else {
-                        mst.setCompra(getTransaccionFacade().find(vmmotostock.getNComp().getIdCompras()));
-                    }
-                    if (vmmotostock.getCostoGuarani() != null) {
-                        BigDecimal precioCosto = BigDecimal.valueOf(vmmotostock.getCostoGuarani());
-                        if (precioCosto.doubleValue() < 10) {
-                            precioCosto = BigDecimal.valueOf(10);
-                        }
-                        mst.setCosto(precioCosto);
-                        BigDecimal[] precio = MotostockBean.calcularPrecios(mst.getCosto());
-                        mst.setPrecioBase(precio[0]);
-                        mst.setPrecioContado(precio[1]);
-                    } else {
-                        mst.setCosto(BigDecimal.valueOf(10));
-                        mst.setPrecioBase(BigDecimal.valueOf(10));
-                        mst.setPrecioContado(BigDecimal.valueOf(10));
-                    }
-                    mst.setPlan(new Plan(2));
-                    mst.setActivo('S');
-                    mst.setUltimaModificacion(new Date());
-                    getFacade().setEntity(mst);
-                    getFacade().create();
-                    contador++;
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(MotostockBean.class.getName()).log(Level.SEVERE, "Ocurrio una excepcion al intentar migrar un registro del stock", ex);
+    
+    private void obtenerListaMoto() {
+        listaMoto = new ArrayList<SelectItem>();
+        listaMoto.add(new SelectItem("X", "-SELECCIONAR-"));
+        List<Moto> listaMotos = new ArrayList<Moto>();
+        listaMotos = getMotoFacade().findGrupoByModelo();
+        if (!listaMotos.isEmpty()) {
+            for (Moto m : listaMotos) {
+                listaMoto.add(new SelectItem(m.getModelo(), m.getMarca() + " " + m.getModelo()));
             }
         }
-        setInfoMessage(null, "Total de registros importados: " + total);
-        return todos();
     }
-
+    
     @Override
     public String buscar() {
-        Moto moto = motoFiltro == null ? null : new Moto(motoFiltro);
-        Transaccion compra = (compraFiltro == null || compraFiltro.equals("-1")) ? null : new Transaccion(Integer.valueOf(compraFiltro));
-        Transaccion venta = (ventaFiltro == null || ventaFiltro.equals("-1")) ? null : new Transaccion(Integer.valueOf(ventaFiltro));
-        Ubicacion ubicacion = (ubicacionFiltro == null || ubicacionFiltro.equals("-1")) ? null : new Ubicacion(Integer.valueOf(ubicacionFiltro));
+        Moto moto = (motoFiltro == null || motoFiltro.trim().equals("X")) ? new Moto() : new Moto(motoFiltro);
+        Transaccion compra = (compraFiltro == null || compraFiltro.equals("-1")) ? new Transaccion() : new Transaccion(Integer.valueOf(compraFiltro));
+        Transaccion venta = (ventaFiltro == null || ventaFiltro.equals("-1")) ? new Transaccion() : new Transaccion(Integer.valueOf(ventaFiltro));
+        Ubicacion ubicacion = (ubicacionFiltro == null || ubicacionFiltro.equals("-1")) ? new Ubicacion() : new Ubicacion(Integer.valueOf(ubicacionFiltro));
         getFacade().setEntity(
-                new Motostock(idFiltro, moto, chasisFiltro, compra, venta, null, null, null, ubicacion, activoFiltro.equals('X') ? null : activoFiltro));
+                new Motostock(idFiltro, moto,
+                (chasisFiltro != null && !chasisFiltro.trim().equals("") ? chasisFiltro : null),
+                compra, venta, null, null, null, ubicacion,
+                activoFiltro.equals('X') ? null : activoFiltro));
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
@@ -237,7 +192,7 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         }
         return getNav();
     }
-
+    
     @Override
     public String nuevo() {
         setAgregar(Boolean.TRUE);
@@ -246,7 +201,7 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         obtenerListas();
         return "motostock";
     }
-
+    
     @Override
     public String modificar() {
         //recuperar la seleccion
@@ -264,13 +219,13 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
             setAgregar(Boolean.FALSE);
             setModificar(Boolean.TRUE);
             obtenerListas();
-            return "moto";
+            return "motostock";
         } else {
             setErrorMessage(null, facade.sel);
             return null;
         }
     }
-
+    
     @Override
     public String guardar() {
         boolean validado = validar();
@@ -296,46 +251,55 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         }
         return todos();
     }
-
+    
+    public String guardarPrecioGrupal() {
+        int totalAfectado = 0;
+        totalAfectado = getFacade().asignarPrecioGrupal(motoFiltro, precioCosto, precioContado, precioBase);
+        setInfoMessage(null, "Total de motos afectadas con los nuevos precios: " + totalAfectado);
+        return todos();
+        
+    }
+    
     public void buscarModelo() {
         if (motoFiltro != null && !motoFiltro.equals("X")) {
             stock.setMoto(getMotoFacade().find(motoFiltro));
         }
     }
-
+    
     @Override
     public String cancelar() {
         stock = new Motostock();
         getFacade().setEntity(stock);
         return this.listar();
     }
-
+    
     @Override
     public String anterior() {
         setLista(getFacade().anterior());
         return getNav();
     }
-
+    
     @Override
     public String siguiente() {
         setLista(getFacade().siguiente());
         return getNav();
     }
-
+    
     @Override
     public String todos() {
         limpiarCampos();
         setModificar(Boolean.FALSE);
         setAgregar(Boolean.FALSE);
+        obtenerListas();
         stock = new Motostock();
         getFacade().setContador(null);
         getFacade().setUltimo(null);
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         getFacade().setOrden(new Orden("id", false));
         this.filtrar();
         return getNav();
     }
-
+    
     @Override
     boolean validar() {
         setFormatNumero(NumberFormat.getInstance(Locale.US));
@@ -448,90 +412,84 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
     public void setStock(Motostock stock) {
         this.stock = stock;
     }
-
+    
     public Character getActivoFiltro() {
         return activoFiltro;
     }
-
+    
     public void setActivoFiltro(Character activoFiltro) {
         this.activoFiltro = activoFiltro;
     }
-
+    
     public String getChasisFiltro() {
         return chasisFiltro;
     }
-
+    
     public void setChasisFiltro(String chasisFiltro) {
         this.chasisFiltro = chasisFiltro;
     }
-
+    
     public String getCompraFiltro() {
         return compraFiltro;
     }
-
+    
     public void setCompraFiltro(String compraFiltro) {
         this.compraFiltro = compraFiltro;
     }
-
+    
     public Integer getIdFiltro() {
         return idFiltro;
     }
-
+    
     public void setIdFiltro(Integer idFiltro) {
         this.idFiltro = idFiltro;
     }
-
+    
     public String getMotoFiltro() {
         return motoFiltro;
     }
-
+    
     public void setMotoFiltro(String motoFiltro) {
         this.motoFiltro = motoFiltro;
     }
-
+    
     public String getUbicacionFiltro() {
         return ubicacionFiltro;
     }
-
+    
     public void setUbicacionFiltro(String ubicacionFiltro) {
         this.ubicacionFiltro = ubicacionFiltro;
     }
-
+    
     public String getVentaFiltro() {
         return ventaFiltro;
     }
-
+    
     public void setVentaFiltro(String ventaFiltro) {
         this.ventaFiltro = ventaFiltro;
     }
-
-    /**
-     * @return the monedaPattern
-     */
-    public String getMonedaPattern() {
-        return monedaPattern;
-    }
-
-    /**
-     * @return the numberPattern
-     */
-    public String getNumberPattern() {
-        return numberPattern;
-    }
-
+    
     public BigDecimal getPrecioBase() {
         return precioBase;
     }
-
+    
     public void setPrecioBase(BigDecimal precioBase) {
         this.precioBase = precioBase;
     }
-
+    
     public BigDecimal getPrecioContado() {
         return precioContado;
     }
-
+    
     public void setPrecioContado(BigDecimal precioContado) {
         this.precioContado = precioContado;
+    }
+    
+    public BigDecimal getPrecioCosto() {
+        return precioCosto;
+    }
+    
+    public void setPrecioCosto(BigDecimal precioCosto) {
+        this.precioCosto = precioCosto;
     }
 }

@@ -4,7 +4,6 @@
  */
 package py.com.bej.web.beans.view;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -17,10 +16,6 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
-import py.com.bej.base.prod.entity.Clientes;
-import py.com.bej.base.prod.entity.Proveedores;
-import py.com.bej.base.prod.session.ClientesProduccionFacade;
-import py.com.bej.base.prod.session.ProveedoresProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.session.CategoriaFacade;
@@ -40,11 +35,7 @@ import py.com.bej.web.utils.JsfUtils;
 public class PersonaBean extends AbstractPageBean<Persona> {
 
     @EJB
-    private ProveedoresProduccionFacade proveedoresProduccionFacade;
-    @EJB
     private CategoriaFacade categoriaFacade;
-    @EJB
-    private ClientesProduccionFacade clientesProduccionFacade;
     @EJB
     private PersonaFacade facade;
     private Persona persona;
@@ -69,6 +60,8 @@ public class PersonaBean extends AbstractPageBean<Persona> {
     void limpiarCampos() {
         setAgregar(Boolean.FALSE);
         setModificar(Boolean.FALSE);
+        setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
+        setMax(Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol()));
         this.id = null;
         this.fisica = null;
         this.documento = null;
@@ -97,199 +90,11 @@ public class PersonaBean extends AbstractPageBean<Persona> {
         return categoriaFacade;
     }
 
-    public ClientesProduccionFacade getClientesProduccionFacade() {
-        if (this.clientesProduccionFacade == null) {
-            this.clientesProduccionFacade = new ClientesProduccionFacade();
-        }
-        return clientesProduccionFacade;
-    }
-
-    public String importar() {
-
-        return "importarPersona";
-    }
-
-    public String migrarClientes() throws Exception {
-        String res = null;
-        int total = 0;
-        //Produccion
-        clientesProduccionFacade = new ClientesProduccionFacade();
-        List<Clientes> listaClientesEnProduccion = null;
-        //Desarrollo
-        Categoria categoriaProduccion = null;
-        //MIGRAR
-        listaClientesEnProduccion = clientesProduccionFacade.buscarOrdenado();
-        if (!listaClientesEnProduccion.isEmpty()) {
-            Persona p = null;
-            List<Persona> lista = new ArrayList<Persona>();
-            String documentoProduccion = null;
-            String nombreProduccion = null;
-            String direccion1 = null;
-            String telefonoFijo = null;
-            String telefonoMovilProduccion = null;
-            String email = null;
-            Date fechaIngreso;
-            categoriaProduccion = getCategoriaFacade().find(new Integer(CategoriaEnum.CLIENTE_PF.getSymbol()));
-
-            for (Clientes c : listaClientesEnProduccion) {
-                //Omitir propietario
-                if (c.getClientesPK().getCedulaRuc().trim().equals(ConfiguracionEnum.PROPIETARIO.getSymbol())) {
-                    continue;
-                }
-                //Documento
-                if (c.getClientesPK().getCedulaRuc().trim().length() < 6) {
-                    documentoProduccion = c.getClientesPK().getCedulaRuc().trim() + "99999";
-                } else if (c.getClientesPK().getCedulaRuc().trim().length() > 11) {
-                    documentoProduccion = c.getClientesPK().getCedulaRuc().trim().substring(0, 10);
-                } else {
-                    documentoProduccion = c.getClientesPK().getCedulaRuc().trim();
-                }
-                //Nombre
-                if (c.getNombreApellido() == null) {
-                    nombreProduccion = "Sin Nombre";
-                } else if (c.getNombreApellido().trim().length() < 5) {
-                    nombreProduccion = c.getNombreApellido().trim() + "AAAAA";
-                } else if (c.getNombreApellido().trim().length() > 50) {
-                    nombreProduccion = c.getNombreApellido().trim().substring(0, 49);
-                } else {
-                    nombreProduccion = c.getNombreApellido().trim();
-                }
-                //Direccion
-                if (c.getDireccion() == null) {
-                    direccion1 = "Sin Direccion registrada";
-                } else if (c.getDireccion().trim().length() < 1) {
-                    direccion1 = c.getDireccion().trim() + "A";
-                } else if (c.getDireccion().trim().length() > 50) {
-                    direccion1 = c.getDireccion().trim().substring(0, 49);
-                } else {
-                    direccion1 = c.getDireccion().trim();
-                }
-
-                //Telefono Fijo
-                if (c.getTelefono() == null) {
-                    telefonoFijo = "000000";
-                } else if (c.getTelefono().trim().length() > 11) {
-                    telefonoFijo = c.getTelefono().trim().substring(0, 10);
-                } else {
-                    telefonoFijo = c.getTelefono().trim();
-                }
-                //Telefono Movil
-                if (c.getMovil() == null) {
-                    telefonoMovilProduccion = "000000";
-                } else if (c.getMovil().trim().length() > 13) {
-                    telefonoMovilProduccion = c.getMovil().trim().substring(0, 12);
-                } else {
-                    telefonoMovilProduccion = c.getMovil().trim();
-                }
-                //Email
-                if (c.getEmail() == null) {
-                    email = "mail@mail.com";
-                } else {
-                    email = c.getEmail().trim();
-                }
-                //Fecha de Ingreso
-                if (c.getFechaIngreso() == null) {
-                    fechaIngreso = new Date();
-                } else {
-                    fechaIngreso = c.getFechaIngreso();
-                }
-                p = new Persona(c.getClientesPK().getCodigoCliente(), documentoProduccion, 'S', nombreProduccion, direccion1, null, telefonoFijo,
-                        telefonoMovilProduccion, email, fechaIngreso, documentoProduccion, null, new Date(), 'S', null, "Sr.", 'H', Short.valueOf("0"), 'S', categoriaProduccion, 'S', new Date());
-                LOGGER.log(Level.INFO, "Se va a agregar en la lista el registro con Id {0}", p.getId());
-                lista.add(p);
-                total++;
-            }
-            try {
-                total = getFacade().cargaMasiva(lista);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        res = "Total de registros importados: " + total;
-        return todos();
-    }
-
-    public String migrarProveedores() {
-        //Proveedores
-        int total = 0;
-        List<Persona> lista = null;
-        Categoria categoriaProduccion = null;
-        Persona p;
-        //Produccion
-        proveedoresProduccionFacade = new ProveedoresProduccionFacade();
-        List<Proveedores> listaProveedores = new ArrayList<Proveedores>();
-        //Desarrollo
-        String codProveedorProduccion = null;
-        String tratamientoProveedorProduccion = null;
-        String nombreProveedorProduccion = null;
-        String direccion1ProveedorProduccion = null;
-        String telefonoProveedorProduccion = null;
-        String emailProveedorProduccion = null;
-        lista = new ArrayList<Persona>();
-        categoriaProduccion = getCategoriaFacade().find(new Integer(CategoriaEnum.PROVEEDOR.getSymbol()));
-        //Buscar
-        listaProveedores = proveedoresProduccionFacade.findAll();
-        if (!listaProveedores.isEmpty()) {
-            for (Proveedores pr : listaProveedores) {
-                if (pr.getCodProveedor().trim().equals("ALEA634530T")) {
-                    codProveedorProduccion = "80002740-0";
-                    tratamientoProveedorProduccion = "S.A.";
-                    nombreProveedorProduccion = "ALEX S.A.";
-                    direccion1ProveedorProduccion = "America y Calle 2 Bo. Aeropuerto - Luque";
-                    telefonoProveedorProduccion = "021 645900";
-                    emailProveedorProduccion = "alexa@alexsa.com.py";
-                } else if (pr.getCodProveedor().trim().equals("CHAA9583400")) {
-                    codProveedorProduccion = "80013744-2";
-                    tratamientoProveedorProduccion = "S.A.E.C.A";
-                    nombreProveedorProduccion = "CHACOMER S.A.E.C.A.";
-                    direccion1ProveedorProduccion = "Av. Eusebio Ayala 3321 c/ Av. Rca. Argentina - Asuncion";
-                    telefonoProveedorProduccion = "021 5180000";
-                    emailProveedorProduccion = "chacomer@chacomer.com.py";
-                } else if (pr.getCodProveedor().trim().equals("MFEB998270M")) {
-                    codProveedorProduccion = "80020496-4";
-                    tratamientoProveedorProduccion = "S.A.C.I.";
-                    nombreProveedorProduccion = "Metalurgica Fernandez S.A.C.I.";
-                    direccion1ProveedorProduccion = "Ruta 1 Km. 16,5 - Capiata";
-                    telefonoProveedorProduccion = "208074";
-                    emailProveedorProduccion = "mail@mail.com";
-                } else if (pr.getCodProveedor().trim().equals("REIB796460N")) {
-                    codProveedorProduccion = "80001307-7";
-                    tratamientoProveedorProduccion = "S.R.L.";
-                    nombreProveedorProduccion = "Reimpex S.R.L.";
-                    direccion1ProveedorProduccion = "RI 4 Curupayty Nº 268 c/ Av. Boggiani - Asuncion";
-                    telefonoProveedorProduccion = "021 602460";
-                    emailProveedorProduccion = "mail@mail.com";
-                } else {
-                    codProveedorProduccion = pr.getCodProveedor().trim();
-                    tratamientoProveedorProduccion = "S.A.";
-                    nombreProveedorProduccion = pr.getNombre().trim();
-                    direccion1ProveedorProduccion = pr.getDireccion().trim();
-                    telefonoProveedorProduccion = pr.getTelefono().trim();
-                    emailProveedorProduccion = "mail@mail.com";
-                }
-                p = new Persona(0, codProveedorProduccion, 'N', nombreProveedorProduccion, direccion1ProveedorProduccion, null, telefonoProveedorProduccion,
-                        null, emailProveedorProduccion, new Date(), codProveedorProduccion, null, new Date(), 'X', null, tratamientoProveedorProduccion, null, null, 'S', categoriaProduccion, 'S', new Date());
-                LOGGER.log(Level.INFO, "Se va a agregar en la lista el proveedor con documento {0}", p.getDocumento());
-                lista.add(p);
-            }
-            try {
-                total = getFacade().cargaMasiva(lista);
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, ex.getMessage());
-            }
-        }
-        setInfoMessage(null, "Total de registros importados: " + total);
-
-        return todos();
-    }
-
     @Override
     public String listar() {
         limpiarCampos();
         setNav("persona");
         LoginBean.getInstance().setUbicacion("Personas");
-        setDesde(0);
-        setMax(10);
         if (facade.getOrden() == null) {
             getFacade().setOrden(new Orden("id", false));
         }
@@ -303,7 +108,7 @@ public class PersonaBean extends AbstractPageBean<Persona> {
     @Override
     List filtrar() {
         getFacade().setEntity(new Persona(documento, fisica, nombre, direccion, telefonoMovil, new Categoria(categoria)));
-        getFacade().setRango(new Integer[]{getDesde(), getMax()});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         setLista(getFacade().findRange());
         return getLista();
     }
@@ -424,11 +229,9 @@ public class PersonaBean extends AbstractPageBean<Persona> {
         getFacade().setEntity(persona);
         getFacade().setContador(null);
         getFacade().setUltimo(null);
-        getFacade().setRango(new Integer[]{0, 10});
+        getFacade().setRango(new Long[]{getDesde(), getMax()});
         getFacade().setOrden(new Orden("id", false));
         this.setValido((Boolean) true);
-        getFacade().setEntity(getPersona());
-        getFacade().setRango(new Integer[]{0, 10});
         this.filtrar();
         return getNav();
     }

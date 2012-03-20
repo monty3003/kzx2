@@ -6,6 +6,7 @@ package py.com.bej.web.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.faces.model.SelectItem;
 import py.com.bej.orm.interfaces.WithId;
 
@@ -33,10 +34,7 @@ public class JsfUtils {
                 }
             }
             for (WithId x : entities) {
-                if (x.getActivo() == null) {
-                    int xx = 0;
-                }
-                if (x.getActivo().equals('S')) {
+                if (x.getActivo() != null && x.getActivo().equals('S')) {
                     items.add(new SelectItem(x.getId(), x.getlabel()));
                 }
             }
