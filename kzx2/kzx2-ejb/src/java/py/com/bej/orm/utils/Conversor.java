@@ -5,6 +5,8 @@
 package py.com.bej.orm.utils;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -58,5 +60,10 @@ public class Conversor {
         } finally {
             return result;
         }
+    }
+
+    public static String numberToStringPattern(Object number) {
+        NumberFormat nf = new DecimalFormat(ConfiguracionEnum.MONEDA_PATTERN.getSymbol());
+        return nf.format(number);
     }
 }

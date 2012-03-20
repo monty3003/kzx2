@@ -16,8 +16,10 @@ public enum ConfiguracionEnum {
     DATE_PATTERN_MES("MM/yyyy", "Formato de Fecha solo mes y año"),
     DATETIME_PATTERN("dd/MM/yyyy - HH:mm:s", "Formato de Fecha y Hora"),
     MONEDA_DECIMALES("0", "Lugares decimales de la moneda"),
+    INDICE_REDONDEO("-3", "Indice de Redondeo en calculos de precios"),
     MONEDA_PATTERN("#,###,##0", "Formato de moneda local"),
-    NUMBER_PATTERN("#,###,##0.00", "Formato de numero en general");
+    NUMBER_PATTERN("#,###,##0.00", "Formato de numero en general"),
+    PROPIETARIO("1275758","Documento del propietario del negocio");
     private String symbol;
     private String label;
 
