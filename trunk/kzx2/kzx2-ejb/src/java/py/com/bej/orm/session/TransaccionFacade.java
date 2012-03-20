@@ -4,9 +4,10 @@
  */
 package py.com.bej.orm.session;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -14,7 +15,8 @@ import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import py.com.bej.orm.entities.Motostock;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Transaccion;
 
 /**
@@ -25,12 +27,36 @@ import py.com.bej.orm.entities.Transaccion;
 public class TransaccionFacade extends AbstractFacade<Transaccion> {
 
     @EJB
+    private PlanFacade planFacade;
+    @EJB
     private CreditoFacade creditoFacade;
     @EJB
     private MotostockFacade motostockFacade;
+    private final static Logger LOGGER = Logger.getLogger(MotostockFacade.class.getName());
 
     public TransaccionFacade() {
         super(Transaccion.class);
+    }
+
+    public PlanFacade getPlanFacade() {
+        if (planFacade == null) {
+            planFacade = new PlanFacade();
+        }
+        return planFacade;
+    }
+
+    public CreditoFacade getCreditoFacade() {
+        if (creditoFacade == null) {
+            creditoFacade = new CreditoFacade();
+        }
+        return creditoFacade;
+    }
+
+    public MotostockFacade getMotostockFacade() {
+        if (motostockFacade == null) {
+            motostockFacade = new MotostockFacade();
+        }
+        return motostockFacade;
     }
 
     @Override
@@ -57,18 +83,29 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
                 } else {
                     cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("nombre")));
                 }
-            } else if (getOrden().getAsc()) {
-                cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
+            } else if (getOrden().getColumna().equals("comprador")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("nombre")));
+                } else {
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("nombre")));
+                }
             } else {
-                cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
+                } else {
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
+                }
             }
         }
         TypedQuery<Transaccion> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("id")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
     }
@@ -77,7 +114,7 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
     public List<Transaccion> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
-            getRango()[0] = 0;
+            getRango()[0] = 0L;
         }
         return findRange();
     }
@@ -95,33 +132,45 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
     public void guardar() {
         try {
             getEm().merge(getEntity());
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
         }
     }
 
-    public int guardarCompra(List<Motostock> motos) {
-        int res = 0;
+    public void guardarVenta(Transaccion t) {
+        //Verificar si el cliente esta actualizado
+        t.getComprador().setUltimaModificacion(new Date());
         try {
-            motostockFacade = new MotostockFacade();
-            getEm().persist(getEntity());
-            getEm().flush();
-            for (Motostock m : motos) {
-                m.setPrecioVenta(BigDecimal.ZERO);
-                m.setCompra(getEntity());
-                motostockFacade.persist(m);
-                res++;
+            if (t.getComprador().getId() != null) {
+                getEm().merge(t.getComprador());
+            } else {
+                t.getComprador().setActivo('S');
+                t.getComprador().setHabilitado('S');
+                t.getComprador().setFechaIngreso(new Date());
+                getEm().persist(t.getComprador());
+
             }
-            getEm().flush();
-            if (getEntity().getCodigo().getId().equals(32)) {
-                creditoFacade = new CreditoFacade();
-                creditoFacade.abrirCredito(getEntity());
+            getEm().persist(t);
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
             }
-        } catch (Exception e) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", e);
-            throw new RuntimeException(e);
-        } finally {
-            return res;
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
         }
     }
 
@@ -147,7 +196,8 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
     public List<Transaccion> findByTransaccion(Integer inicio, Integer fin) {
         List<Transaccion> res = new ArrayList<Transaccion>();
         inicio();
-        cq.where(cb.between(r.get("codigo").get("id"), inicio, fin));
+        cq.where(cb.greaterThanOrEqualTo(r.get("codigo").get("id"), inicio));
+        cq.where(cb.and(cb.lessThanOrEqualTo(r.get("codigo").get("id"), fin)));
         cq.orderBy(cb.desc(r.get("id")));
         TypedQuery<Transaccion> q = getEm().createQuery(cq);
         res = q.getResultList();
@@ -200,8 +250,8 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
     }
 
     @Override
-    public TypedQuery<Transaccion> setearConsulta() {
-        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+    public TypedQuery setearConsulta() {
+        TypedQuery q = getEm().createQuery(cq);
         if (getEntity().getId() != null) {
             q.setParameter("id", getEntity().getId());
         }
@@ -227,5 +277,17 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
             q.setParameter("saldado", getEntity().getSaldado());
         }
         return q;
+    }
+
+    public Transaccion findByNumeroAnterior(Integer idAnterior, Integer categoriaDesde, Integer categoriaHasta) throws Exception {
+        Transaccion res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("idAnterior"), idAnterior),
+                cb.greaterThanOrEqualTo(r.get("codigo").get("id"), categoriaDesde),
+                cb.lessThanOrEqualTo(r.get("codigo").get("id"), categoriaHasta)));
+        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+        res = q.getSingleResult();
+        return res;
     }
 }

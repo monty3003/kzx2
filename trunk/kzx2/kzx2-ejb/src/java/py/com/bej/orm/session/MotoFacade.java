@@ -55,10 +55,13 @@ public class MotoFacade extends AbstractFacade<Moto> {
         }
         TypedQuery<Moto> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("codigo")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setDesde(getRango()[0]);
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
@@ -68,7 +71,7 @@ public class MotoFacade extends AbstractFacade<Moto> {
     public List<Moto> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
-            getRango()[0] = 0;
+            getRango()[0] = 0L;
         }
         return findRange();
     }
@@ -134,8 +137,8 @@ public class MotoFacade extends AbstractFacade<Moto> {
     }
 
     @Override
-    public TypedQuery<Moto> setearConsulta() {
-        TypedQuery<Moto> q = getEm().createQuery(cq);
+    public TypedQuery setearConsulta() {
+        TypedQuery q = getEm().createQuery(cq);
         if (getEntity().getCodigo() != null) {
             q.setParameter("codigo", getEntity().getCodigo());
         }
@@ -152,11 +155,27 @@ public class MotoFacade extends AbstractFacade<Moto> {
             q.setParameter("color", getEntity().getColor());
         }
         if (getEntity().getFabricante() != null) {
-            q.setParameter("fabricante", getEntity().getFabricante().getId());
+            q.setParameter("fabricante.id", getEntity().getFabricante().getId());
         }
         if (getEntity().getCategoria() != null) {
-            q.setParameter("categoria", getEntity().getCategoria().getId());
+            q.setParameter("categoria.id", getEntity().getCategoria().getId());
         }
         return q;
+    }
+
+    public List<Moto> findGrupoByModelo() {
+        List<Moto> res = null;
+        List<Object[]> resultado = getEm().createQuery("select m.codigo,m.marca,m.modelo,m.activo,count(m.codigo) from Moto m where m.activo = 'S' group by m.modelo order by m.marca desc, m.modelo asc").getResultList();
+        if (!resultado.isEmpty()) {
+            res = new ArrayList<Moto>();
+            Moto m;
+            for (Object[] o : resultado) {
+                m = new Moto(String.valueOf(o[0]), null, String.valueOf(o[1]), String.valueOf(o[2]), null, null, null);
+                Character activo = (Character) o[3];
+                m.setActivo(activo);
+                res.add(m);
+            }
+        }
+        return res;
     }
 }

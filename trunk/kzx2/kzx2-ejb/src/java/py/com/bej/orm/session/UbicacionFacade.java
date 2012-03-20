@@ -41,10 +41,13 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
         }
         TypedQuery<Ubicacion> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("id")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong(""+q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
     }
@@ -53,7 +56,7 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     public List<Ubicacion> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
-            getRango()[0] = 0;
+            getRango()[0] = 0L;
         }
         return findRange();
     }
@@ -93,7 +96,7 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     }
 
     @Override
-    public TypedQuery<Ubicacion> setearConsulta() {
+    public TypedQuery setearConsulta() {
         TypedQuery<Ubicacion> q = getEm().createQuery(cq);
         if (getEntity().getId() != null) {
             q.setParameter("id", getEntity().getId());
@@ -105,6 +108,13 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
     }
 
     public Ubicacion findByDescripcion(String descripcion) throws Exception {
-        return (Ubicacion) getEm().createQuery("select u from Ubicacion u where u.descripcion =?").setParameter(1, descripcion).getSingleResult();
+        Ubicacion res = null;
+        inicio();
+        if (descripcion != null) {
+            cq.select(cq.from(getEntityClass())).where(cb.like(cb.lower(
+                    r.get("descripcion")), descripcion.toLowerCase()));
+            res = (Ubicacion) getEm().createQuery(cq).getResultList().get(0);
+        }
+        return res;
     }
 }

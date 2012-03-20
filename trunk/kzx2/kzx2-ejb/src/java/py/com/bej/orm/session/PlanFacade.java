@@ -7,24 +7,26 @@ package py.com.bej.orm.session;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.ejb.LocalBean;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
-import py.com.bej.orm.entities.Factura;
+import py.com.bej.orm.entities.Plan;
 
 /**
  *
  * @author Diego_M
  */
 @Stateless
-public class FacturaFacade extends AbstractFacade<Factura> {
+@LocalBean
+public class PlanFacade extends AbstractFacade<Plan> {
 
-    public FacturaFacade() {
-        super(Factura.class);
+    public PlanFacade() {
+        super(Plan.class);
     }
 
     @Override
-    public List<Factura> findRange() {
+    public List<Plan> findRange() {
         inicio();
         List<Predicate> criteria = predicarCriteria();
         if (!criteria.isEmpty()) {
@@ -41,18 +43,20 @@ public class FacturaFacade extends AbstractFacade<Factura> {
                 } else {
                     cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
-            } else if (getOrden().getAsc()) {
-                cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
             } else {
-                cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
+                } else {
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna())));
+                }
             }
         }
-        TypedQuery<Factura> q = setearConsulta();
+        TypedQuery<Plan> q = setearConsulta();
         if (getContador() == null) {
             cq.select(cq.from(getEntityClass()));
             cq.select(cb.count(r.get("id")));
             TypedQuery<Integer> q1 = setearConsulta();
-            setContador(Long.parseLong(""+q1.getSingleResult()));
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
         q.setMaxResults(getRango()[1].intValue());
         q.setFirstResult(getRango()[0].intValue());
@@ -62,7 +66,7 @@ public class FacturaFacade extends AbstractFacade<Factura> {
     }
 
     @Override
-    public List<Factura> anterior() {
+    public List<Plan> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
             getRango()[0] = 0L;
@@ -71,7 +75,7 @@ public class FacturaFacade extends AbstractFacade<Factura> {
     }
 
     @Override
-    public List<Factura> siguiente() {
+    public List<Plan> siguiente() {
         getRango()[0] += getRango()[1];
         if (getRango()[0] > getContador()) {
             getRango()[0] = getContador() - 1;
@@ -91,37 +95,46 @@ public class FacturaFacade extends AbstractFacade<Factura> {
     @Override
     public List<Predicate> predicarCriteria() {
         List<Predicate> criteria = new ArrayList<Predicate>();
-        if (getEntity().getNumero() != null) {
-            criteria.add(cb.like(cb.lower(
-                    r.get("numero")), "%"
-                    + getEntity().getNumero().toLowerCase() + "%"));
-        }
-        if (getEntity().getSaldado() != ' ') {
-            ParameterExpression<Character> p =
-                    cb.parameter(Character.class, "saldado");
-            criteria.add(cb.equal(r.get("saldado"), p));
+        if (getEntity().getId() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "id");
+            criteria.add(cb.equal(r.get("id"), p));
         }
         if (getEntity().getCategoria().getId() != null) {
             ParameterExpression<Integer> p =
-                    cb.parameter(Integer.class, "categoria.id");
+                    cb.parameter(Integer.class, "categoria");
             criteria.add(cb.equal(r.get("categoria").get("id"), p));
         }
-
+        if (getEntity().getNombre() != null) {
+            criteria.add(cb.like(cb.lower(
+                    r.get("nombre")), "%"
+                    + getEntity().getNombre().toLowerCase() + "%"));
+        }
+        if (getEntity().getActivo() != null) {
+            ParameterExpression<Integer> p =
+                    cb.parameter(Integer.class, "activo");
+            criteria.add(cb.equal(r.get("activo"), p));
+        }
         return criteria;
     }
 
     @Override
     public TypedQuery setearConsulta() {
         TypedQuery q = getEm().createQuery(cq);
-        if (getEntity().getNumero() != null) {
-            q.setParameter("numero", getEntity().getNumero());
+        if (getEntity().getId() != null) {
+            q.setParameter("id", getEntity().getId());
         }
-        if (getEntity().getSaldado() != null) {
-            q.setParameter("saldado", getEntity().getSaldado());
-        }
-        if (getEntity().getCategoria() != null) {
+        if (getEntity().getCategoria().getId() != null) {
             q.setParameter("categoria", getEntity().getCategoria().getId());
+        }
+        if (getEntity().getNombre() != null) {
+            q.setParameter("nombre", getEntity().getNombre());
+        }
+        if (getEntity().getActivo() != null) {
+            q.setParameter("activo", getEntity().getActivo());
         }
         return q;
     }
+    // Add business logic below. (Right-click in editor and choose
+    // "Insert Code > Add Business Method")
 }

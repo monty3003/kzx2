@@ -6,42 +6,35 @@ package py.com.bej.orm.session;
 
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.ejb.LocalBean;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.Predicate;
-import py.com.bej.orm.entities.Pago;
+import py.com.bej.orm.entities.Rol;
 
 /**
  *
- * @author diego
+ * @author Diego_M
  */
 @Stateless
-public class PagoFacade extends AbstractFacade<Pago> {
+@LocalBean
+public class RolFacade extends AbstractFacade<Rol> {
 
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-
-    protected EntityManager getEntityManager() {
-        return em;
-    }
-
-    public PagoFacade() {
-        super(Pago.class);
+    public RolFacade() {
+        super(Rol.class);
     }
 
     @Override
-    public List<Pago> findRange() {
+    public List<Rol> findRange() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public List<Pago> anterior() {
+    public List<Rol> anterior() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public List<Pago> siguiente() {
+    public List<Rol> siguiente() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -56,7 +49,9 @@ public class PagoFacade extends AbstractFacade<Pago> {
     }
 
     @Override
-    public TypedQuery<Pago> setearConsulta() {
+    public TypedQuery<Rol> setearConsulta() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    // Add business logic below. (Right-click in editor and choose
+    // "Insert Code > Add Business Method")
 }
