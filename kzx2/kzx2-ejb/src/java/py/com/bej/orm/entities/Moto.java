@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
@@ -33,40 +31,33 @@ import py.com.bej.orm.interfaces.WithId;
 public class Moto extends WithId<String> {
 
     @Id
-    @Basic(optional = false)
-    @Column(name = "codigo", nullable = false, length = 14)
+    @Column(name = "codigo", nullable = false, length = 20)
     @NotNull(message = "Codigo: Ingrese un valor")
     @Size(min = 6, max = 20, message = "Codigo: Ingrese un valor entre 6 a 20 caracteres")
     private String codigo;
     @NotNull(message = "Codigo Fabrica: Ingrese un valor")
     @Size(min = 6, max = 20, message = "Codigo Fabrica: Ingrese de 6 a 20 caracteres")
-    @Basic(optional = false)
     @Column(name = "codigo_fabrica", nullable = false, length = 20)
     private String codigoFabrica;
-    @Basic(optional = false)
     @NotNull(message = "Marca: Ingrese un valor")
     @Size(min = 6, max = 20, message = "Marca: Ingrese de 6 a 20 caracteres")
     @Column(name = "marca", nullable = false, length = 20)
     private String marca;
-    @Basic(optional = false)
     @NotNull(message = "Modelo: Ingrese un valor")
     @Column(name = "modelo", nullable = false, length = 20)
     private String modelo;
-    @Basic(optional = false)
     @NotNull(message = "Color: Ingrese un valor")
     @Column(name = "color", nullable = false, length = 20)
     private String color;
-    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = true, updatable = false, nullable = false)
     @ManyToOne(optional = false)
     private Persona fabricante;
-    @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoria;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "moto", cascade = CascadeType.ALL)

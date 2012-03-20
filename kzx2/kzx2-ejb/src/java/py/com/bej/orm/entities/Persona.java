@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,8 +19,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,8 +31,7 @@ import py.com.bej.orm.utils.Conversor;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Persona", catalog = "bej", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"documento"})})
+@Table(name = "Persona", catalog = "bej")
 @XmlRootElement
 public class Persona extends WithId<Integer> {
 
@@ -43,23 +39,17 @@ public class Persona extends WithId<Integer> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @NotNull(message = "Ingrese un valor")
     @Size(min = 6, max = 11, message = "Ingrese un valor entre 6 y 11 caracteres")
-    @Basic(optional = false)
     @Column(name = "documento", nullable = false, unique = true, length = 11)
     private String documento;
-    @Basic(optional = false)
     @Column(name = "fisica", nullable = false)
     private Character fisica;
-    @NotNull(message = "Ingrese un valor")
     @Size(min = 5, max = 50, message = "Ingrese un nombre valido")
-    @Basic(optional = false)
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
-    @Basic(optional = false)
-    @Column(name = "direccion1", nullable = false, length = 50)
+    @Column(name = "direccion1", nullable = false, length = 100)
     private String direccion1;
-    @Column(name = "direccion2", length = 50)
+    @Column(name = "direccion2", length = 100)
     private String direccion2;
     @Column(name = "telefono_fijo", length = 11)
     private String telefonoFijo;
@@ -68,40 +58,34 @@ public class Persona extends WithId<Integer> {
     @Pattern(regexp = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message = "Ingrese una direccion de email valida")//if the field contains email address consider using this annotation to enforce field validation
     @Column(name = "email", length = 25)
     private String email;
-    @Basic(optional = false)
     @Column(name = "fecha_ingreso", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaIngreso;
-    @Column(name = "ruc", length = 10)
+    @Column(name = "ruc", length = 11)
     private String ruc;
     @Column(name = "contacto", length = 45)
     private String contacto;
     @Column(name = "fecha_nacimiento")
     @Temporal(TemporalType.DATE)
     private Date fechaNacimiento;
-    @Basic(optional = false)
     @Column(name = "estado_civil", nullable = false)
     private Character estadoCivil;
     @Column(name = "profesion", length = 40)
     private String profesion;
-    @Basic(optional = false)
     @Column(name = "tratamiento", nullable = false, length = 15)
     private String tratamiento;
     @Column(name = "sexo")
     private Character sexo;
     @Column(name = "hijos")
     private Short hijos;
-    @Basic(optional = false)
-    @Column(name = "habilitado")
+    @Column(name = "habilitado", nullable = false)
     private Character habilitado;
-    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false, insertable = false, updatable = true)
+    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoria;
     @Column(name = "activo", length = 1, nullable = false)
-    @Basic(optional = false)
     private Character activo;
     @Column(name = "ultimaModificacion", nullable = false)
-    @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "fabricante", cascade = CascadeType.ALL)
@@ -110,6 +94,8 @@ public class Persona extends WithId<Integer> {
     private List<Transaccion> transaccionsVendedor;
     @OneToMany(mappedBy = "comprador", cascade = CascadeType.ALL)
     private List<Transaccion> transaccionsComprador;
+    @OneToMany(mappedBy = "garante", cascade = CascadeType.ALL)
+    private List<Credito> creditos;
     @Transient
     private String fechaIngresoString;
     @Transient
@@ -141,7 +127,7 @@ public class Persona extends WithId<Integer> {
         this.documento = documento;
     }
 
-    public Persona(int id, String documento, Character fisica, String nombre, String direccion1, String direccion2, String telefonoFijo, String telefonoMovil, String email, Date fechaIngreso, String ruc, String contacto, Date fechaNacimiento, Character estadoCivil, String profesion, String tratamiento, Character sexo, Short hijos, Character habilitado, Categoria categoria, Character activo, Date ultimaModificacion) {
+    public Persona(Integer id, String documento, Character fisica, String nombre, String direccion1, String direccion2, String telefonoFijo, String telefonoMovil, String email, Date fechaIngreso, String ruc, String contacto, Date fechaNacimiento, Character estadoCivil, String profesion, String tratamiento, Character sexo, Short hijos, Character habilitado, Categoria categoria, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.documento = documento;
         this.fisica = fisica;
@@ -445,5 +431,19 @@ public class Persona extends WithId<Integer> {
     @Override
     public String getlabel() {
         return this.nombre;
+    }
+
+    /**
+     * @return the creditos
+     */
+    public List<Credito> getCreditos() {
+        return creditos;
+    }
+
+    /**
+     * @param creditos the creditos to set
+     */
+    public void setCreditos(List<Credito> creditos) {
+        this.creditos = creditos;
     }
 }

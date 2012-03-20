@@ -7,11 +7,9 @@ package py.com.bej.orm.entities;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,12 +21,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConfiguracionEnum;
+import py.com.bej.orm.utils.Conversor;
 
 /**
  *
@@ -39,125 +37,115 @@ import py.com.bej.orm.interfaces.WithId;
 @XmlRootElement
 public class Transaccion extends WithId<Integer> {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "codigo", referencedColumnName = "id", insertable = true, updatable = true)
+    @Column(name = "id_anterior", nullable = true)
+    private Integer idAnterior;
+    @JoinColumn(name = "codigo", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Categoria codigo;
-    @JoinColumn(name = "factura", unique = true, referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "factura", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
     @OneToOne(optional = false, cascade = CascadeType.ALL)
     private Factura factura;
-    @NotNull(message = "Ingrese una fecha de operacion")
-    @Past(message = "Ingrese una fecha válida")
-    @Basic(optional = false)
     @Column(name = "fechaOperacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaOperacion;
-    @NotNull(message = "Ingrese una fecha de entrega válida")
-    @Basic(optional = false)
     @Column(name = "fechaEntrega", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaEntrega;
-    @JoinColumn(name = "vendedor", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "vendedor", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Persona vendedor;
-    @JoinColumn(name = "comprador", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "comprador", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Persona comprador;
-    @Basic(optional = false)
     @Column(name = "anulado", nullable = false)
     private Character anulado;
     @Min(value = 0, message = "El Sub Total Exentas es un monto muy bajo")
-    @DecimalMin(value="0.00",message="Ingrese un valor")
     @Column(name = "sub_total_exentas", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalExentas;
     @Min(value = 0, message = "El Sub Total Gravadas 10% es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "sub_total_gravadas_10", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalGravadas10;
     @Min(value = 0, message = "El Sub Total Gravadas 5% es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "sub_total_gravadas_5", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotalGravadas5;
     @Min(value = 0)
-    @Basic(optional = false)
     @Column(name = "neto_sin_iva_5", nullable = false)
     private BigDecimal netoSinIva5;
     @Min(value = 0)
-    @Basic(optional = false)
     @Column(name = "neto_sin_iva_10", nullable = false)
     private BigDecimal netoSinIva10;
-    @Min(value = 1000, message = "El Sub Total es un monto muy bajo")
-    @Basic(optional = false)
+    @Min(value = 0, message = "El Sub Total es un monto muy bajo")
     @Column(name = "sub_total", nullable = false, precision = 10, scale = 2)
     private BigDecimal subTotal;
-    @DecimalMin(value = "0.00", message = "El Sub Total IVA 5% es un monto muy bajo")
+    @Min(value = 0, message = "El Sub Total IVA 5% es un monto muy bajo")
     @Column(name = "total_iva5", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva5;
     @Min(value = 0, message = "El Sub Total IVA 10% es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "total_iva10", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva10;
     @Min(value = 0, message = "El Total IVA es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "total_iva", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalIva;
     @Min(value = 0, message = "El Descuento es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "descuento", nullable = false)
     private Float descuento;
-    @Min(value = 1000, message = "El Total es un monto muy bajo")
-    @Basic(optional = false)
+    @Min(value = 0, message = "El Total es un monto muy bajo")
     @Column(name = "total", nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
     @Min(value = 0, message = "El Sub Total Descuento es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "total_descuento", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalDescuento;
     @Min(value = 0, message = "El Total Pagado es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "total_pagado", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPagado;
     @Min(value = 0, message = "La entrega inicial es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "entrega_inicial", nullable = false, precision = 10, scale = 2)
     private BigDecimal entregaInicial;
     @Min(value = 0, message = "El Nro de cuotas es un numero negativo")
-    @Basic(optional = false)
     @Column(name = "cuotas", nullable = false)
     private short cuotas;
+    @Min(value = 0, message = "El Nro de dias es un numero negativo")
+    @Column(name = "dias_a_primer_venc", nullable = false)
+    private short diasAPrimerVencimiento;
     @Min(value = 0, message = "El monto de cada cuota es un monto muy bajo")
-    @Basic(optional = false)
     @Column(name = "monto_cuota_igual", nullable = false, precision = 10, scale = 2)
     private BigDecimal montoCuotaIgual;
-    @Basic(optional = false)
     @Column(name = "saldado", nullable = false)
     private Character saldado;
     @Min(value = 1, message = "Seleccione por lo menos un item")
-    @Basic(optional = false)
     @Column(name = "cantidad_items", nullable = false)
     private Short cantidadItems;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "fechaCreacion", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaCreacion;
+    @JoinColumn(name = "usuario_creacion", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Usuario usuarioCreacion;
+    @JoinColumn(name = "usuario_modificacion", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Usuario usuarioModificacion;
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<Motostock> motostocksCompra;
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<Motostock> motostocksVenta;
+//    @OneToMany(mappedBy = "transaccion", cascade = CascadeType.PERSIST)
+//    private List<Pago> pagos;
     @Transient
     private String fechaOperacionString;
     @Transient
     private String fechaEntregaString;
     @Transient
     private Categoria codigoMax;
-    @OneToMany(mappedBy = "transaccion", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "transaccion", cascade = CascadeType.PERSIST)
     private List<Credito> creditosTransaccion;
 
     public Transaccion() {
@@ -182,6 +170,16 @@ public class Transaccion extends WithId<Integer> {
 
     public Transaccion(Integer id) {
         this.id = id;
+    }
+
+    public Transaccion(Integer id, Categoria codigo, Factura factura, Persona comprador, Character anulado, Character saldado, Character activo) {
+        this.id = id;
+        this.codigo = codigo;
+        this.factura = factura;
+        this.comprador = comprador;
+        this.saldado = saldado;
+        this.anulado = anulado;
+        this.activo = activo;
     }
 
     public Transaccion(Integer id, Categoria codigo, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, Character anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, Float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, Character saldado, short cantidadItems) {
@@ -210,6 +208,40 @@ public class Transaccion extends WithId<Integer> {
         this.cantidadItems = cantidadItems;
     }
 
+    public Transaccion(Integer idAnterior, Categoria codigo, Factura factura, Date fechaOperacion, Date fechaEntrega, Persona vendedor, Persona comprador, Character anulado, BigDecimal subTotalExentas, BigDecimal subTotalGravadas10, BigDecimal subTotalGravadas5, BigDecimal netoSinIva5, BigDecimal netoSinIva10, BigDecimal subTotal, BigDecimal totalIva5, BigDecimal totalIva10, BigDecimal totalIva, Float descuento, BigDecimal total, BigDecimal totalDescuento, BigDecimal totalPagado, BigDecimal entregaInicial, short cuotas, BigDecimal montoCuotaIgual, Character saldado, Short cantidadItems, Character activo, Date ultimaModificacion, Date fechaCreacion, Usuario usuarioCreacion, Usuario usuarioModificacion) {
+        this.idAnterior = idAnterior;
+        this.codigo = codigo;
+        this.factura = factura;
+        this.fechaOperacion = fechaOperacion;
+        this.fechaEntrega = fechaEntrega;
+        this.vendedor = vendedor;
+        this.comprador = comprador;
+        this.anulado = anulado;
+        this.subTotalExentas = subTotalExentas;
+        this.subTotalGravadas10 = subTotalGravadas10;
+        this.subTotalGravadas5 = subTotalGravadas5;
+        this.netoSinIva5 = netoSinIva5;
+        this.netoSinIva10 = netoSinIva10;
+        this.subTotal = subTotal;
+        this.totalIva5 = totalIva5;
+        this.totalIva10 = totalIva10;
+        this.totalIva = totalIva;
+        this.descuento = descuento;
+        this.total = total;
+        this.totalDescuento = totalDescuento;
+        this.totalPagado = totalPagado;
+        this.entregaInicial = entregaInicial;
+        this.cuotas = cuotas;
+        this.montoCuotaIgual = montoCuotaIgual;
+        this.saldado = saldado;
+        this.cantidadItems = cantidadItems;
+        this.activo = activo;
+        this.ultimaModificacion = ultimaModificacion;
+        this.fechaCreacion = fechaCreacion;
+        this.usuarioCreacion = usuarioCreacion;
+        this.usuarioModificacion = usuarioModificacion;
+    }
+
     @Override
     public Integer getId() {
         return id;
@@ -218,6 +250,14 @@ public class Transaccion extends WithId<Integer> {
     @Override
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getIdAnterior() {
+        return idAnterior;
+    }
+
+    public void setIdAnterior(Integer idAnterior) {
+        this.idAnterior = idAnterior;
     }
 
     public Categoria getCodigo() {
@@ -396,6 +436,30 @@ public class Transaccion extends WithId<Integer> {
         this.cantidadItems = cantidadItems;
     }
 
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Usuario getUsuarioCreacion() {
+        return usuarioCreacion;
+    }
+
+    public void setUsuarioCreacion(Usuario usuarioCreacion) {
+        this.usuarioCreacion = usuarioCreacion;
+    }
+
+    public Usuario getUsuarioModificacion() {
+        return usuarioModificacion;
+    }
+
+    public void setUsuarioModificacion(Usuario usuarioModificacion) {
+        this.usuarioModificacion = usuarioModificacion;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -457,13 +521,16 @@ public class Transaccion extends WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.codigo.getDescripcion() + " " + this.getFactura().getNumero() + " " + this.getFechaOperacionString();
+        return this.getFactura().getId() + " - " + this.codigo.getDescripcion();
     }
 
     /**
      * @return the fechaOperacionString
      */
     public String getFechaOperacionString() {
+        if (fechaOperacionString == null) {
+            fechaOperacionString = Conversor.deDateToString(fechaOperacion, ConfiguracionEnum.DATETIME_PATTERN.getSymbol());
+        }
         return fechaOperacionString;
     }
 
@@ -556,5 +623,20 @@ public class Transaccion extends WithId<Integer> {
      */
     public void setFactura(Factura factura) {
         this.factura = factura;
+    }
+
+    public short getDiasAPrimerVencimiento() {
+        return diasAPrimerVencimiento;
+    }
+
+    public void setDiasAPrimerVencimiento(short diasAPrimerVencimiento) {
+        this.diasAPrimerVencimiento = diasAPrimerVencimiento;
+    }
+
+    public void setCreditosTransaccion(List<Credito> creditosTransaccion) {
+        for (Credito cr : creditosTransaccion) {
+            cr.setTransaccion(this);
+        }
+        this.creditosTransaccion = creditosTransaccion;
     }
 }

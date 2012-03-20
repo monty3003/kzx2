@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,10 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -35,61 +34,80 @@ public class Motostock extends WithId<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "moto", referencedColumnName = "codigo", insertable = true, updatable = true)
+    @Column(name = "id_anterior", nullable = true)
+    private Integer idAnterior;
+    @JoinColumn(name = "moto", referencedColumnName = "codigo", insertable = true, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Moto moto;
     @Column(name = "motor", length = 25)
     private String motor;
     @Size(min = 6, max = 25, message = "Chasis: Ingrese un valor entre 6 y 25 letras")
-    @Basic(optional = false)
     @Column(name = "chasis", nullable = false, length = 25)
     private String chasis;
-    @JoinColumn(name = "compra", referencedColumnName = "id", insertable = true, updatable = true)
+    @JoinColumn(name = "compra", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Transaccion compra;
-    @JoinColumn(name = "venta", referencedColumnName = "id", nullable = true, insertable = false, updatable = false)
-    @ManyToOne(optional = true)
+    @JoinColumn(name = "venta", referencedColumnName = "id", updatable = true, nullable = true)
+    @ManyToOne(optional = true, cascade = CascadeType.MERGE)
     private Transaccion venta;
-    @NotNull(message = "Precio de Costo: ingrese un valor")
-    @DecimalMin(value = "10.00", message = "Precio: Ingrese un valor positivo")
+    @Min(value = 10, message = "Precio: Ingrese un valor positivo")
     @Column(name = "costo", nullable = false, precision = 10, scale = 2)
     private BigDecimal costo;
-    @Basic(optional = false)
-    @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioVenta;
-    @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = false, updatable = true)
+    @Column(name = "precio_base", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioBase;
+    @Column(name = "precio_contado", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioContado;
+    @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Ubicacion ubicacion;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @JoinColumn(name = "plan", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Plan plan;
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
     @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
 
     public Motostock() {
         this.moto = new Moto();
         this.ubicacion = new Ubicacion();
+        this.compra = new Transaccion();
+        this.plan = new Plan();
     }
 
     public Motostock(Integer id) {
         this.id = id;
     }
 
-    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioVenta, Ubicacion ubicacion, Character activo, Date ultimaModificacion) {
+    public Motostock(Integer id, Moto moto, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Ubicacion ubicacion, Character activo) {
         this.id = id;
+        this.moto = moto;
+        this.chasis = chasis;
+        this.compra = compra;
+        this.venta = venta;
+        this.costo = costo;
+        this.precioBase = precioBase;
+        this.precioContado = precioContado;
+        this.ubicacion = ubicacion;
+        this.activo = activo;
+    }
+
+    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Ubicacion ubicacion, Plan plan, Character activo, Date ultimaModificacion) {
+        this.id = id;
+        this.idAnterior = id;
         this.moto = moto;
         this.motor = motor;
         this.chasis = chasis;
         this.compra = compra;
         this.venta = venta;
         this.costo = costo;
-        this.precioVenta = precioVenta;
+        this.precioBase = precioBase;
+        this.precioContado = precioContado;
         this.ubicacion = ubicacion;
+        this.plan = plan;
         this.activo = activo;
         this.ultimaModificacion = ultimaModificacion;
     }
@@ -102,6 +120,14 @@ public class Motostock extends WithId<Integer> {
     @Override
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getIdAnterior() {
+        return idAnterior;
+    }
+
+    public void setIdAnterior(Integer idAnterior) {
+        this.idAnterior = idAnterior;
     }
 
     public String getMotor() {
@@ -128,12 +154,20 @@ public class Motostock extends WithId<Integer> {
         this.costo = costo;
     }
 
-    public BigDecimal getPrecioVenta() {
-        return precioVenta;
+    public BigDecimal getPrecioBase() {
+        return precioBase;
     }
 
-    public void setPrecioVenta(BigDecimal precioVenta) {
-        this.precioVenta = precioVenta;
+    public void setPrecioBase(BigDecimal precioBase) {
+        this.precioBase = precioBase;
+    }
+
+    public BigDecimal getPrecioContado() {
+        return precioContado;
+    }
+
+    public void setPrecioContado(BigDecimal precioContado) {
+        this.precioContado = precioContado;
     }
 
     public Ubicacion getUbicacion() {
@@ -191,7 +225,7 @@ public class Motostock extends WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.chasis + " " + this.moto.getlabel();
+        return "[" + this.getId() + "] " + this.chasis + " " + this.moto.getlabel();
     }
 
     /**
@@ -234,5 +268,13 @@ public class Motostock extends WithId<Integer> {
      */
     public void setVenta(Transaccion venta) {
         this.venta = venta;
+    }
+
+    public Plan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(Plan plan) {
+        this.plan = plan;
     }
 }

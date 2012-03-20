@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,18 +29,15 @@ import py.com.bej.orm.interfaces.WithId;
 public class Categoria extends WithId<Integer> {
 
     @Id
-    @Basic(optional = false)
     @Column(name = "id", nullable = false)
     private Integer id;
     @Size(max = 50)
     @NotEmpty(message = "Ingrese un valor")
-    @Column(name = "descripcion", length = 50)
+    @Column(name = "descripcion", length = 50, nullable = false)
     private String descripcion;
-    @Column(name = "activo", length = 1)
-    @Basic(optional = false)
+    @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
-    @Column(name = "ultimaModificacion")
-    @Basic(optional = false)
+    @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
