@@ -13,6 +13,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import py.com.bej.orm.entities.Persona;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 
 /**
  *
@@ -23,6 +24,20 @@ public class PersonaFacade extends AbstractFacade<Persona> {
 
     public PersonaFacade() {
         super(Persona.class);
+    }
+
+    public List<Persona> findGarantes(Integer idComprador) {
+        List<Persona> res = null;
+        inicio();
+        if (idComprador != null) {
+            cq.where(cb.notEqual(r.get("id"), idComprador));
+        }
+        cq.where(cb.and(cb.equal(r.get("activo"), 'S'),
+                cb.notEqual(r.get("documento"), ConfiguracionEnum.PROPIETARIO.getSymbol())));
+        cq.orderBy(cb.desc(r.get("id")));
+        TypedQuery<Persona> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
     }
 
     @Override
@@ -51,10 +66,13 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         }
         TypedQuery<Persona> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("id")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setDesde(getRango()[0]);
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
@@ -64,7 +82,7 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     public List<Persona> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 10) {
-            getRango()[0] = 0;
+            getRango()[0] = 0L;
         }
         return findRange();
     }
@@ -108,7 +126,10 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     public List<Persona> findBetween(Integer inicio, Integer fin) {
         List<Persona> res = new ArrayList<Persona>();
         inicio();
-        cq.where(cb.between(r.get("categoria.id"), inicio, fin));
+        cq.where(cb.and(
+                cb.greaterThanOrEqualTo(r.get("categoria").get("id"), inicio),
+                cb.lessThanOrEqualTo(r.get("categoria").get("id"), fin)));
+        cq.orderBy(cb.desc(r.get("id")));
         TypedQuery<Persona> q = getEm().createQuery(cq);
         res = q.getResultList();
         return res;
@@ -207,8 +228,8 @@ public class PersonaFacade extends AbstractFacade<Persona> {
     }
 
     @Override
-    public TypedQuery<Persona> setearConsulta() {
-        TypedQuery<Persona> q = getEm().createQuery(cq);
+    public TypedQuery setearConsulta() {
+        TypedQuery q = getEm().createQuery(cq);
         if (getEntity().getId() != null) {
             q.setParameter("id", getEntity().getId());
         }

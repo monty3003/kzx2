@@ -43,10 +43,13 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
         }
         TypedQuery<Categoria> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("id")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setDesde(getRango()[0]);
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
@@ -55,7 +58,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     public List<Categoria> findBetween(Integer inicio, Integer fin) {
         List<Categoria> res = new ArrayList<Categoria>();
         inicio();
-        cq.where(cb.between(r.get("id"), inicio, fin));
+        cq.where(cb.and(cb.greaterThanOrEqualTo(r.get("id"), inicio), cb.lessThanOrEqualTo(r.get("id"), fin)));
         TypedQuery<Categoria> q = getEm().createQuery(cq);
         res = q.getResultList();
         return new ArrayList<Categoria>(res);
@@ -65,7 +68,7 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     public List<Categoria> anterior() {
         getRango()[0] -= getRango()[1];
         if (getRango()[0] < 0) {
-            getRango()[0] = 0;
+            getRango()[0] = 0L;
         }
         return findRange();
     }
@@ -105,8 +108,8 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
     }
 
     @Override
-    public TypedQuery<Categoria> setearConsulta() {
-        TypedQuery<Categoria> q = getEm().createQuery(cq);
+    public TypedQuery setearConsulta() {
+        TypedQuery q = getEm().createQuery(cq);
         if (getEntity().getId() != null) {
             q.setParameter("id", getEntity().getId());
         }

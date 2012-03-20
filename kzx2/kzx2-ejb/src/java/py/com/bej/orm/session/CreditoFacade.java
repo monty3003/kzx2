@@ -5,16 +5,18 @@
 package py.com.bej.orm.session;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.Predicate;
+import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Credito;
 import py.com.bej.orm.entities.Transaccion;
+import py.com.bej.orm.utils.CategoriaEnum;
 
 /**
  *
@@ -22,20 +24,30 @@ import py.com.bej.orm.entities.Transaccion;
  */
 @Stateless
 public class CreditoFacade extends AbstractFacade<Credito> {
-
+    
+    @EJB
+    private CategoriaFacade categoriaFacade;
     @EJB
     private FinanciacionFacade financiacionFacade;
-    @PersistenceContext(unitName = "kzx2-ejbPU")
-    private EntityManager em;
-
-    protected EntityManager getEntityManager() {
-        return em;
-    }
-
+    
     public CreditoFacade() {
         super(Credito.class);
     }
-
+    
+    public CategoriaFacade getCategoriaFacade() {
+        if (categoriaFacade == null) {
+            categoriaFacade = new CategoriaFacade();
+        }
+        return categoriaFacade;
+    }
+    
+    public FinanciacionFacade getFinanciacionFacade() {
+        if (financiacionFacade == null) {
+            financiacionFacade = new FinanciacionFacade();
+        }
+        return financiacionFacade;
+    }
+    
     @Override
     public List<Credito> findRange() {
         inicio();
@@ -68,60 +80,70 @@ public class CreditoFacade extends AbstractFacade<Credito> {
         }
         TypedQuery<Credito> q = setearConsulta();
         if (getContador() == null) {
-            setContador(q.getResultList().size());
+            cq.select(cq.from(getEntityClass()));
+            cq.select(cb.count(r.get("id")));
+            TypedQuery<Integer> q1 = setearConsulta();
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
-        q.setMaxResults(getRango()[1]);
-        q.setFirstResult(getRango()[0]);
+        q.setMaxResults(getRango()[1].intValue());
+        q.setFirstResult(getRango()[0].intValue());
         setDesde(getRango()[0]);
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
     }
-
+    
     @Override
     public List<Credito> anterior() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public List<Credito> siguiente() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public void guardar() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public List<Predicate> predicarCriteria() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
-    public TypedQuery<Credito> setearConsulta() {
+    public TypedQuery setearConsulta() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public void abrirCredito(Transaccion t, Credito cr) throws Exception {
+        cr.getGarante().setUltimaModificacion(new Date());
+        if (cr.getGarante().getId() != null) {
+            getEm().merge(cr.getGarante());
+        } else {
+            cr.getGarante().setActivo('S');
+            cr.getGarante().setHabilitado('S');
+            getEm().persist(cr.getGarante());
+        }
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(t.getFechaOperacion());
+        cr.setActivo('S');
+        cr.setAmortizacion(t.getCuotas());
+        cal.add(Calendar.DAY_OF_MONTH, t.getDiasAPrimerVencimiento());
+        cr.setFechaInicio(cal.getTime());
+        cr.setEstado(new Categoria(CategoriaEnum.ABIERTO.getSymbol()));
+        cal.add(Calendar.MONTH, cr.getAmortizacion());
+        Date fin = cal.getTime();
+        cr.setFechaFin(fin);
+        cr.setTransaccion(t);
+        cr.setTotalInteresesPagado(BigDecimal.ZERO);
+        cr.setTotalAmortizadoPagado(BigDecimal.ZERO);
 
-    protected void abrirCredito(Transaccion t) {
-        CategoriaFacade cat = new CategoriaFacade();
-        Credito c = new Credito();
-        c.setTransaccion(t);
-        c.setAmortizacion(t.getCuotas());
-        c.setTan((float) 0.25);
-        c.setTae(c.getTan() / c.getAmortizacion());
-        c.setCategoria(cat.find(60));
-        c.setEstado(cat.find(0));
-        c.setFechaInicio(t.getFechaOperacion());
-        c.setFechaFin(new Date());
-        c.setSistemaCredito(cat.find(44));
-        c.setCreditoTotal(t.getEntregaInicial().add(t.getMontoCuotaIgual().multiply(new BigDecimal(t.getCuotas()))));
-        c.setCapital(t.getTotalPagado().subtract(t.getEntregaInicial()));
-        c.setTotalInteresesPagado(BigDecimal.ZERO);
-        c.setTotalAmortizadoPagado(BigDecimal.ZERO);
-        setEntity(c);
-        getEm().persist(getEntity());
-        getEm().flush();
-        financiacionFacade = new FinanciacionFacade();
-        financiacionFacade.crearCuotas(getEntity());
+        //Generar Cuotas
+        cr.setFinanciacions(getFinanciacionFacade().crearCuotas(cr));
+        
+        setEntity(cr);
+        create();
     }
 }

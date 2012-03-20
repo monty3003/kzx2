@@ -6,6 +6,9 @@ package py.com.bej.orm.session;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -16,6 +19,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.interfaces.WithId;
 import py.com.bej.orm.utils.Orden;
 
@@ -34,20 +39,21 @@ public abstract class AbstractFacade<T extends WithId> {
     public Root r;
     public EntityType et;
     private Orden orden;
-    private Integer contador;
-    private Integer desde;
-    private Integer ultimo;
-    private Integer[] rango;
+    private Long contador;
+    private Long desde;
+    private Long ultimo;
+    private Long[] rango;
     public String c0 = "No se encontraron coincidencias";
     public String r0 = "No se encontraron coincidencias";
     public String ex1 = "El registro se ha guardado con éxito";
     public String ex2 = "El registro se ha modificado con éxito";
     public String ex3 = "El registro se ha eliminado con éxito";
     public String sel = "Seleccione un registro para modificar";
+    private final static Logger LOGGER = Logger.getLogger(AbstractFacade.class.getName());
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
-        this.orden = new Orden(entityClass.getDeclaredFields()[1].getName(), Boolean.TRUE);
+        this.orden = new Orden(entityClass.getDeclaredFields()[1].getName(), Boolean.FALSE);
     }
 
     protected EntityManager getEm() {
@@ -59,8 +65,21 @@ public abstract class AbstractFacade<T extends WithId> {
     }
 
     public void edit(T entity) {
-        entity.setUltimaModificacion(new Date());
-        getEm().merge(entity);
+        try {
+            entity.setUltimaModificacion(new Date());
+            getEm().merge(entity);
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
     }
 
     public void remove(T entity) {
@@ -87,7 +106,7 @@ public abstract class AbstractFacade<T extends WithId> {
 
     public abstract List<Predicate> predicarCriteria();
 
-    public abstract TypedQuery<T> setearConsulta();
+    public abstract TypedQuery setearConsulta();
 
     /**
      * @return the entityClass
@@ -104,9 +123,62 @@ public abstract class AbstractFacade<T extends WithId> {
     }
 
     public void create() {
-        entity.setActivo('S');
-        entity.setUltimaModificacion(new Date());
-        getEm().persist(entity);
+        try {
+            entity.setActivo('S');
+            entity.setUltimaModificacion(new Date());
+            getEm().persist(entity);
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
+    }
+
+    public void create(T tx) {
+        try {
+            getEm().persist(tx);
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
+    }
+
+    public int cargaMasiva(List<T> lista) throws Exception {
+        int res = 0;
+        try {
+            for (T e : lista) {
+                LOGGER.log(Level.INFO, "Se va a guardar el registro {0}", e.toString());
+                getEm().persist(e);
+                res++;
+            }
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> listaDeErrores = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : listaDeErrores) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
+        return res;
     }
 
     public void inicio() {
@@ -118,56 +190,56 @@ public abstract class AbstractFacade<T extends WithId> {
     /**
      * @return the contador
      */
-    public Integer getContador() {
+    public Long getContador() {
         return contador;
     }
 
     /**
      * @param contador the contador to set
      */
-    public void setContador(Integer contador) {
+    public void setContador(Long contador) {
         this.contador = contador;
     }
 
     /**
      * @return the rango
      */
-    public Integer[] getRango() {
+    public Long[] getRango() {
         return rango;
     }
 
     /**
      * @param rango the rango to set
      */
-    public void setRango(Integer[] rango) {
+    public void setRango(Long[] rango) {
         this.rango = rango;
     }
 
     /**
      * @return the desde
      */
-    public Integer getDesde() {
+    public Long getDesde() {
         return desde;
     }
 
     /**
      * @param desde the desde to set
      */
-    public void setDesde(Integer desde) {
+    public void setDesde(Long desde) {
         this.desde = desde;
     }
 
     /**
      * @return the ultimo
      */
-    public Integer getUltimo() {
+    public Long getUltimo() {
         return ultimo;
     }
 
     /**
      * @param ultimo the ultimo to set
      */
-    public void setUltimo(Integer ultimo) {
+    public void setUltimo(Long ultimo) {
         this.ultimo = ultimo;
     }
 
