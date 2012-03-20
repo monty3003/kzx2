@@ -46,6 +46,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Vmpagomotos.findByGuardado", query = "SELECT v FROM Vmpagomotos v WHERE v.guardado = :guardado"),
     @NamedQuery(name = "Vmpagomotos.findByAnulado", query = "SELECT v FROM Vmpagomotos v WHERE v.anulado = :anulado")})
 public class Vmpagomotos implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -104,6 +105,23 @@ public class Vmpagomotos implements Serializable {
     public Vmpagomotos(Integer numeroRecibo, byte[] sSMATimeStamp) {
         this.numeroRecibo = numeroRecibo;
         this.sSMATimeStamp = sSMATimeStamp;
+    }
+
+    public Vmpagomotos(Integer numeroRecibo, String cedulaRuc, Integer codEmpleado, Date fechaPago, Date hora, String numCuotas, Date ultimopago, Integer montoEntrega, Integer montosaldo, Integer saldomomento, String concepto, Integer guardado, Boolean anulado, Integer idVentas) {
+        this.numeroRecibo = numeroRecibo;
+        this.cedulaRuc = cedulaRuc;
+        this.codEmpleado = codEmpleado;
+        this.fechaPago = fechaPago;
+        this.hora = hora;
+        this.numCuotas = numCuotas;
+        this.ultimopago = ultimopago;
+        this.montoEntrega = montoEntrega;
+        this.montosaldo = montosaldo;
+        this.saldomomento = saldomomento;
+        this.concepto = concepto;
+        this.guardado = guardado;
+        this.anulado = anulado;
+        this.idVentas = new Vmventamotos(idVentas);
     }
 
     public Integer getNumeroRecibo() {
@@ -258,5 +276,4 @@ public class Vmpagomotos implements Serializable {
     public String toString() {
         return "py.com.bej.base.prod.entity.Vmpagomotos[ numeroRecibo=" + numeroRecibo + " ]";
     }
-    
 }

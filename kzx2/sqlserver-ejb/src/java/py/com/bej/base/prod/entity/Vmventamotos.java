@@ -64,13 +64,14 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Vmventamotos.findByFechaEntrega", query = "SELECT v FROM Vmventamotos v WHERE v.fechaEntrega = :fechaEntrega"),
     @NamedQuery(name = "Vmventamotos.findByUbicacion", query = "SELECT v FROM Vmventamotos v WHERE v.ubicacion = :ubicacion")})
 public class Vmventamotos implements Serializable {
-    @Column(name =     "FechaVenta")
+
+    @Column(name = "FechaVenta")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaVenta;
-    @Column(name =     "CompFecha")
+    @Column(name = "CompFecha")
     @Temporal(TemporalType.TIMESTAMP)
     private Date compFecha;
-    @Column(name =     "FechaEntrega")
+    @Column(name = "FechaEntrega")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaEntrega;
     @Basic(optional = false)
@@ -149,6 +150,43 @@ public class Vmventamotos implements Serializable {
     private Vmmotostock idMoto;
 
     public Vmventamotos() {
+    }
+
+    public Vmventamotos(Integer IdVenta, Boolean Anulado, Boolean Cancelado, String Cedula_Ruc, Boolean Chapa, Integer CodigoEmpleado,
+            Date CompFecha, String CompObservacion, Integer CompResfuerzo, Boolean ConCompromiso, Integer EntregaMoto, Boolean Entregado,
+            Date FechaEntrega, Date FechaVenta, Boolean Guardado, Integer IdCodeudor, Integer IdTransaccion, Integer MontoCuotas,
+            String MontoLetras, Integer NumeroCuotas, String Observacion, Integer PrecioContado, Integer PrecioMoto, Integer Refuerzo,
+            Integer SalAcMoto, Integer SaldoMoto, Integer TotalPagos, Integer ubicacion, Integer IdMoto) {
+        this.fechaVenta = FechaVenta;
+        this.compFecha = CompFecha;
+        this.fechaEntrega = FechaEntrega;
+        this.idVenta = IdVenta;
+        this.idTransaccion = IdTransaccion;
+        this.cedulaRuc = Cedula_Ruc;
+        this.codigoEmpleado = CodigoEmpleado;
+        this.plan = 1;
+        this.precioContado = PrecioContado;
+        this.precioMoto = PrecioMoto;
+        this.entregaMoto = EntregaMoto;
+        this.compResfuerzo = CompResfuerzo;
+        this.compObservacion = CompObservacion;
+        this.conCompromiso = ConCompromiso;
+        this.refuerzo = Refuerzo;
+        this.saldoMoto = SaldoMoto;
+        this.numeroCuotas = NumeroCuotas;
+        this.montoCuotas = MontoCuotas;
+        this.totalPagos = TotalPagos;
+        this.salAcMoto = SalAcMoto;
+        this.idCodeudor = IdCodeudor;
+        this.observacion = Observacion;
+        this.guardado = Guardado;
+        this.anulado = Anulado;
+        this.cancelado = Cancelado;
+        this.montoLetras = MontoLetras;
+        this.chapa = Chapa;
+        this.entregado = Entregado;
+        this.ubicacion = ubicacion;
+        this.idMoto = new Vmmotostock(IdMoto);
     }
 
     public Vmventamotos(Integer idVenta) {
@@ -459,5 +497,4 @@ public class Vmventamotos implements Serializable {
     public void setVmpagomotosCollection(Collection<Vmpagomotos> vmpagomotosCollection) {
         this.vmpagomotosCollection = vmpagomotosCollection;
     }
-    
 }
