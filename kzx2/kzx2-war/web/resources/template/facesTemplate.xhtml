@@ -17,9 +17,11 @@
     </h:head>
 
     <h:body onload="javascript:formatInputs(document.forms);">
-        <h:outputStylesheet>
+        <style>
+            .rf-msgs-warn{color: black;}
+            .rf-msgs-inf{color: blue;}
             .rf-msgs-err{color: red;}
-        </h:outputStylesheet>
+        </style>
         <div id="top" style="height: 20px;">
             <ui:insert name="top">Bej Motos</ui:insert>
         </div>
@@ -28,11 +30,12 @@
                 <h:form>
                     <div>
                         <ul class="menu">
+                            <li class="top"><h:commandLink action="main" styleClass="top_link"><span>Inicio</span></h:commandLink></li>
                             <li class="top"><h:commandLink action="#{personaBean.listar}" styleClass="top_link"><span>Personas</span></h:commandLink>
                                 <ul class="sub">
                                     <li><h:commandLink action="#{personaBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{personaBean.listar}" value="Buscar"/></li>
-                                    <li><h:commandLink action="#{personaBean.importar}" value="Importar"/></li>
+                                    <li><h:commandLink action="#{clienteMigraBean.importar}" value="Importar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
@@ -40,7 +43,7 @@
                                 <ul class="sub">
                                     <li><h:commandLink action="#{compraMotosBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{compraMotosBean.listar}" value="Buscar"/></li>
-                                    <li><h:commandLink action="#{compraMotosBean.importar}" value="Importar"/></li>
+                                    <li><h:commandLink action="#{migrarTransaccionesBean.importarCompras()}" value="Importar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
@@ -48,7 +51,7 @@
                                 <ul class="sub">
                                     <li><h:commandLink action="#{ventaMotosBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{ventaMotosBean.listar}" value="Buscar"/></li>
-                                    <li><h:commandLink action="#{ventaMotosBean.importar}" value="Importar"/></li>
+                                    <li><h:commandLink action="#{migrarTransaccionesBean.importarVentas()}" value="Importar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
@@ -56,11 +59,11 @@
                                 <ul class="sub">
                                     <li><h:commandLink action="#{motoBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{motoBean.listar}" value="Buscar"/></li>
-                                    <li><h:commandLink action="#{motoBean.importar}" value="Importar"/></li>
+                                    <li><h:commandLink action="#{motoMigraBean.importar}" value="Importar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
-                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Stock</span></h:commandLink>
+                            <li class="top"><h:commandLink action="#{motostockBean.listar}" styleClass="top_link"><span>Stock</span></h:commandLink>
                                 <ul class="sub">
                                     <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
@@ -68,14 +71,38 @@
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
-                            <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
+                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Créditos</span></h:commandLink>
                                 <ul class="sub">
-                                    <li><a href="#">Nuevo</a></li>
-                                    <li><a href="#">Buscar</a></li>
+                                    <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
                                     <li><a href="#">Importar</a></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
+                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Planes</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{planBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{planBean.listar}" value="Buscar"/></li>
+                                    <li><h:commandLink action="#{asignarPlanBean.consultarPlan()}" value="Consultar"/></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Pagos</span></h:commandLink>
+                                <ul class="sub">
+                                    <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
+                                    <li><a href="#">Importar</a></li>
+                                    <li><a href="#">Imprimir</a></li>
+                                </ul>
+                            </li>
+                            <!--                            <li class="top"><a href="#" class="top_link"><span>Repuestos</span></a>
+                                                            <ul class="sub">
+                                                                <li><a href="#">Nuevo</a></li>
+                                                                <li><a href="#">Buscar</a></li>
+                                                                <li><a href="#">Importar</a></li>
+                                                                <li><a href="#">Imprimir</a></li>
+                                                            </ul>
+                                                        </li>-->
                             <li class="top"><a href="#" class="top_link"><span>Taller</span></a></li>
                             <li class="top"><a href="#" class="top_link"><span>Datos Básicos</span></a>
                                 <ul class="sub">
@@ -85,6 +112,7 @@
                                     <li><a href="#">Buscar</a></li>
                                 </ul>
                             </li>
+                            <li class="top"><h:commandLink action="#{loginBean.logout()}" styleClass="top_link"><span>Salir</span></h:commandLink></li>
                         </ul>
                     </div>
                 </h:form>
@@ -95,7 +123,7 @@
             </ui:insert>
         </div>
         <div id="bottom" style="height: 20px;">
-            Version 0.1.5 Fecha 02/02/2012
+            Version 0.1.6 Fecha 13/03/2012
             <ui:insert name="bottom"></ui:insert>
         </div>
 
