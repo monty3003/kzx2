@@ -82,6 +82,18 @@ public class Vmplanmoto implements Serializable {
         this.sSMATimeStamp = sSMATimeStamp;
     }
 
+    public Vmplanmoto(Integer idPlanMoto, Integer cuotaNumero, Integer montoCuota, Integer montoInteresMensual, Date fechaVencimiento, Date fechaPago, Boolean guardado, Boolean anulado, Integer idVenta) {
+        this.idPlanMoto = idPlanMoto;
+        this.cuotaNumero = cuotaNumero;
+        this.montoCuota = montoCuota;
+        this.montoInteresMensual = montoInteresMensual;
+        this.fechaVencimiento = fechaVencimiento;
+        this.fechaPago = fechaPago;
+        this.guardado = guardado;
+        this.anulado = anulado;
+        this.idVenta = new Vmventamotos(idVenta);
+    }
+
     public Integer getIdPlanMoto() {
         return idPlanMoto;
     }

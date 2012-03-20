@@ -23,8 +23,22 @@ public class VentaMotosProduccionFacade extends AbstractFacade<Vmventamotos> {
         super(Vmventamotos.class);
     }
 
-    public List<Vmventamotos> findByIdCompraOrdenado() {
-        return getEm().createQuery("select c from Vmventamotos c order by c.idVenta asc").getResultList();
+    public List<Vmventamotos> findByIdVentaOrdenado() {
+        return getEm().createQuery("select new py.com.bej.base.prod.entity.Vmventamotos("
+                + " v.idVenta, v.anulado, v.cancelado, v.cedulaRuc, v.chapa, v.codigoEmpleado,"
+                + " v.compFecha, v.compObservacion, v.compResfuerzo, v.conCompromiso, v.entregaMoto, v.entregado,"
+                + " v.fechaEntrega, v.fechaVenta, v.guardado, v.idCodeudor, v.idTransaccion, v.montoCuotas,"
+                + " v.montoLetras, v.numeroCuotas, v.observacion, v.precioContado, v.precioMoto, v.refuerzo,"
+                + " v.salAcMoto, v.saldoMoto, v.totalPagos, v.ubicacion, v.idMoto.idMoto)"
+                + " from Vmventamotos v "
+                + " where v.idMoto.idMoto IS NOT NULL and v.idVenta != 176"
+                + " order by v.idVenta asc").getResultList();
+//        return getEm().createNativeQuery("SELECT IdVenta, Anulado, Cancelado, Cedula_Ruc, Chapa, CodigoEmpleado,"
+//                + " CompFecha, CompObservacion, CompResfuerzo, ConCompromiso, EntregaMoto, Entregado,"
+//                + " FechaEntrega, FechaVenta, Guardado, IdCodeudor, IdTransaccion, MontoCuotas,"
+//                + " MontoLetras, NumeroCuotas, Observacion, PrecioContado, PrecioMoto, Refuerzo,"
+//                + " SSMA_TimeStamp, SalAcMoto, SaldoMoto, TotalPagos, ubicacion, IdMoto"
+//                + " FROM BDBEJ.dbo.VMVENTAMOTOS ORDER BY IdVenta ASC").getResultList();
     }
 
     @Override
