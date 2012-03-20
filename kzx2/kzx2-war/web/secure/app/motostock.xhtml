@@ -20,8 +20,8 @@ and open the template in the editor.
             <ui:define name="content">
                 <h:form id="frm">
                     <h:panelGroup rendered="#{motostockBean.agregar eq true or motostockBean.modificar eq true}">
-                        <h5><h:outputText value="#{loginBean.ubicacion}"/></h5>
                         <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="moto">Moto: </label></div>
@@ -99,6 +99,7 @@ and open the template in the editor.
                     </h:panelGroup>
                     <h:panelGroup rendered="#{motostockBean.agregar eq false and motostockBean.modificar eq false}">
                         <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <table class="busqueda">
                                 <tr>
                                     <td>
@@ -153,7 +154,7 @@ and open the template in the editor.
                                     <thead>
                                         <tr>
                                             <th width="2%"></th>
-                                            <th><p>
+                                            <th width="5%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Nº
                                                         <f:setPropertyActionListener value="id" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
@@ -162,7 +163,7 @@ and open the template in the editor.
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'id'}"/></p></th>
                                             <th><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Moto
-                                                        <f:setPropertyActionListener value="moto.codigo" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="moto" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
@@ -174,21 +175,21 @@ and open the template in the editor.
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'chasis'}"/></p></th>
-                                            <th><p>
+                                            <th width="15%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Compra
-                                                        <f:setPropertyActionListener value="compra.id" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="compra" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                                  rendered="#{motostockBean.facade.orden.columna eq 'compra.id'}"/></p></th>
-                                            <th><p>
+                                                                  rendered="#{motostockBean.facade.orden.columna eq 'compra'}"/></p></th>
+                                            <th width="15%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Venta
-                                                        <f:setPropertyActionListener value="venta.id" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="venta" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
-                                                                  rendered="#{motostockBean.facade.orden.columna eq 'venta.id'}"/></p></th>
-                                            <th width="25%"><p>
+                                                                  rendered="#{motostockBean.facade.orden.columna eq 'venta'}"/></p></th>
+                                            <th width="10%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Precio
                                                         <f:setPropertyActionListener value="precioContado" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
@@ -197,7 +198,7 @@ and open the template in the editor.
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'precioContado'}"/></p></th>
                                             <th><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Ubicación
-                                                        <f:setPropertyActionListener value="ubicacion.descripcion" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="ubicacion" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
@@ -242,7 +243,10 @@ and open the template in the editor.
                                                     </h:panelGroup>
                                                 </td>
                                                 <td><h:outputText value="#{row.ubicacion.descripcion}"/></td>
-                                                <td><h:outputText value="#{row.activo eq 'S'?'SI':'NO'}"/></td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                    <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                </td>
                                             </tr>
                                         </ui:repeat>
                                     </tbody>
@@ -260,6 +264,7 @@ and open the template in the editor.
                             <div class="botonera">
                                 <h:commandButton id="btnNuevo" value="Nuevo" action="#{motostockBean.nuevo}" styleClass="submit"/>
                                 <h:commandButton id="btnModificar" value="Modificar" action="#{motostockBean.modificar}" styleClass="submit" rendered="#{not empty motostockBean.lista }"/>
+                                <h:commandButton id="btnAsignar" value="Asignar Precio" action="#{motostockBean.asignarPrecioGrupal()}" styleClass="submit"/>
                             </div>
                         </fieldset>
                     </h:panelGroup>

@@ -26,19 +26,19 @@
                                     <input id="factura" jsfc="h:inputText" name="factura" value="#{ventaMotosBean.comprobanteFiltro}" maxlength="45"/>
                                 </td>
                                 <td>
-                                    <label for="codigo">Categoria: </label>
-                                    <select id="codigo" name="codigo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.categoriaFiltro}">
-                                        <f:selectItems value="#{ventaMotosBean.listaCategoria}"/>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
                                     <label for="proveedor">Cliente </label>
                                     <select id="cliente" name="cliente" jsfc="h:selectOneMenu" value="#{ventaMotosBean.compradorFiltro}">
                                         <f:selectItems value="#{ventaMotosBean.listaCliente}"/>
                                     </select>
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="codigo">Categoria: </label>
+                                    <select id="codigo" name="codigo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.categoriaFiltro}">
+                                        <f:selectItems value="#{ventaMotosBean.listaCategoria}"/>
+                                    </select>
+                                </td>    
                                 <td>
                                     <label for="saldado">Saldado: </label>
                                     <select id="saldado" name="saldado" jsfc="h:selectOneMenu" value="#{ventaMotosBean.saldadoFiltro}">
@@ -99,7 +99,7 @@
                                         <th width="20%">
                                             <p>
                                                 <h:commandLink action="#{ventaMotosBean.listar}">Comprador
-                                                    <f:setPropertyActionListener value="cliente" target="#{ventaMotosBean.facade.orden.columna}"/>
+                                                    <f:setPropertyActionListener value="comprador" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
                                                 </h:commandLink>
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
@@ -147,12 +147,12 @@
                                             <td><h:outputText value="#{row.id}"/></td>
                                             <td><h:outputText value="#{row.factura.numero}"/></td>
                                             <td><h:outputText value="#{row.codigo.descripcion}"/></td>
-                                            <td><h:outputText value="#{row.vendedor.nombre}"/></td>
+                                            <td><h:outputText value="#{row.comprador.nombre}"/></td>
                                             <td><h:outputText value="#{row.fechaOperacion}">
                                                     <f:convertDateTime pattern="dd/MM/yyyy-HH:mm:s" timeZone="GMT-3"/>
                                                 </h:outputText></td>
                                             <td><h:outputText value="#{row.totalPagado}">
-                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                    <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                 </h:outputText></td>
                                             <td><h:outputText value="#{row.saldado eq 'S'?'Si':'No'}"/></td>
                                             <td><h:outputText value="#{row.anulado eq 'S'?'Si':'No'}"/></td>

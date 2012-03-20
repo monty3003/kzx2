@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Plan</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{planBean.agregar eq true or planBean.modificar eq true}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="categoria">Categoría: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{planBean.plan.categoria.id}">
+                                            <f:selectItems value="#{planBean.listaCategoria}"/>
+                                            <rich:validator/>
+                                        </h:selectOneMenu>&#160;<rich:messages for="frm:categoria"/></div>
+                                </div>
+                                <div class="fila">
+                                    <label for="nombre">Nombre: </label>
+                                    <div class="cont"><h:inputText id="nombre" value="#{planBean.plan.nombre}" size="50"/> &#160;<rich:messages for="frm:nombre"/></div>
+                                </div>
+                                <hr/>
+                                <h3>Entrega Inicial</h3>
+                                <div class="fila">
+                                    <div class="etiq"><label for="porcentajeEntrega">Porcentaje de Entrega Mínima</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="porcentajeEntrega" minValue="0" maxValue="100" value="#{planBean.porcentajeEntregaMinima}"
+                                                                              showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true"> 
+                                            <rich:validator/> 
+                                        </rich:inputNumberSlider>&#160;<rich:messages for="frm:porcentajeEntrega"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="entregaMinima">Entrega Mínima</label></div>
+                                    <div class="cont">
+                                        <h:inputText id="entregaMinima" styleClass="d_num" value="#{planBean.plan.montoEntregaMinimo}">
+                                            <f:ajax event="blur" render="@this"/>
+                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
+                                        </h:inputText>
+                                        &#160;<rich:messages for="frm:entregaMinima"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="entregaMaxima">Entrega Máxima</label></div>
+                                    <div class="cont">
+                                        <h:inputText id="entregaMaxima" styleClass="d_num" value="#{planBean.plan.montoEntregaMaximo}">
+                                            <f:ajax event="blur" render="@this"/>
+                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
+                                        </h:inputText>
+                                        &#160;<rich:messages for="frm:entregaMaxima"/></div>
+                                </div>
+                                <hr/>
+                                <h3>Financiación</h3>
+                                <div class="fila">
+                                    <div class="etiq"><label for="financiacionMinima">Cuota Mínima</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="financiacionMinima" minValue="0" maxValue="25" value="#{planBean.plan.financiacionMinima}"
+                                                                              step="1" showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                          
+                                            <rich:validator/>                    
+                                        </rich:inputNumberSlider>&#160;<rich:messages for="frm:financiacionMinima"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="financiacionMaxima">Cuota Máxima</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="financiacionMaxima" minValue="0" maxValue="25" value="#{planBean.plan.financiacionMaxima}"
+                                                                              step="1" showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:financiacionMaxima"/>
+                                    </div>
+                                </div>
+                                <hr/>
+                                <h3>Interés</h3>
+                                <div class="fila">
+                                    <div class="etiq"><label for="tasaAnual">Tasa Anual</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="tasaAnual" minValue="0" maxValue="100" value="#{planBean.tasaAnual}"
+                                                                              showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:tasaAnual"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="tasaEfectiva">Tasa Efectiva</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="tasaEfectiva" minValue="0" maxValue="100" value="#{planBean.tasaEfectiva}"
+                                                                              showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:tasaEfectiva"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="moratorio">Tasa Moratoria</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="moratorio" minValue="0" maxValue="4" value="#{planBean.tasaMoratoria}"
+                                                                              showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:moratorio"/>
+                                    </div>
+                                </div>
+                                <hr/>
+                                <div class="fila">
+                                    <div class="etiq"><label for="redondeo">Indice de Redondeo</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="redondeo" minValue="-5" maxValue="5" value="#{planBean.plan.indiceRedondeo}"
+                                                                              step="1" showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:redondeo"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="dias">Días a primer vencimiento</label></div>
+                                    <div class="cont"><rich:inputNumberSlider id="dias" minValue="0" maxValue="90" value="#{planBean.plan.diasAPrimerVencimiento}"
+                                                                              step="1" showInput="true" enableManualInput="true"
+                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:dias"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="porcentajeDescuento">Porcentaje de Descuento</label></div>
+                                    <div class="cont">
+                                        <h:inputText id="porcentajeDescuento" styleClass="d_num" value="#{planBean.porcentajeDescuento}">
+                                            <f:ajax event="blur" render="@this"/>
+                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
+                                            <rich:validator/>    
+                                        </h:inputText>
+                                        %&#160;<rich:messages for="frm:porcentajeDescuento"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="montoDescuento">Monto del Descuento</label></div>
+                                    <div class="cont"><h:inputText id="montoDescuento" styleClass="d_num" value="#{planBean.plan.montoDescuento}">
+                                            <f:ajax event="blur" render="@this"/>
+                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
+                                            <rich:validator/>    
+                                        </h:inputText>
+                                        &#160;<rich:messages for="frm:montoDescuento"/>
+                                    </div>
+                                </div>
+                                <hr/>
+                            </div>
+                            <div class="botonera">
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{planBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{planBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{planBean.agregar eq false and planBean.modificar eq false}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="idFiltro">Nº:</label>
+                                        <h:inputText id="idFiltro" styleClass="d_num" value="#{planBean.idFiltro}" size="5" maxlength="14"/>
+                                    </td>
+                                    <td>
+                                        <label for="categoriaFiltro">Categoria: </label>
+                                        <h:selectOneMenu id="categoriaFiltro" value="#{planBean.categoriaFiltro}">
+                                            <f:selectItems value="#{planBean.listaCategoria}"/>
+                                        </h:selectOneMenu>
+                                    </td>
+                                    <td>
+                                        <label for="nombreFiltro">Nombre: </label>
+                                        <h:inputText id="nombreFiltro" value="#{planBean.nombreFiltro}" size="50" maxlength="50"/>
+                                    </td>
+                                    <td>
+                                        <label for="activoFiltro">Activo: </label>
+                                        <h:selectOneMenu id="activoFiltro" value="#{planBean.activoFiltro}">
+                                            <f:selectItem itemValue="X" itemLabel="-SELECCIONAR-"/>
+                                            <f:selectItem itemValue="S" itemLabel="SI"/>
+                                            <f:selectItem itemValue="N" itemLabel="NO"/>
+                                        </h:selectOneMenu>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{planBean.buscar}"/>
+                                <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{planBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup rendered="#{not empty planBean.lista }">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <tr>
+                                            <th width="2%"></th>
+                                            <th width="5%"><p>
+                                                    <h:commandLink action="#{planBean.listar}">Nº
+                                                        <f:setPropertyActionListener value="id" target="#{planBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{planBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(planBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{planBean.facade.orden.columna eq 'id'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{planBean.listar}">Nombre
+                                                        <f:setPropertyActionListener value="nombre" target="#{planBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{planBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(planBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{planBean.facade.orden.columna eq 'nombre'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{planBean.listar}">Categoría
+                                                        <f:setPropertyActionListener value="categoria" target="#{planBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{planBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(planBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{planBean.facade.orden.columna eq 'categoria'}"/></p></th>
+                                            <th><p>
+                                                    <h:commandLink action="#{planBean.listar}">Activo
+                                                        <f:setPropertyActionListener value="activo" target="#{planBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{planBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(planBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{planBean.facade.orden.columna eq 'activo'}"/></p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat var="row" value="#{planBean.lista}">
+                                            <tr>
+                                                <td><input type="radio" id="radio" name="radio"
+                                                           value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.nombre}"/></td>
+                                                <td><h:outputText value="#{row.categoria.descripcion}"/></td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                    <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <h:commandLink action="#{planBean.anterior}">Anterior</h:commandLink>
+                                                &#160;|&#160;#{planBean.desde + 1}..#{planBean.facade.ultimo} de #{planBean.facade.contador}&#160;|&#160;
+                                                <h:commandLink action="#{planBean.siguiente}">Siguiente</h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{planBean.nuevo}" styleClass="submit"/>
+                                <h:commandButton id="btnModificar" value="Modificar" action="#{planBean.modificar}" styleClass="submit" rendered="#{not empty planBean.lista }"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

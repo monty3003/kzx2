@@ -20,8 +20,8 @@ and open the template in the editor.
             <ui:define name="content">
                 <h:form id="frm">
                     <h:panelGroup rendered="#{motoBean.agregar eq true or motoBean.modificar eq true}">
-                        <h5><h:outputText value="#{loginBean.ubicacion}"/></h5>
                         <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="codigo">Código: </label></div>
@@ -68,13 +68,14 @@ and open the template in the editor.
                                 </h:panelGroup>
                             </div>
                             <div class="botonera">
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{motoBean.guardar}"/>
+                                <h:commandButton styleClass="submit" value="Guardar" action="#{motoBean.guardar}"/>
                                 <h:commandButton value="Cancelar" action="#{motoBean.todos}" immediate="true"/>
                             </div>
                         </fieldset>
                     </h:panelGroup>
                     <h:panelGroup rendered="#{motoBean.agregar eq false and motoBean.modificar eq false}">
                         <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <table class="busqueda">
                                 <tr>
                                     <td>
@@ -84,6 +85,10 @@ and open the template in the editor.
                                     <td>
                                         <label for="codigoFabricaFiltro">Código Fábrica: </label>
                                         <h:inputText id="codigoFabricaFiltro" value="#{motoBean.codigoFabrica}" maxlength="20"/>
+                                    </td>
+                                    <td>
+                                        <label for="activoFiltro">Activo: </label>
+                                        <h:selectBooleanCheckbox id="activoFiltro" value="#{motoBean.activo}"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -104,7 +109,7 @@ and open the template in the editor.
                             </table>
                             <div class="botonera">
                                 <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{motoBean.buscar}"/>
-                                <input class="submit" type="submit" jsfc="h:commandButton" value="Todos" action="#{motoBean.todos}"/>
+                                <h:commandButton styleClass="submit" value="Todos" action="#{motoBean.todos}"/>
                             </div>
                         </fieldset>
                         <div class="mensajes">
@@ -169,7 +174,10 @@ and open the template in the editor.
                                                 <td><h:outputText value="#{row.marca}"/></td>
                                                 <td><h:outputText value="#{row.modelo}"/></td>
                                                 <td><h:outputText value="#{row.color}"/></td>
-                                                <td><h:outputText value="#{row.activo}"/></td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                    <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                </td>
                                             </tr>
                                         </ui:repeat>
                                     </tbody>

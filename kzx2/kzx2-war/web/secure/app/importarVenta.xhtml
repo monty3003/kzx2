@@ -23,10 +23,14 @@ and open the template in the editor.
                         <div class="tablaForm">
                             <div class="fila">
                                 <h3>Importar datos de Venta de la Base de datos en produccion</h3>
-                                <h:commandButton value="Importar" action="#{ventaMotosBean.migrarVentas()}"/>
+                                <h:commandButton value="Importar Ventas" action="#{migrarTransaccionesBean.migrarVentas()}"/>
+                            </div>
+                            <hr/>
+                            <div class="fila">
+                                <h3>Importar datos de PAGOS de la Base de datos en produccion</h3>
+                                <h:commandButton value="Importar Pagos" action="#{migrarTransaccionesBean.migrarPagos()}"/>
                             </div>
                         </div>
-
                     </fieldset>           
                 </h:form>
             </ui:define>

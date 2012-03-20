@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Consultar Plan</title>
+    </head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="modelo">Seleccione un Modelo</label></div>
+                                    <div class="cont"><h:selectOneMenu id="modelo" value="#{asignarPlanBean.moto.modelo}">
+                                            <f:selectItems value="#{asignarPlanBean.listaMoto}"/>
+                                            <f:ajax listener="#{asignarPlanBean.obtenerListaStock()}" render="stock"/>
+                                        </h:selectOneMenu></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="stock">Seleccione una Moto</label></div>
+                                    <div class="cont"><h:selectOneMenu id="stock" value="#{asignarPlanBean.stockId}">
+                                            <f:selectItems value="#{asignarPlanBean.listaStock}"/>
+                                            <f:ajax event="blur"/>
+                                        </h:selectOneMenu></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="modelo">Seleccione un Plan</label></div>
+                                    <div class="cont"><h:selectOneMenu id="plan" value="#{asignarPlanBean.planId}">
+                                            <f:selectItems value="#{asignarPlanBean.listaPlan}"/>
+                                            <f:ajax event="blur" listener="#{asignarPlanBean.asignarPlan()}" render="panelGrilla"/>
+                                        </h:selectOneMenu></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"></div>
+                                    <div class="cont"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h:panelGroup id="panelGrilla">
+                                    <h:panelGroup rendered="#{empty asignarPlanBean.listaDePlanes}">
+                                        <div>
+                                            <h3>Seleccione los datos de arriba y haga clic aqui</h3>
+                                        </div>
+                                    </h:panelGroup>
+                                    <h:panelGroup rendered="#{not empty asignarPlanBean.listaDePlanes}">
+                                        <table id="tabla" class="tablaDatos">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="13">
+                                                        <div style="display: inline-block;clear: left;"><h:outputText value="#{asignarPlanBean.motostock.moto.getlabel()}"/></div>
+                                                        <div style="display: inline-block;clear: right;"><h:outputText value="Precio Contado:"/>
+                                                            <h:outputText value="#{asignarPlanBean.motostock.precioContado}">
+                                                                <f:convertNumber pattern="#{asignarPlanBean.monedaPattern}"/>
+                                                            </h:outputText></div>
+                                                    </th></tr>
+                                                <tr>
+                                                    <ui:repeat value="#{asignarPlanBean.listaDeEntrega}" var="row">
+                                                        <th>
+                                                            <h:outputText value="#{row}">
+                                                                <f:convertNumber pattern="#{asignarPlanBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </th>
+                                                    </ui:repeat>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <ui:repeat value="#{asignarPlanBean.listaDePlanes}" var="v">
+                                                    <tr>
+                                                        <th><h:outputText value="#{v.numeroCuota}"/></th>
+                                                        <ui:repeat value="#{v.listaMontoCuotas}" var="cuota">
+                                                            <td>
+                                                                <h:outputText value="#{cuota}">
+                                                                    <f:convertNumber pattern="#{asignarPlanBean.monedaPattern}"/>
+                                                                </h:outputText>
+                                                            </td>
+                                                        </ui:repeat>
+                                                    </tr>
+                                                </ui:repeat>
+                                            </tbody>
+                                        </table>
+                                        <div class="botonera">
+                                            <h:commandButton value="Asignar" action="#{asignarPlanBean.asignar}"/>
+                                            <h:commandButton value="Imprimir" action="#{asignarPlanBean.imprimirGrilla}"/>
+                                        </div>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>
