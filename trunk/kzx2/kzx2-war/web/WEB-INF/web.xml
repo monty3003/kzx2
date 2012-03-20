@@ -13,12 +13,10 @@
         <param-name>org.richfaces.enableControlSkinning</param-name>
         <param-value>false</param-value>
     </context-param>
-
     <context-param>
         <param-name>org.richfaces.enableControlSkinningClasses</param-name>
         <param-value>false</param-value>
     </context-param>
-
     <context-param>
         <param-name>org.richfaces.skin</param-name>
         <param-value>plain</param-value>
@@ -64,9 +62,17 @@
         <url-pattern>/lista*</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>5</session-timeout>
+        <session-timeout>2</session-timeout>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/index.jsp</location>
+    </error-page>
+     <error-page>
+        <error-code>500</error-code>
+        <location>/index.jsp</location>
+    </error-page>
 </web-app>
