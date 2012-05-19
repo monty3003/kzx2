@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PlanDePago" pageWidth="612" pageHeight="936" columnWidth="512" leftMargin="57" rightMargin="43" topMargin="28" bottomMargin="50">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="DOCUMENTO" class="java.lang.String"/>
+	<parameter name="NOMBRE" class="java.lang.String"/>
+	<parameter name="MOTO" class="java.lang.String"/>
+	<parameter name="CREDITO_N" class="java.lang.String"/>
+	<parameter name="AMORTIZACION" class="java.lang.String"/>
+	<parameter name="MONTO_TOTAL_VENTA" class="java.lang.String"/>
+	<parameter name="ENTREGA_INICIAL" class="java.lang.String"/>
+	<parameter name="CAPITAL" class="java.lang.String"/>
+	<parameter name="CREDITO_TOTAL" class="java.lang.String"/>
+	<parameter name="PIE_PAGINA" class="java.lang.String"/>
+	<field name="numeroCuota" class="java.lang.Short"/>
+	<field name="totalAPagarString" class="java.lang.String"/>
+	<field name="fechaVencimiento" class="java.util.Date"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="80" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="512" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ANEXO 1 - PLAN DE PAGO
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="57" y="20" width="64" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{DOCUMENTO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="57" y="35" width="196" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{NOMBRE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="57" y="66" width="196" height="13"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{MOTO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="185" y="20" width="45" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{CREDITO_N}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="57" y="51" width="66" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{AMORTIZACION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="412" y="20" width="100" height="16"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{MONTO_TOTAL_VENTA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="412" y="36" width="100" height="15"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{ENTREGA_INICIAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="412" y="51" width="100" height="15"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{CAPITAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="412" y="66" width="100" height="14"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{CREDITO_TOTAL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="20" width="57" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[C.I. Nº:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="35" width="57" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="66" width="57" height="13"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Moto:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="128" y="22" width="57" height="14"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Crédito Nº:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="50" width="57" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Plazo:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="20" width="74" height="16"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Monto Venta:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="35" width="74" height="16"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Entrega Inicial:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="51" width="74" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Capital:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="66" width="74" height="14"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Crédito Total:
+                ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="21" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="64" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cuota
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="0" width="114" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vencimiento
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="185" y="0" width="98" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Monto
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="283" y="0" width="96" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pagado El
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="379" y="0" width="133" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Firma
+                ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="20" width="512" height="1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="0" width="512" height="1"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="64" y="0" width="121" height="29"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaVencimiento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="185" y="0" width="98" height="29"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Courier New" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalAPagarString}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="283" y="5" width="96" height="19"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="12"/>
+				</textElement>
+				<text><![CDATA[___/___/_____
+                ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="29" width="512" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="0" y="0" width="64" height="29"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroCuota}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement mode="Transparent" x="0" y="5" width="370" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{PIE_PAGINA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="391" y="5" width="80" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="471" y="5" width="40" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

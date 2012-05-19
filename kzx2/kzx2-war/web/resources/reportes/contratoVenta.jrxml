@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="contratoVenta" pageWidth="612" pageHeight="936" columnWidth="490" leftMargin="72" rightMargin="50" topMargin="49" bottomMargin="49">
+    <property name="ireport.zoom" value="1.5"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="662"/>
+    <property name="ireport.scriptlethandling" value="0"/>
+    <property name="ireport.encoding" value="UTF-8"/>
+    <import value="net.sf.jasperreports.engine.*"/>
+    <import value="java.util.*"/>
+    <import value="net.sf.jasperreports.engine.data.*"/>
+    <parameter name="ENCABEZADO" class="java.lang.String"/>
+    <parameter name="FIRMA_TITULAR" class="java.lang.String"/>
+    <parameter name="FIRMA_GARANTE" class="java.lang.String"/>
+    <parameter name="FIRMA_VENDEDOR" class="java.lang.String"/>
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="PIE_PAGINA" class="java.lang.String"/>
+    <parameter name="PIE" class="java.lang.String"/>
+    <parameter name="EMPRESA" class="java.lang.String"/>
+    <parameter name="EMPRESA_DIRECCION" class="java.lang.String"/>
+    <field name="contenido" class="java.lang.String"/>
+    <field name="orden" class="java.lang.Short"/>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="215" splitType="Stretch">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="102" width="490" height="102"/>
+                <textElement textAlignment="Justified" verticalAlignment="Top" markup="html"/>
+                <textFieldExpression><![CDATA[$P{ENCABEZADO}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="71" width="490" height="23"/>
+                <textElement textAlignment="Center">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TITULO}]]>
+                </textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement x="0" y="0" width="490" height="61"/>
+            </rectangle>
+            <textField>
+                <reportElement x="0" y="0" width="490" height="29"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Arial" size="18" isBold="true" isPdfEmbedded="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="29" width="490" height="32"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_DIRECCION}]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <columnHeader>
+        <band splitType="Stretch"/>
+    </columnHeader>
+    <detail>
+        <band height="22" splitType="Stretch">
+            <textField isStretchWithOverflow="true" isBlankWhenNull="false">
+                <reportElement key="textField" stretchType="RelativeToBandHeight" x="20" y="0" width="470" height="19"/>
+                <textElement textAlignment="Justified" verticalAlignment="Top" markup="html">
+                    <font isBold="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{contenido}]]>
+                </textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" pattern="##0).">
+                <reportElement x="0" y="0" width="20" height="19"/>
+                <textElement textAlignment="Center" verticalAlignment="Top"/>
+                <textFieldExpression><![CDATA[$F{orden}]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="75" splitType="Stretch">
+            <textField>
+                <reportElement mode="Transparent" x="0" y="55" width="370" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{PIE_PAGINA}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="370" y="55" width="80" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="450" y="55" width="40" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+    <lastPageFooter>
+        <band height="367" splitType="Stretch">
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="-1" y="301" width="157" height="33"/>
+                <box>
+                    <pen lineStyle="Dashed"/>
+                    <topPen lineWidth="1.0" lineStyle="Dashed"/>
+                    <leftPen lineStyle="Dashed"/>
+                    <bottomPen lineStyle="Dashed"/>
+                    <rightPen lineStyle="Dashed"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle" markup="html"/>
+                <textFieldExpression><![CDATA[$P{FIRMA_TITULAR}]]>
+                </textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="184" y="301" width="143" height="33" isRemoveLineWhenBlank="true"/>
+                <box>
+                    <topPen lineWidth="1.0" lineStyle="Dashed"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle" markup="html"/>
+                <textFieldExpression><![CDATA[$P{FIRMA_GARANTE}]]>
+                </textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="340" y="301" width="149" height="33"/>
+                <box>
+                    <topPen lineWidth="1.0" lineStyle="Dashed"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle" markup="html"/>
+                <textFieldExpression><![CDATA[$P{FIRMA_VENDEDOR}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement mode="Transparent" x="-1" y="346" width="370" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{PIE_PAGINA}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="449" y="346" width="40" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="369" y="346" width="80" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]>
+                </textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="490" height="20"/>
+                <textElement textAlignment="Justified" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$P{PIE}]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </lastPageFooter>
+</jasperReport>

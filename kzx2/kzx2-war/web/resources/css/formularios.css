@@ -10,42 +10,108 @@
 /*URL: http://www.dynamicdrive.com/style/ */
 
 .feedbackform{
-padding: 5px;
+    padding: 5px;
 }
 
 div.fieldwrapper{ /*field row DIV (includes two columns- Styled label column and 'thefield' column)*/
-width: 550px; /*width of form rows*/
-overflow: hidden;
-padding: 5px 0;
+    width: 550px; /*width of form rows*/
+    overflow: hidden;
+    padding: 5px 0;
 }
 
 div.fieldwrapper label.styled{ /* label elements that should be styled (left column within fieldwrapper DIV) */
-float: left;
-width: 150px; /*width of label (left column)*/
-text-transform: uppercase;
-border-bottom: 1px solid red;
-margin-right: 15px; /*spacing with right column*/
+    float: left;
+    width: 150px; /*width of label (left column)*/
+    text-transform: uppercase;
+    border-bottom: 1px solid red;
+    margin-right: 15px; /*spacing with right column*/
 }
 
 div.fieldwrapper div.thefield{ /* DIV that wraps around the actual form fields (right column within fieldwrapper DIV) */
-float: left;
-margin-bottom: 10px; /* space following the field */
+    float: left;
+    margin-bottom: 10px; /* space following the field */
 }
 
 div.fieldwrapper div.thefield input[type="text"]{ /* style for INPUT type="text" fields. Has no effect in IE7 or below! */
-width: 250px;
+    width: 250px;
 }
 
 div.fieldwrapper div.thefield textarea{ /* style for TEXTAREA fields. */
-width: 300px;
-height: 150px;
+    width: 300px;
+    height: 150px;
 }
 
 div.buttonsdiv{ /*div that wraps around the submit/reset buttons*/
-margin-top: 5px; /*space above buttonsdiv*/
+    margin-top: 5px; /*space above buttonsdiv*/
 }
 
 div.buttonsdiv input{ /* style for INPUT fields within 'buttonsdiv'. Assumed to be form buttons. */
-width: 80px;
-background: #e1dfe0;
+    width: 80px;
+    background: #e1dfe0;
 }
+
+.centrado{
+    text-align: center;
+    width: 70%;
+    display: block;
+    position: relative;
+    margin: 10px auto 80px auto;
+    clear: both;
+}
+
+/*#######################RESUMEN##############################*/
+.resumen{
+    text-align: center;
+    width: 70%;
+    display: block;
+    position: relative;
+    margin: 10px auto;
+    clear: both;
+}
+.resumen table{
+    width: 100%;
+    vertical-align: middle;
+    border: 2px solid #000099;
+    margin: 10px;
+}
+.resumen table thead{
+    padding: 4px;
+    border: 1px solid #000099;
+    background-color: #9999ff;
+}
+.resumen table th{
+    width: 20%;
+    padding: 4px;
+    border: 1px solid #000099;
+    background-color: #9999ff;
+}
+.resumen table td{
+/*    padding: 4px;*/
+    border: 1px solid #000099;
+    background-color: #e1dfe0;
+}
+
+/*.dosTablas{
+    text-align: center;
+    width: 80%;
+    display: block;
+    position: relative;
+    margin: 10px auto 80px auto;
+    clear: both;
+    padding: 4px;
+}*/
+.resumen .tablaCompartida{
+    margin: 5px auto;
+    width: 45%;
+    height: auto;
+    float: left;
+    display: block;
+/*    overflow: scroll;*/
+    position: relative;
+    padding: 4px;
+}
+.tablaCompartida .tablaDetallePago{
+    margin: 0px auto;
+    padding: 0px;
+}
+

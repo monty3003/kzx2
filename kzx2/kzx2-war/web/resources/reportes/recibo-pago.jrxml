@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="215" pageHeight="850" columnWidth="175" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="EMPRESA" class="java.lang.String"/>
+	<parameter name="FIRMA_COBRADOR" class="java.lang.String"/>
+	<parameter name="EMPRESA_DIRECCION" class="java.lang.String"/>
+	<field name="pago.fecha" class="java.util.Date"/>
+	<field name="pago.totalPagado" class="java.lang.String"/>
+	<field name="pago.totalPagadoString" class="java.lang.String"/>
+	<field name="codigo.id" class="java.lang.Integer"/>
+	<field name="codigo.descripcion" class="java.lang.String"/>
+	<field name="importe" class="java.math.BigDecimal"/>
+	<field name="concepto" class="java.lang.String"/>
+	<field name="pago.numeroDocumento" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="102" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="41" width="175" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RECIBO DE DINERO]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="0" width="175" height="16"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{EMPRESA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="16" width="175" height="15"/>
+				<textElement textAlignment="Center" markup="html"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA_DIRECCION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="43" y="61" width="132" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pago.numeroDocumento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="61" width="43" height="20"/>
+				<textElement/>
+				<text><![CDATA[Nº:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="43" y="81" width="132" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pago.fecha}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="82" width="43" height="20"/>
+				<textElement/>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="29" height="20"/>
+				<textElement/>
+				<text><![CDATA[Cod.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="29" y="0" width="88" height="20"/>
+				<textElement/>
+				<text><![CDATA[Concepto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="131" y="0" width="44" height="20"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Importe]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="29" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{codigo.id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="29" y="0" width="79" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{codigo.descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="131" y="0" width="44" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{importe}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="108" y="0" width="23" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{concepto}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch">
+			<textField>
+				<reportElement x="108" y="0" width="67" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pago.totalPagado}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="108" height="20"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL A PAGAR]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="20" width="175" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pago.totalPagadoString}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="22" width="175" height="32"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$P{FIRMA_COBRADOR}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

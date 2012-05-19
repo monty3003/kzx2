@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="612" pageHeight="936" columnWidth="564" leftMargin="28" rightMargin="20" topMargin="10" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="PIE_PAGINA" class="java.lang.String"/>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="credito.fechaInicioString" class="java.lang.String"/>
+	<field name="credito.id" class="java.lang.Integer"/>
+	<field name="numeroCuota" class="java.lang.Short"/>
+	<field name="credito.amortizacion" class="java.lang.Short"/>
+	<field name="totalAPagarString" class="java.lang.String"/>
+	<field name="fechaVencimiento" class="java.util.Date"/>
+	<field name="nombreTitular" class="java.lang.String"/>
+	<field name="documentoTitular" class="java.lang.String"/>
+	<field name="domicilioTitular" class="java.lang.String"/>
+	<field name="nombreGarante" class="java.lang.String"/>
+	<field name="documentoGarante" class="java.lang.String"/>
+	<field name="domicilioGarante" class="java.lang.String"/>
+	<field name="descripcionPagare" class="java.lang.String"/>
+	<field name="condicionesPagare" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="406" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="17" width="326" height="79"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PAGARE A LA ORDEN SIN PROTESTO
+                
+                
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="17" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Crédito Nº]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="450" y="17" width="113" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{credito.id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="350" y="37" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pagare Nº
+                
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="450" y="37" width="113" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{numeroCuota}+"/"+$F{credito.amortizacion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="350" y="57" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vencimiento
+                
+                ]]></text>
+			</staticText>
+			<textField pattern="MM/dd/yyyy" isBlankWhenNull="true">
+				<reportElement x="450" y="57" width="113" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaVencimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="350" y="76" width="100" height="21"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total a Pagar
+                
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="450" y="77" width="113" height="20" backcolor="#CCCCCC"/>
+				<box rightPadding="5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalAPagarString}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="210" y="108" width="32" height="20"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Pilar,
+                
+                ]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="242" y="108" width="322" height="20"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{credito.fechaInicioString}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="1" y="140" width="563" height="19"/>
+				<textElement textAlignment="Justified" markup="html">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcionPagare}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1" y="285" width="55" height="20"/>
+				<textElement/>
+				<text><![CDATA[Nombre
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="55" y="285" width="271" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{nombreTitular}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1" y="305" width="55" height="20"/>
+				<textElement/>
+				<text><![CDATA[Domicilio
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="55" y="305" width="271" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{domicilioTitular}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="326" y="305" width="20" height="20"/>
+				<textElement/>
+				<text><![CDATA[C.I.
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="346" y="305" width="68" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{documentoTitular}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="326" y="285" width="237" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0" lineStyle="Dashed"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[Firma:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="339" width="55" height="20"/>
+				<textElement/>
+				<text><![CDATA[Nombre
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="55" y="339" width="271" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{nombreGarante}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="326" y="338" width="237" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0" lineStyle="Dashed"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[Firma:
+                ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="359" width="55" height="20"/>
+				<textElement/>
+				<text><![CDATA[Domicilio
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="55" y="359" width="271" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{domicilioGarante}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="326" y="359" width="20" height="20"/>
+				<textElement/>
+				<text><![CDATA[C.I.
+                ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="346" y="358" width="68" height="21"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{documentoGarante}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="1" y="386" width="414" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{PIE_PAGINA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="199" width="564" height="16"/>
+				<textElement textAlignment="Justified" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{condicionesPagare}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
