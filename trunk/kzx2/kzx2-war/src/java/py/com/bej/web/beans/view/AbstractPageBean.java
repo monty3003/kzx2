@@ -24,6 +24,8 @@ public abstract class AbstractPageBean<T extends WithId> implements Serializable
     private static final long serialVersionUID = 1L;
     private String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
     private String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
+    private String fechaHoraPattern = ConfiguracionEnum.DATETIME_PATTERN.getSymbol();
+    private String fechaCortaPattern = ConfiguracionEnum.DATE_PATTERN_CORTO.getSymbol();
     private Long desde = Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol());
     private Long max = Long.parseLong(ConfiguracionEnum.PAG_MAX.getSymbol());
     private Long total;
@@ -246,5 +248,19 @@ public abstract class AbstractPageBean<T extends WithId> implements Serializable
 
     public String getNumberPattern() {
         return numberPattern;
+    }
+
+    /**
+     * @return the fechaHoraPattern
+     */
+    public String getFechaHoraPattern() {
+        return fechaHoraPattern;
+    }
+
+    /**
+     * @return the fechaCortaPattern
+     */
+    public String getFechaCortaPattern() {
+        return fechaCortaPattern;
     }
 }

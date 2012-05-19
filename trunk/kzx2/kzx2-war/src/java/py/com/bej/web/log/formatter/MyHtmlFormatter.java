@@ -17,7 +17,6 @@ public class MyHtmlFormatter extends Formatter {
         // Bold any levels >= WARNING
         buf.append("<tr>");
         buf.append("<td>");
-
         if (rec.getLevel().intValue() >= Level.WARNING.intValue()) {
             buf.append("<b>");
             buf.append(rec.getLevel());
@@ -28,16 +27,19 @@ public class MyHtmlFormatter extends Formatter {
         buf.append("</td>");
         buf.append("<td>");
         buf.append(calcDate(rec.getMillis()));
+        buf.append("</td>");
+        buf.append("<td><p>");
         buf.append(' ');
         buf.append(formatMessage(rec));
         buf.append('\n');
-        buf.append("<td>");
+        buf.append("</p></td>");
         buf.append("</tr>\n");
         return buf.toString();
     }
 
     private String calcDate(long millisecs) {
-        SimpleDateFormat date_format = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+//        SimpleDateFormat date_format = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+        SimpleDateFormat date_format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         Date resultdate = new Date(millisecs);
         return date_format.format(resultdate);
     }
@@ -48,7 +50,7 @@ public class MyHtmlFormatter extends Formatter {
     public String getHead(Handler h) {
         return "<HTML>\n<HEAD>\n" + (new Date()) + "\n</HEAD>\n<BODY>\n<PRE>\n"
                 + "<table border>\n  "
-                + "<tr><th>Time</th><th>Log Message</th></tr>\n";
+                + "<tr><th>Level</th><th>Time</th><th>Log Message</th></tr>\n";
     }
 
     // This method is called just after the handler using this

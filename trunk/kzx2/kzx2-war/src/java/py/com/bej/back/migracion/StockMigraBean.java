@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -16,6 +17,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.base.prod.entity.Vmmotostock;
 import py.com.bej.base.prod.session.MotostockProduccionFacade;
 import py.com.bej.orm.entities.Moto;
@@ -79,7 +82,7 @@ public class StockMigraBean implements Serializable {
         return "importarStock";
     }
 
-    public String migrarStock() throws Exception {
+    public String migrarStock() {
         int total = 0;
         motostockProduccionFacade = new MotostockProduccionFacade();
         List<Vmmotostock> listaStockProduccion = null;
@@ -155,6 +158,15 @@ public class StockMigraBean implements Serializable {
                     mst.setUltimaModificacion(new Date());
                     getFacade().create(mst);
                     contador++;
+                }
+
+            } catch (ConstraintViolationException cve) {
+                Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+                Logger.getLogger(StockMigraBean.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+                for (ConstraintViolation cv : lista) {
+                    Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                    Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                    Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Root Bean :", cv.getRootBean());
                 }
             } catch (Exception ex) {
                 Logger.getLogger(StockMigraBean.class.getName()).log(Level.SEVERE, "Ocurrio una excepcion al intentar migrar un registro del stock", ex);

@@ -22,7 +22,9 @@ import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Credito;
+import py.com.bej.orm.entities.Factura;
 import py.com.bej.orm.entities.Motostock;
+import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.Transaccion;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.CreditoFacade;
@@ -282,7 +284,13 @@ public class CompraMotosBean extends AbstractPageBean<Transaccion> {
 
     @Override
     public String buscar() {
-        getFacade().setEntity(compra);
+        getFacade().setEntity(new Transaccion(
+                (idFiltro != null && !idFiltro.trim().equals("")) ? Integer.valueOf(idFiltro) : null,
+                (categoriaFiltro != null && categoriaFiltro > 0) ? new Categoria(categoriaFiltro) : null,
+                (comprobanteFiltro != null && comprobanteFiltro.trim().equals("")) ? new Factura(comprobanteFiltro) : null,
+                (comprador != null && comprador > 0) ? new Persona(comprador) : new Persona(),
+                (anuladoFiltro) ? 'S' : 'N', (saldadoFiltro) ? 'S' : 'N', (activoFiltro != null && activoFiltro) ? 'S' : 'N'));
+        getFacade().getEntity().setVendedor(new Persona());
         getFacade().setContador(null);
         setLista(getFacade().findRange());
         if (getLista().isEmpty()) {
