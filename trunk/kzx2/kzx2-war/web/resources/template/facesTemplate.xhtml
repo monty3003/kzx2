@@ -67,15 +67,16 @@
                                 <ul class="sub">
                                     <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
                                     <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
+                                    <li><h:commandLink action="#{motostockBean.asignarPrecioGrupal()}" value="Asignar Precios"/></li>
                                     <li><a href="#">Importar</a></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
-                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Créditos</span></h:commandLink>
+                            <li class="top"><h:commandLink action="#{creditoBean.listar}" styleClass="top_link"><span>Créditos</span></h:commandLink>
                                 <ul class="sub">
-                                    <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
-                                    <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
-                                    <li><a href="#">Importar</a></li>
+                                    <li><h:commandLink action="#{creditoBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{creditoBean.listar}" value="Buscar"/></li>
+                                    <li><h:commandLink action="consolidarCuenta" value="Consolidar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
@@ -87,11 +88,11 @@
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
-                            <li class="top"><h:commandLink action="#{Motostockbean.listar}" styleClass="top_link"><span>Pagos</span></h:commandLink>
+                            <li class="top"><h:commandLink action="#{pagoBean.listar}" styleClass="top_link"><span>Pagos</span></h:commandLink>
                                 <ul class="sub">
-                                    <li><h:commandLink action="#{motostockBean.nuevo}" value="Nuevo"/></li>
-                                    <li><h:commandLink action="#{motostockBean.listar}" value="Buscar"/></li>
-                                    <li><a href="#">Importar</a></li>
+                                    <li><h:commandLink action="#{pagoBean.nuevo}" value="Nuevo"/></li>
+                                    <li><h:commandLink action="#{pagoBean.listar}" value="Buscar"/></li>
+                                    <li><h:commandLink action="#{pagoBean.cobrarCredito()}" value="Cobrar"/></li>
                                     <li><a href="#">Imprimir</a></li>
                                 </ul>
                             </li>
