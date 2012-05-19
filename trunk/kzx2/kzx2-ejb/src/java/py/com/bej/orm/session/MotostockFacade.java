@@ -31,6 +31,15 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
         super(Motostock.class);
     }
 
+    public Motostock findByVenta(Integer transaccion) throws Exception {
+        Motostock res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("venta").get("id"), transaccion), cb.equal(r.get("activo"), "S")));
+        TypedQuery<Motostock> q = getEm().createQuery(cq);
+        res = q.getSingleResult();
+        return res;
+    }
+
     public Motostock findByNumeroAnterior(Integer idAnterior) throws Exception {
         Motostock res = null;
         inicio();
@@ -143,7 +152,7 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
             Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
             Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
             for (ConstraintViolation cv : lista) {
-                Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, "{0},{1},{2}", 
+                Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, "{0},{1},{2}",
                         new Object[]{cv.getConstraintDescriptor(), cv.getMessageTemplate(), cv.getMessage()});
             }
         } catch (Exception ex) {

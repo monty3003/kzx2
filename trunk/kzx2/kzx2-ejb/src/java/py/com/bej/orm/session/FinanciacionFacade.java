@@ -12,13 +12,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.Predicate;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Credito;
 import py.com.bej.orm.entities.Financiacion;
+import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.utils.CategoriaEnum;
 
 /**
@@ -28,8 +32,86 @@ import py.com.bej.orm.utils.CategoriaEnum;
 @Stateless
 public class FinanciacionFacade extends AbstractFacade<Financiacion> {
 
+    private final static Logger LOGGER = Logger.getLogger(FinanciacionFacade.class.getName());
+
     public FinanciacionFacade() {
         super(Financiacion.class);
+    }
+
+    public List<Financiacion> findByTransaccion(Integer id) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("credito").get("transaccion").get("id"), id), cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public Long findCantidadByTransaccion(Integer id) {
+        Long res = null;
+        inicio();
+        cq.select(cb.count(r.get("id")));
+        cq.where(cb.and(cb.equal(r.get("credito").get("transaccion").get("id"), id), cb.equal(r.get("activo"), 'S')));
+        TypedQuery<Long> q = getEm().createQuery(cq);
+        res = (Long) q.getSingleResult();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasPendientesPorCliente(Integer cliente, Date fechaLimite) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.and(cb.or(cb.lessThan(r.get("fechaVencimiento"), fechaLimite), cb.equal(r.get("fechaVencimiento"), fechaLimite))),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasPendientesPorCliente(Integer cliente) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Financiacion> buscarProximaCuotaAVencer(Integer cliente, Date fechaLimite) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.and(cb.greaterThan(r.get("fechaVencimiento"), fechaLimite)),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public Financiacion cancelarCuotaConPagoAsignado(Financiacion f) {
+        Pago pago = null;
+        pago = new PagoFacade().find(f.getPagoAsignado());
+        if (pago != null) {
+            f.setTotalPagado(pago.getTotalPagado());
+            f.setFechaPago(pago.getFecha());
+            f.setCancelado('S');
+        }
+        return f;
+    }
+
+    public void cancelarCuotas() throws Exception {
+        List<Financiacion> cuotas = findByTransaccion(Integer.SIZE);
     }
 
     @Override
@@ -49,7 +131,20 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
 
     @Override
     public void guardar() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            getEm().merge(getEntity());
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
     }
 
     @Override
@@ -75,7 +170,7 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
         BigDecimal interesAnualEfectivo = new BigDecimal(credito.getTae());
         BigDecimal cuotaCapital = saldoCapital.divide(BigDecimal.valueOf(contarCuotas), 0, RoundingMode.HALF_DOWN);
         BigDecimal interesAnualNeto = new BigDecimal(credito.getTan());
-        BigDecimal cuotaInteres = cuotaCapital.multiply(interesAnualNeto).setScale(0, RoundingMode.UP);
+        BigDecimal cuotaInteres = cuotaCapital.multiply(interesAnualNeto).setScale(0, RoundingMode.HALF_DOWN);
         BigDecimal cuotaNeta = cuotaCapital.add(cuotaInteres);
         BigDecimal totalAPagar = credito.getTransaccion().getMontoCuotaIgual();
         BigDecimal ajusteRedondeo = totalAPagar.subtract(cuotaNeta);
@@ -123,7 +218,7 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
             f.setActivo('S');
             f.setUltimaModificacion(new Date());
             Logger.getLogger(FinanciacionFacade.class.getName()).log(Level.INFO, "_{0}______________{1}_______{2}______{3}_____{4}_____{5}",
-                    new Object[]{f.getNumeroCuota(), f.getFechaVencimiento(), f.getCapital(), f.getInteres(), f.getTotalAPagar()});
+                    new Object[]{f.getNumeroCuota(), f.getFechaVencimiento(), f.getCapital(), f.getInteres(), f.getAjusteRedondeo(), f.getTotalAPagar()});
             res.add(f);
         }
         return res;
