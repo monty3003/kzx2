@@ -6,10 +6,15 @@ package py.com.bej.orm.session;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Moto;
 
 /**
@@ -89,8 +94,16 @@ public class MotoFacade extends AbstractFacade<Moto> {
     public void guardar() {
         try {
             getEm().merge(getEntity());
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Excepcion al intentar modificar los datos de la Moto", ex);
         }
     }
 
