@@ -31,7 +31,12 @@ public class PagoMotosProduccionFacade extends AbstractFacade<Vmpagomotos> {
         resx = getEm().createNativeQuery("select NumeroRecibo,Cedula_Ruc,CodEmpleado,\"Fecha Pago\","
                 + "Hora,NumCuotas,ULTIMOPAGO,\"Monto Entrega\",MONTOSALDO,SALDOMOMENTO,Concepto,"
                 + "GUARDADO,ANULADO,IdVentas"
-                + " from BDBEJ.dbo.Vmpagomotos where \"Monto Entrega\"<>0 and Anulado=0 and idVentas=? order by NumeroRecibo ASC").setParameter(1, idVenta).getResultList();
+                + " from BDBEJ.dbo.Vmpagomotos "
+                + "where \"Monto Entrega\">0"
+                + " and \"Fecha Pago\" IS NOT NULL"
+                + " and Anulado=0"
+                + " and idVentas=?"
+                + " order by \"Fecha Pago\" asc, NumeroRecibo ASC").setParameter(1, idVenta).getResultList();
         if (resx != null && !resx.isEmpty()) {
 
             for (Object[] reg : resx) {

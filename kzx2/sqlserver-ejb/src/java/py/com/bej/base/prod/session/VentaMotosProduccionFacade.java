@@ -31,7 +31,7 @@ public class VentaMotosProduccionFacade extends AbstractFacade<Vmventamotos> {
                 + " v.montoLetras, v.numeroCuotas, v.observacion, v.precioContado, v.precioMoto, v.refuerzo,"
                 + " v.salAcMoto, v.saldoMoto, v.totalPagos, v.ubicacion, v.idMoto.idMoto)"
                 + " from Vmventamotos v "
-                + " where v.idMoto.idMoto IS NOT NULL and v.idVenta != 176"
+                + " where v.idMoto.idMoto IS NOT NULL and v.idVenta != 176 and (v.idTransaccion = 1 or v.idTransaccion = 2)"
                 + " order by v.idVenta asc").getResultList();
 //        return getEm().createNativeQuery("SELECT IdVenta, Anulado, Cancelado, Cedula_Ruc, Chapa, CodigoEmpleado,"
 //                + " CompFecha, CompObservacion, CompResfuerzo, ConCompromiso, EntregaMoto, Entregado,"
