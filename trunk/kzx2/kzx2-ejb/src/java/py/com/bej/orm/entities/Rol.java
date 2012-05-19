@@ -25,7 +25,7 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Rol", catalog = "bej")
+@Table(name = "rol", catalog = "bej")
 @XmlRootElement
 public class Rol extends WithId<Integer> {
 

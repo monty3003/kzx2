@@ -19,7 +19,6 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -27,7 +26,7 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Ubicacion", catalog = "bej")
+@Table(name = "ubicacion", catalog = "bej")
 @XmlRootElement
 public class Ubicacion extends WithId<Integer> {
 
@@ -35,7 +34,7 @@ public class Ubicacion extends WithId<Integer> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @NotEmpty(message = "Ingrese un valor")
+    @NotNull(message = "Ingrese un valor")
     @Size(min = 4, max = 45, message = "Ingrese una descripcion valida")
     @Column(name = "descripcion", nullable = false, length = 45, unique = true)
     private String descripcion;

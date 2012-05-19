@@ -31,7 +31,7 @@ import py.com.bej.orm.utils.Conversor;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Persona", catalog = "bej")
+@Table(name = "persona", catalog = "bej")
 @XmlRootElement
 public class Persona extends WithId<Integer> {
 
