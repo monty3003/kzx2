@@ -12,8 +12,12 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -25,6 +29,7 @@ import py.com.bej.base.prod.entity.Vmcompras;
 import py.com.bej.base.prod.entity.Vmmotostock;
 import py.com.bej.base.prod.entity.Vmpagomotos;
 import py.com.bej.base.prod.entity.Vmplanmoto;
+import py.com.bej.base.prod.entity.Vmresfuerzos;
 import py.com.bej.base.prod.entity.Vmventamotos;
 import py.com.bej.base.prod.session.ComprasProduccionFacade;
 import py.com.bej.base.prod.session.PagoMotosProduccionFacade;
@@ -32,8 +37,10 @@ import py.com.bej.base.prod.session.PlanMotosProduccionFacade;
 import py.com.bej.base.prod.session.VentaMotosProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Credito;
+import py.com.bej.orm.entities.DetallePago;
 import py.com.bej.orm.entities.Factura;
 import py.com.bej.orm.entities.Financiacion;
+import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.entities.Persona;
@@ -41,6 +48,7 @@ import py.com.bej.orm.entities.Transaccion;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.CreditoFacade;
 import py.com.bej.orm.session.FacturaFacade;
+import py.com.bej.orm.session.FinanciacionFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.MotostockFacade;
 import py.com.bej.orm.session.PagoFacade;
@@ -59,6 +67,8 @@ import py.com.bej.web.servlets.security.LoginBean;
 @SessionScoped
 public class MigrarTransaccionesBean implements Serializable {
 
+    @EJB
+    private FinanciacionFacade financiacionFacade;
     @EJB
     private PagoFacade pagoFacade;
     @EJB
@@ -87,6 +97,7 @@ public class MigrarTransaccionesBean implements Serializable {
     private TransaccionFacade facade;
     private static final long serialVersionUID = 1L;
     public final static Logger LOGGER = Logger.getLogger(MigrarTransaccionesBean.class.getName());
+    private Map<Short, BigDecimal> map;
 
     /** Creates a new instance of MigrarTransaccionesBean */
     public MigrarTransaccionesBean() {
@@ -120,6 +131,16 @@ public class MigrarTransaccionesBean implements Serializable {
             this.pagoFacade = new PagoFacade();
         }
         return pagoFacade;
+    }
+
+    /**
+     * @return the facade
+     */
+    public FinanciacionFacade getFinanciacionFacade() {
+        if (this.financiacionFacade == null) {
+            this.financiacionFacade = new FinanciacionFacade();
+        }
+        return financiacionFacade;
     }
 
     /**
@@ -379,7 +400,7 @@ public class MigrarTransaccionesBean implements Serializable {
         Categoria codigoDesarrollo = null;
         Factura facturaDesarrollo = null;
         String numero;
-        Categoria categoriaFactura;
+        Categoria categoriaFactura = null;
         Date fechaOperacionProduccion;
         Date fechaEntregaProduccion;
         Persona compradorProduccion;
@@ -396,16 +417,25 @@ public class MigrarTransaccionesBean implements Serializable {
         BigDecimal totalProduccion;
         BigDecimal totalDescuentoProduccion = BigDecimal.ZERO;
         BigDecimal totalPagadoProduccion;
-        Short cuotasProduccion;
+        Short cuotasProduccion = null;
         Short cantidadItemsProduccion = 1;
-        Character activo = 'S';
+        Character activo;
         Character saldadoProduccion;
-        Date fechaUltimoPagoProduccion = new Date();
+        Date fechaUltimoPagoProduccion = null;
         Date ultimaModificacion = new Date();
         //Desarrollo
         List<Financiacion> listaCuotasDesarrollo = new ArrayList<Financiacion>();
         Credito credito = null;
         List<Pago> listaPagosDesarrollo;
+        BigDecimal montoCuota;
+        Short cuotaNumero;
+        Integer cantidadCuotas;
+        BigDecimal interesTotal;
+        BigDecimal interesMensual;
+        BigDecimal factor;
+        BigDecimal cien = BigDecimal.valueOf(100);
+        BigDecimal montoCapital;
+        BigDecimal montoInteres;
         //Produccion
         List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
         ventaMotosProduccionFacade = new VentaMotosProduccionFacade();
@@ -414,11 +444,15 @@ public class MigrarTransaccionesBean implements Serializable {
         Financiacion financiacionDesarrollo;
         if (!listaVentasProduccion.isEmpty()) {
             for (Vmventamotos c : listaVentasProduccion) {
+                if (c.getIdVenta() == 389) {
+                    int pararAqui = 0;
+                }
+                activo = 'S';
                 idProduccion = c.getIdVenta();
                 LOGGER.log(Level.INFO, "==============================================================");
                 LOGGER.log(Level.INFO, "La venta Nro. {0}", c.getIdVenta());
                 fechaOperacionProduccion = c.getFechaVenta() == null ? new Date() : c.getFechaVenta();
-                fechaEntregaProduccion = c.getFechaEntrega() == null ? new Date() : c.getFechaEntrega();
+                fechaEntregaProduccion = c.getFechaEntrega() == null ? fechaOperacionProduccion : c.getFechaEntrega();
                 listaPagosDesarrollo = new ArrayList<Pago>();
                 //Buscar Cliente
                 String codCliente = null;
@@ -448,6 +482,16 @@ public class MigrarTransaccionesBean implements Serializable {
                 } else {
                     saldadoProduccion = 'S';
                 }
+                //Entrega Inicial con refuerzo incluido
+                if (c.getVmresfuerzosCollection() != null && !c.getVmresfuerzosCollection().isEmpty()) {
+                    LOGGER.log(Level.INFO, "La venta {0} tiene {1} registros de Refuerzos", new Object[]{c.getIdVenta(), c.getVmresfuerzosCollection().size()});
+                    for (Vmresfuerzos r : c.getVmresfuerzosCollection()) {
+                        if (!r.getAnulado() && r.getGuardado()) {
+                            LOGGER.log(Level.INFO, "Se va a sumar al monto total el refuerzo con el monto :{0}", r.getMontoResfuerzo());
+                            totalPagadoProduccion.add(BigDecimal.valueOf(r.getMontoResfuerzo()));
+                        }
+                    }
+                }
                 //Factura
                 facturaDesarrollo = new Factura();
                 facturaDesarrollo.setSaldado(saldadoProduccion);
@@ -466,93 +510,162 @@ public class MigrarTransaccionesBean implements Serializable {
                 facturaDesarrollo.setActivo('S');
                 facturaDesarrollo.setUltimaModificacion(ultimaModificacion);
                 //Contado o Credito
-                if (c.getIdTransaccion() == 1) {
-                    //Venta a Contado
-                    categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCO.getSymbol());
-                    facturaDesarrollo.setCategoria(categoriaFactura);
-                    cuotasProduccion = 0;
-                    listaPagosDesarrollo.add(new Pago(null, fechaOperacionProduccion, null, totalPagadoProduccion, Boolean.FALSE, 'S', new Date()));
-                    LOGGER.info("Es Venta CONTADO");
-                } else {
-                    //Venta Credito
-                    List<Vmplanmoto> listaCuotasProduccion = new ArrayList<Vmplanmoto>();
-                    montoCuotaIgualProduccion = c.getMontoCuotas() < 0 ? BigDecimal.ZERO : BigDecimal.valueOf(c.getMontoCuotas());
-                    BigDecimal capitalProduccion = BigDecimal.valueOf(c.getSaldoMoto());
-                    cuotasProduccion = Short.valueOf("" + c.getNumeroCuotas());
-                    BigDecimal creditoTotalProduccion = BigDecimal.valueOf(montoCuotaIgualProduccion.intValue() * cuotasProduccion);
-                    listaCuotasDesarrollo = new ArrayList<Financiacion>();
-                    categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR.getSymbol());
-                    facturaDesarrollo.setCategoria(categoriaFactura);
-                    BigDecimal interes = BigDecimal.valueOf(0.26F);
-
-                    credito = new Credito(null, new Categoria(CategoriaEnum.S_PER.getSymbol()), null,
-                            c.getFechaVenta(), null, new Categoria(CategoriaEnum.S_ESP.getSymbol()), 0.0F, 0.0F,
-                            capitalProduccion, cuotasProduccion, creditoTotalProduccion, BigDecimal.ZERO,
-                            BigDecimal.ZERO, BigDecimal.ZERO, fechaUltimoPagoProduccion, new Short("0"),
-                            new Categoria(CategoriaEnum.ABIERTO.getSymbol()), 'S', new Date());
-                    if (c.getIdCodeudor() != null && c.getIdCodeudor() > 0) {
-                        credito.setGarante(getPersonaFacade().findByDocumento(String.valueOf(c.getIdCodeudor())));
+                if (c.getIdTransaccion() == 1 || c.getIdTransaccion() == 2) {
+                    //Excepcion
+                    if (c.getIdVenta() == 910) {
+                        c.setIdTransaccion(1);
+                        c.setEntregaMoto(3250000);
                     }
+                    if (c.getIdTransaccion() == 1) {
+                        //Venta a Contado
+                        categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCO.getSymbol());
+                        facturaDesarrollo.setCategoria(categoriaFactura);
+                        cuotasProduccion = 0;
+                        listaPagosDesarrollo.add(new Pago(null, fechaOperacionProduccion, null, String.valueOf(c.getIdTransaccion()), totalPagadoProduccion, 'S', new Date()));
+                        LOGGER.info("Es Venta CONTADO");
+                    } else {
+                        //Venta Credito
+                        List<Vmplanmoto> listaCuotasProduccion = new ArrayList<Vmplanmoto>();
+                        if (c.getNumeroCuotas() != null && c.getNumeroCuotas() > 0) {
+                            cuotasProduccion = Short.valueOf("" + c.getNumeroCuotas());
+                        } else {
+                            cuotasProduccion = Short.valueOf("" + c.getVmplanmotoCollection().size());
+                        }
+                        if (c.getMontoCuotas() != null && c.getMontoCuotas() > 0) {
+                            montoCuotaIgualProduccion = BigDecimal.valueOf(c.getMontoCuotas());
+                        } else {
+                            if (c.getSaldoMoto() != null && c.getSaldoMoto() > 0) {
+                                montoCuotaIgualProduccion = BigDecimal.valueOf(c.getSaldoMoto() / cuotasProduccion);
+                            } else {
+                                montoCuotaIgualProduccion = BigDecimal.valueOf((c.getPrecioMoto() - c.getEntregaMoto()) / cuotasProduccion);
+                            }
+                        }
+                        BigDecimal capitalProduccion = BigDecimal.valueOf(c.getSaldoMoto());
+                        BigDecimal creditoTotalProduccion = BigDecimal.valueOf(montoCuotaIgualProduccion.intValue() * cuotasProduccion);
+                        listaCuotasDesarrollo = new ArrayList<Financiacion>();
+                        categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR.getSymbol());
+                        facturaDesarrollo.setCategoria(categoriaFactura);
+                        credito = new Credito(null, new Categoria(CategoriaEnum.S_PER.getSymbol()), null,
+                                c.getFechaVenta(), c.getFechaVenta(), new Categoria(CategoriaEnum.S_ESP.getSymbol()), 0.0F, 0.0F, 2.5F,
+                                capitalProduccion, cuotasProduccion, creditoTotalProduccion, BigDecimal.ZERO,
+                                BigDecimal.ZERO, BigDecimal.ZERO, fechaUltimoPagoProduccion, new Short("0"),
+                                new Categoria(CategoriaEnum.ABIERTO.getSymbol()), 'S', new Date());
+                        if (c.getIdCodeudor() != null && c.getIdCodeudor() > 0) {
+                            credito.setGarante(getPersonaFacade().findByDocumento(String.valueOf(c.getIdCodeudor())));
+                        }
+                        //Calcular montos
+                        cantidadCuotas = c.getNumeroCuotas();
+                        //Saltar errores
+                        if (cantidadCuotas <= 0) {
+                            cantidadCuotas = 2;
+                            activo = 'N';
+                        }
+                        if (c.getPrecioContado() == null || c.getPrecioContado() <= 0) {
+                            c.setPrecioContado(1000000);
+                            activo = 'N';
+                        }
+                        montoCuota = montoCuotaIgualProduccion;
+                        interesTotal = BigDecimal.valueOf(((c.getPrecioMoto() - c.getPrecioContado()) * 100) / c.getPrecioContado());
+                        interesMensual = interesTotal.divide(BigDecimal.valueOf(cantidadCuotas), 4, RoundingMode.UP);
+                        factor = cien.divide((interesMensual.add(cien)), 4, RoundingMode.UP);
+                        montoCapital = montoCuota.multiply(factor);
+                        montoInteres = montoCuota.subtract(montoCapital);
+                        //FINANCIACION
+                        //Buscar Cuotas
+                        listaCuotasProduccion = getPlanMotosProduccionFacade().findByIdVenta(c.getIdVenta());
+                        if (!listaCuotasProduccion.isEmpty()) {
+                            LOGGER.log(Level.INFO, "Es Venta CREDITO y tiene {0} Cuotas", listaCuotasProduccion.size());
+                            BigDecimal totalPagadoHastaAhora = BigDecimal.ZERO;
 
-                    //FINANCIACION
-                    //Buscar Cuotas
-                    listaCuotasProduccion = getPlanMotosProduccionFacade().findByIdVenta(c.getIdVenta());
-                    if (!listaCuotasProduccion.isEmpty()) {
-                        LOGGER.log(Level.INFO, "Es Venta CREDITO y tiene {0} Cuotas", listaCuotasProduccion.size());
-                        BigDecimal totalPagadoHastaAhora = BigDecimal.ZERO;
-                        BigDecimal montoCuota;
-                        Short cuotaNumero;
-                        Date fechaVencimiento;
-                        Character activoX;
-                        for (int x = 0; x < listaCuotasProduccion.size(); x++) {
-                            Vmplanmoto p = listaCuotasProduccion.get(x);
-                            activoX = 'S';
-                            if (p.getFechaVencimiento() != null) {
-                                fechaVencimiento = p.getFechaVencimiento();
-                            } else {
-                                fechaVencimiento = new Date();
-                                activoX = 'N';
+                            Date fechaVencimiento;
+                            Character activoX;
+                            Character cancelado = 'N';
+                            for (int x = 0; x < listaCuotasProduccion.size(); x++) {
+                                Vmplanmoto p = listaCuotasProduccion.get(x);
+                                activoX = 'S';
+                                if (p.getFechaVencimiento() != null) {
+                                    fechaVencimiento = p.getFechaVencimiento();
+                                } else {
+                                    fechaVencimiento = new Date();
+                                    activoX = 'N';
+                                }
+                                if (p.getCuotaNumero() != null) {
+                                    cuotaNumero = Short.valueOf("" + p.getCuotaNumero());
+                                } else {
+                                    cuotaNumero = Short.MIN_VALUE;
+                                    activoX = 'N';
+                                }
+                                if (p.getGuardado()) {
+                                    if (p.getAnulado()) {
+                                        activoX = 'N';
+                                    }
+//                                } else {
+//                                    cancelado = 'S';
+//                                }
+                                }
+                                financiacionDesarrollo = new Financiacion(null, credito, cuotaNumero,
+                                        montoCapital, montoInteres,
+                                        montoCuota, montoCuota,
+                                        BigDecimal.ZERO, null, cancelado, fechaVencimiento, BigDecimal.valueOf(p.getMontoInteresMensual()),
+                                        p.getFechaPago() != null ? BigDecimal.valueOf(p.getMontoCuota()) : null, activoX, new Date());
+                                totalPagadoHastaAhora = totalPagadoHastaAhora.add(montoCuotaIgualProduccion);
+                                if (credito.getFechaFin().before(fechaVencimiento)) {
+                                    credito.setFechaFin(fechaVencimiento);
+                                }
+                                listaCuotasDesarrollo.add(financiacionDesarrollo);
                             }
-                            if (p.getCuotaNumero() != null) {
-                                cuotaNumero = Short.valueOf("" + p.getCuotaNumero());
-                            } else {
-                                cuotaNumero = Short.MIN_VALUE;
-                                activoX = 'N';
-                            }
-                            if (p.getMontoCuota() != null) {
-                                montoCuota = BigDecimal.valueOf(p.getMontoCuota());
-                            } else {
-                                montoCuota = BigDecimal.ZERO;
-                                activoX = 'N';
-                            }
-                            financiacionDesarrollo = new Financiacion(null, credito, cuotaNumero,
-                                    credito.getCapital(), credito.getCapital().multiply(interes),
-                                    montoCuota, credito.getCreditoTotal(),
-                                    BigDecimal.ZERO, p.getFechaPago(), fechaVencimiento, BigDecimal.valueOf(p.getMontoInteresMensual()),
-                                    montoCuotaIgualProduccion, activoX, new Date());
-                            totalPagadoHastaAhora = totalPagadoHastaAhora.add(montoCuotaIgualProduccion);
-                            if (x == (listaCuotasProduccion.size() - 1)) {
-                                credito.setFechaFin(fechaOperacionProduccion);
-                                credito.setActivo('N');
-                            }
-                            Object[] params = new Object[4];
-                            params[0] = financiacionDesarrollo.getNumeroCuota();
-                            params[1] = financiacionDesarrollo.getCuotaNeta();
-                            params[2] = financiacionDesarrollo.getFechaVencimiento();
-
-//                            LOGGER.log(Level.INFO, "{0}__________{1}__________{2}", params);
-                            listaCuotasDesarrollo.add(financiacionDesarrollo);
                         }
                     }
-                }
-                compradorProduccion = getPersonaFacade().findByDocumento(codCliente);
-                if (compradorProduccion == null) {
-                    compradorProduccion = getPersonaFacade().findByDocumento(ConfiguracionEnum.PROPIETARIO.getSymbol());
-                    anuladoFiltro = 'S';
+                    compradorProduccion = getPersonaFacade().findByDocumento(codCliente);
+                    if (compradorProduccion == null) {
+                        compradorProduccion = getPersonaFacade().findByDocumento(ConfiguracionEnum.PROPIETARIO.getSymbol());
+                        anuladoFiltro = 'S';
+                    } else {
+                        anuladoFiltro = c.getAnulado() ? 'S' : 'N';
+                    }
                 } else {
-                    anuladoFiltro = c.getAnulado() ? 'S' : 'N';
+                    //Otras Transacciones
+                    BigDecimal cientoDos = new BigDecimal("102");
+                    BigDecimal ochentaPorCiento = new BigDecimal("0.8");
+                    if (c.getIdTransaccion() == 7) {
+                        //Devolucion
+                        categoriaFactura = new Categoria(CategoriaEnum.DEVOLUCION_SIMPLE.getSymbol());
+                    } else if (c.getIdTransaccion() == 8) {
+                        //Canje
+                        categoriaFactura = new Categoria(CategoriaEnum.CANJE_SIMPLE.getSymbol());
+                    }
+                    facturaDesarrollo.setCategoria(categoriaFactura);
+                    fechaOperacionProduccion = c.getFechaVenta();
+                    fechaEntregaProduccion = fechaOperacionProduccion;
+                    Motostock m = null;
+                    try {
+                        m = getMotostockFacade().findByNumeroAnterior(c.getIdMoto().getIdMoto());
+                    } catch (Exception ex) {
+                        Logger.getLogger(MigrarTransaccionesBean.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    compradorProduccion = m.getMoto().getFabricante();
+                    anuladoFiltro = 'S';
+                    BigDecimal precio = m.getCosto().multiply(cien.divide(cientoDos, 10, RoundingMode.HALF_DOWN));
+                    subTotalExentasProduccion = precio.multiply(ochentaPorCiento).setScale(0, RoundingMode.HALF_UP);
+                    BigDecimal netoSinIva10 = precio.subtract(subTotalExentasProduccion);
+                    totalIva10Produccion = netoSinIva10.multiply((BigDecimal.TEN.divide(cien, 1, RoundingMode.HALF_DOWN))).setScale(0, RoundingMode.HALF_UP);
+                    totalIvaProduccion = totalIva10Produccion;
+                    subTotalGravadas10Produccion = netoSinIva10.add(totalIva10Produccion);
+                    subTotal = m.getCosto();
+                    totalDescuentoProduccion = BigDecimal.ZERO;
+                    descuentoProduccion = 0.0F;
+                    totalProduccion = m.getCosto();
+                    subTotalGravadas5Produccion = BigDecimal.ZERO;
+                    totalIva5Produccion = BigDecimal.ZERO;
+                    totalPagadoProduccion = m.getCosto();
+                    entregaInicialProduccion = m.getCosto();
+                    cuotasProduccion = Short.valueOf("0");
+                    montoCuotaIgualProduccion = BigDecimal.ZERO;
+                    saldadoProduccion = 'S';
+                    cantidadItemsProduccion = Short.valueOf("1");
+                    activo = 'N';
+                    credito = null;
                 }
-
                 //Factura
                 numero = "" + c.getIdVenta();
                 if (numero != null && !numero.equals("null") && numero.length() < 7) {
@@ -636,7 +749,37 @@ public class MigrarTransaccionesBean implements Serializable {
                 }
             } catch (Exception ex) {
                 Logger.getLogger(MigrarTransaccionesBean.class.getName()).log(Level.SEVERE, "Excepcion al intentar asignar ventas al stock", ex);
+            }//Desactivar los modelos que no tienen stock
+            List<Moto> listaCompleta = getMotoFacade().findAll();
+            for (Moto m : listaCompleta) {
+                boolean hayStock = false;
+                List<Motostock> listaDeStock = new ArrayList<Motostock>();
+                if (m.getActivo() != null) {
+                    if (m.getActivo().equals('S')) {
+                        listaDeStock = m.getMotostocks();
+//                        LOGGER.log(Level.WARNING, "El modelo {0} tiene {1} motos.", new Object[]{m.getCodigo(), listaDeStock.size()});
+                        if (!listaDeStock.isEmpty()) {
+                            for (Motostock ms : listaDeStock) {
+                                if (ms.getVenta() == null) {
+                                    hayStock = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                if (hayStock) {
+                    m.setActivo('S');
+                } else {
+                    m.setActivo('N');
+                }
+                getMotoFacade().setEntity(m);
+                LOGGER.log(Level.INFO, "Se va a guardar la moto: {0}", m.getId());
+                getMotoFacade().guardar();
             }
+
             setInfoMessage(null, "Total de registros importados: " + totalMigrado);
         }
 
@@ -644,7 +787,54 @@ public class MigrarTransaccionesBean implements Serializable {
         return "listaventamotos";
     }
 
-    public String migrarPagos() {
+    private void poblarMapaDeCuotas(Object key, Object value) throws Exception {
+        Short k = null;
+        BigDecimal v = BigDecimal.ZERO;
+        k = new Short(String.valueOf(key));
+        v = new BigDecimal(String.valueOf(value));
+        map.put(k, v);
+    }
+
+    private String limpiarCadena(String valor) {
+        if (valor.equals("4+")) {
+            int r = 0;
+        }
+        String res = valor;
+        int letra = -2;
+        do {
+            if (valor.contains("y")) {
+                letra = valor.indexOf("y");
+            } else if (valor.contains("/")) {
+                letra = valor.indexOf("/");
+            } else if (valor.contains(",")) {
+                letra = valor.indexOf(",");
+            } else if (valor.contains("+")) {
+                letra = valor.indexOf("+");
+            } else if (valor.contains(" ")) {
+                letra = valor.indexOf(" ");
+            } else {
+                letra = -1;
+            }
+            switch (letra) {
+                case 0:
+                    valor = valor.substring(1, valor.length());
+                    break;
+                case 1:
+                    valor = valor.substring(0, 1);
+                    break;
+                case 2:
+                    valor = valor.substring(0, 2);
+                    break;
+                case 3:
+                    valor = valor.substring(0, valor.length() - 1);
+                    break;
+            }
+        } while (letra != -1);
+        res = valor.trim();
+        return res;
+    }
+
+    public String migrarPagosDeCuotas() {
         String res = null;
         int totalPagosImportados = 0;
         Transaccion t;
@@ -653,45 +843,514 @@ public class MigrarTransaccionesBean implements Serializable {
         listaVentasProduccion = ventaMotosProduccionFacade.findByIdVentaOrdenado();
         try {
             if (!listaVentasProduccion.isEmpty()) {
+                boolean esPagoParcial;
                 for (Vmventamotos c : listaVentasProduccion) {
 
                     //Buscar Transaccion
                     t = getFacade().findByNumeroAnterior(c.getIdVenta(), CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol());
                     Credito credito = null;
-                    if (!t.getCreditosTransaccion().isEmpty()) {
-                        credito = t.getCreditosTransaccion().get(t.getCreditosTransaccion().size() - 1);
+                    credito = getCreditoFacade().findByTransaccion(t.getId());
+                    if (credito.getId() == 1732) {
+                        int pararAqui = 0;
                     }
+                    //Fecha de ultimo Pago
+                    Date fechaUltimoPago = credito.getFechaInicio();
+                    //Monto total pagado
+                    BigDecimal montoTotalPagado = BigDecimal.ZERO;
+                    //Monto de la cuota fija
+                    Integer montoCuotaFija = c.getMontoCuotas();
                     //Buscar Pagos
                     pagosProduccion = getPagoMotosProduccionFacade().findByIdVenta(c.getIdVenta());
                     //Registrar Pagos
                     if (!pagosProduccion.isEmpty()) {
                         List<Pago> pagosDesarrollo = new ArrayList<Pago>();
-                        boolean esPagoParcial = false;
                         String cadenaParcial = "parcial";
                         String cadenaIniciar = "Iniciar";
+                        List<DetallePago> detalle = null;
+                        Categoria pagoParcial = getCategoriaFacade().find(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol());
+                        Categoria pagoTotal = getCategoriaFacade().find(CategoriaEnum.PAGO_CUOTA.getSymbol());
+                        Categoria categoriaPago = pagoTotal;
                         for (Vmpagomotos pago : pagosProduccion) {
-                            if (pago.getConcepto() != null && pago.getConcepto().contains(cadenaParcial)) {
-                                esPagoParcial = true;
+                            esPagoParcial = false;
+                            if (pago.getGuardado() < 0) {
+                                if (pago.getConcepto() != null && pago.getConcepto().contains(cadenaParcial)) {
+                                    esPagoParcial = true;
+                                }
+                                if (pago.getMontoEntrega() == null || pago.getMontoEntrega() < 1
+                                        || pago.getConcepto() == null || pago.getConcepto().contains(cadenaIniciar)) {
+                                    continue;
+                                }
+                                Pago pg = new Pago(null, pago.getFechaPago(),
+                                        credito, String.valueOf(pago.getNumeroRecibo()), BigDecimal.valueOf(pago.getMontoEntrega()),
+                                        pago.getAnulado() ? 'N' : 'S', new Date());
+                                if (pg.getFecha() == null) {
+                                    pg.setFecha(new Date());
+                                    pg.setActivo('N');
+                                }
+                                detalle = new ArrayList<DetallePago>();
+                                if (pago.getNumCuotas() != null) {
+                                    map = new HashMap<Short, BigDecimal>();
+                                    //Es complejo
+                                    if (pago.getNumCuotas().contains("/")
+                                            || pago.getNumCuotas().contains("-")
+                                            || pago.getNumCuotas().contains("+")
+                                            || pago.getNumCuotas().contains(",")
+                                            || pago.getNumCuotas().contains("'")
+                                            || pago.getNumCuotas().contains(" ")) {
+                                        StringTokenizer stBarra = new StringTokenizer(pago.getNumCuotas(), "/");
+                                        String cuotas = null;
+                                        cuotas = stBarra.nextToken();
+                                        if (cuotas.contains("-")) {
+                                            //Tiene varias cuotas adentro o es un pago parcial
+                                            Integer montoDelPago = pago.getMontoEntrega();
+                                            StringTokenizer stGuion = new StringTokenizer(cuotas, "-");
+                                            if (stGuion.countTokens() > 1) {
+                                                do {
+                                                    esPagoParcial = Boolean.FALSE;
+                                                    String valor = null;
+                                                    try {
+                                                        valor = stGuion.nextToken();
+                                                        if (valor.contains("+")) {
+                                                            esPagoParcial = Boolean.TRUE;
+                                                            categoriaPago = pagoParcial;
+                                                        }
+                                                        valor = limpiarCadena(valor);
+                                                        if (!esPagoParcial) {
+                                                            poblarMapaDeCuotas(valor, montoCuotaFija);
+                                                            montoDelPago = montoDelPago - montoCuotaFija;
+                                                        } else {
+                                                            poblarMapaDeCuotas(valor, montoDelPago);
+                                                        }
+                                                    } catch (NumberFormatException nfe) {
+                                                        LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
+                                                        LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
+                                                        if (valor.contains("+")) {
+                                                            valor = valor.substring(1, valor.length() - 1);
+                                                            poblarMapaDeCuotas(valor, montoDelPago);
+                                                        }
+                                                    } catch (Exception ex) {
+                                                        LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
+                                                    }
+                                                } while (stGuion.hasMoreElements());
+                                            } else {
+                                                //Cuota Simple. Puede ser Parcial
+                                                String valor = stGuion.nextToken();
+                                                try {
+                                                    if (valor.contains("+")) {
+                                                        esPagoParcial = Boolean.TRUE;
+                                                        categoriaPago = pagoParcial;
+                                                    }
+                                                    valor = limpiarCadena(valor);
+                                                    if (!esPagoParcial) {
+                                                        poblarMapaDeCuotas(valor, montoCuotaFija);
+                                                        montoDelPago = montoDelPago - montoCuotaFija;
+                                                    } else {
+                                                        poblarMapaDeCuotas(valor, montoDelPago);
+                                                    }
+                                                } catch (NumberFormatException nfe) {
+                                                    LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
+                                                    LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
+                                                    if (valor.contains("+")) {
+                                                        valor = valor.substring(1, valor.length() - 1);
+                                                    }
+                                                } catch (Exception ex) {
+                                                    LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
+                                                }
+                                            }
+                                        } else {
+                                            //Cuota Simple Parcial
+                                            Integer montoDelPago = pago.getMontoEntrega();
+                                            String valor = cuotas;
+                                            try {
+                                                if (valor.contains("+")) {
+                                                    esPagoParcial = Boolean.TRUE;
+                                                    categoriaPago = pagoParcial;
+                                                }
+                                                valor = limpiarCadena(valor);
+                                                if (valor.equals("")) {
+                                                    int eee = 0;
+                                                }
+                                                if (!esPagoParcial) {
+                                                    poblarMapaDeCuotas(valor, montoCuotaFija);
+                                                    montoDelPago = montoDelPago - montoCuotaFija;
+                                                } else {
+                                                    poblarMapaDeCuotas(valor, montoDelPago);
+                                                }
+                                            } catch (NumberFormatException nfe) {
+                                                LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
+                                                LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
+                                                if (valor.contains("+")) {
+                                                    valor = valor.substring(1, valor.length() - 1);
+                                                }
+                                            } catch (Exception ex) {
+                                                LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
+                                            }
+                                        }
+                                    } else {
+                                        //Cuota Simple y total
+                                        if (pago.getNumCuotas().equals("160000")) {
+                                            pago.setNumCuotas("13");
+                                        }
+                                        try {
+                                            poblarMapaDeCuotas(pago.getNumCuotas().trim(), pago.getMontoEntrega());
+                                        } catch (NumberFormatException nfe) {
+                                            LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
+                                            LOGGER.log(Level.INFO, "La cadena es :{0}", pago.getNumCuotas());
+                                        } catch (Exception ex) {
+                                            LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
+                                        }
+                                    }
+                                }
+                                Iterator<Short> it = map.keySet().iterator();
+                                Short cuota;
+                                BigDecimal monto;
+                                do {
+                                    cuota = it.next();
+                                    monto = map.get(cuota);
+                                    if (monto.equals(BigDecimal.valueOf(montoCuotaFija))) {
+                                        categoriaPago = pagoTotal;
+                                    } else {
+                                        categoriaPago = pagoParcial;
+                                    }
+                                    detalle.add(new DetallePago(categoriaPago, pg, pagoTotal.getDescripcion() + " " + cuota, monto, cuota, 'S', new Date(), Boolean.FALSE));
+                                } while (it.hasNext());
+                                for (DetallePago dt : detalle) {
+                                    if (dt.getConcepto().length() > 50) {
+                                        LOGGER.log(Level.INFO, "====Detalle: {0} Concepto:{1}", new Object[]{pg.getNumeroDocumento(), dt.getConcepto()});
+                                    }
+                                }
+                                pg.setDetalle(detalle);
+                                if (pago.getFechaPago() != null && pago.getFechaPago().after(fechaUltimoPago)) {
+                                    fechaUltimoPago = pago.getFechaPago();
+                                }
+                                pagosDesarrollo.add(pg);
                             }
-                            if (pago.getMontoEntrega() == null || pago.getMontoEntrega() < 1
-                                    || pago.getConcepto() == null || pago.getConcepto().contains(cadenaIniciar)) {
-                                continue;
-                            }
-                            Pago pg = new Pago(null, pago.getFechaPago(),
-                                    credito, BigDecimal.valueOf(pago.getMontoEntrega()),
-                                    esPagoParcial, pago.getAnulado() ? 'N' : 'S', new Date());
-                            if (pg.getFecha() == null) {
-                                pg.setFecha(new Date());
-                                pg.setActivo('N');
-                            }
-                            pagosDesarrollo.add(pg);
+                        }
+                        for (Pago px : pagosDesarrollo) {
+                            montoTotalPagado = montoTotalPagado.add(px.getTotalPagado());
                         }
                         totalPagosImportados = getPagoFacade().cargaMasiva(pagosDesarrollo);
+                        //Actualizar el credito
+                        //Fecha ultimo Pago
+                        credito.setFechaUltimoPago(fechaUltimoPago);
+                        //Monto total pagado
+                        if (credito.getCreditoTotal().equals(montoTotalPagado) || credito.getCreditoTotal().equals(credito.getCreditoTotal().min(montoTotalPagado))) {
+                            BigDecimal totalAmortizacion = BigDecimal.ZERO;
+                            BigDecimal totalInteres = BigDecimal.ZERO;
+                            for (Financiacion f : credito.getFinanciacions()) {
+                                if (f.getActivo() == 'S') {
+                                    totalAmortizacion = totalAmortizacion.add(f.getCapital());
+                                    totalInteres = totalInteres.add(f.getInteres());
+                                    f.setCancelado('S');
+                                }
+                            }
+                            credito.setTotalAmortizadoPagado(totalAmortizacion);
+                            credito.setTotalInteresesPagado(totalInteres);
+                            credito.setEstado(new Categoria(CategoriaEnum.CERRADO.getSymbol()));
+                        } else {
+                            credito.setTotalAmortizadoPagado(montoTotalPagado);
+                        }
+                        getCreditoFacade().setEntity(credito);
+                        getCreditoFacade().guardar();
                     }
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(MigrarTransaccionesBean.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+        setInfoMessage(null, "Total de Pagos Importados : " + totalPagosImportados);
+        return "listaventamotos";
+    }
+
+    public String migrarPagos() {
+        String res = null;
+        int totalPagosImportados = 0;
+        Transaccion t;
+        Credito credito = null;
+        List<Vmpagomotos> pagosProduccion;
+        List<Financiacion> listaCuotas;
+        List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
+        listaVentasProduccion = ventaMotosProduccionFacade.findByIdVentaOrdenado();
+        try {
+            if (!listaVentasProduccion.isEmpty()) {
+                for (Vmventamotos c : listaVentasProduccion) {
+                    //Buscar Transaccion
+                    t = getFacade().findByNumeroAnterior(c.getIdVenta(), CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol());
+                    //Buscar Credito
+                    credito = getCreditoFacade().findByTransaccion(t.getId());
+                    //Buscar Financiacion
+                    listaCuotas = getFinanciacionFacade().findByTransaccion(t.getId());
+                    //Fecha de ultimo Pago
+                    Date fechaUltimoPago = credito.getFechaInicio();
+                    //Monto total pagado
+                    BigDecimal montoTotalPagado = BigDecimal.ZERO;
+                    //Monto de la cuota fija
+                    Integer montoCuotaFija = c.getMontoCuotas();
+                    //Buscar Pagos
+                    pagosProduccion = getPagoMotosProduccionFacade().findByIdVenta(c.getIdVenta());
+                    //Registrar Pagos
+                    if (!pagosProduccion.isEmpty()) {
+                        List<Pago> pagosDesarrollo = new ArrayList<Pago>();
+                        List<DetallePago> detalle = null;
+                        Categoria pagoParcial = getCategoriaFacade().find(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol());
+                        Categoria pagoTotal = getCategoriaFacade().find(CategoriaEnum.PAGO_CUOTA.getSymbol());
+                        Categoria categoriaPago = pagoTotal;
+                        BigDecimal saldoParaSiguienteCuota = null;
+                        for (Vmpagomotos pago : pagosProduccion) {
+                            LOGGER.log(Level.INFO, "El pago es Nro:{0}", pago.getNumeroRecibo());
+                            Short numeroCuota;
+                            BigDecimal montoPagoDetalle;
+                            BigDecimal faltaParaCancelarCuota;
+                            detalle = new ArrayList<DetallePago>();
+                            Pago pg = new Pago(null, pago.getFechaPago(),
+                                    credito, String.valueOf(pago.getNumeroRecibo()), BigDecimal.valueOf(pago.getMontoEntrega()),
+                                    pago.getAnulado() ? 'N' : 'S', new Date());
+                            if (pg.getFecha() == null) {
+                                pg.setFecha(new Date());
+                                pg.setActivo('N');
+                            }
+                            //ANTES: SALDAR LO QUE QUEDO DEL PAGO ANTERIOR
+                            if (saldoParaSiguienteCuota != null) {
+                                do {
+                                    boolean faltaCancelar = false;
+                                    for (Financiacion f : listaCuotas) {
+                                        if (saldoParaSiguienteCuota.compareTo(BigDecimal.ZERO) <= 0) {
+                                            break;
+                                        }
+                                        if (f.getCancelado().equals('N')) {
+                                            faltaCancelar = true;
+                                            int dimensionDelSaldo = saldoParaSiguienteCuota.compareTo(BigDecimal.valueOf(montoCuotaFija));
+                                            switch (dimensionDelSaldo) {
+                                                case -1: {
+                                                    //Pago Parcial de la Cuota. Se suma al pago actual
+                                                    if (f.getTotalPagado() == null) {
+                                                        f.setTotalPagado(saldoParaSiguienteCuota);
+                                                    } else {
+                                                        f.setTotalPagado(f.getTotalPagado().add(saldoParaSiguienteCuota));
+                                                    }
+                                                    f.setFechaPago(fechaUltimoPago);
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(saldoParaSiguienteCuota);
+                                                    break;
+                                                }
+                                                case 0: {
+                                                    //Saldo da exacto para un pago total
+                                                    f.setTotalPagado(saldoParaSiguienteCuota);
+                                                    f.setFechaPago(fechaUltimoPago);
+                                                    f.setCancelado('S');
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(saldoParaSiguienteCuota);
+                                                    break;
+                                                }
+                                                case 1: {
+                                                    //Saldo da para varios pagos. 
+                                                    f.setTotalPagado(f.getTotalAPagar());
+                                                    f.setFechaPago(fechaUltimoPago);
+                                                    f.setCancelado('S');
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(f.getTotalAPagar());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!faltaCancelar) {
+                                        break;
+                                    }
+                                } while (saldoParaSiguienteCuota.compareTo(BigDecimal.ZERO) > 0);
+                            }
+                            saldoParaSiguienteCuota = null;
+                            // EL PAGO ES IDENTICO A UNA CUOTA
+                            if (pago.getMontoEntrega().equals(montoCuotaFija)) {
+                                categoriaPago = pagoTotal;
+                                for (Financiacion f : listaCuotas) {
+                                    if (f.getFechaPago() == null) {
+                                        if (f.getCancelado().equals('N')) {
+                                            // SE PROCEDE A CANCELAR LA CUOTA
+                                            numeroCuota = f.getNumeroCuota();
+                                            montoPagoDetalle = BigDecimal.valueOf(pago.getMontoEntrega());
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            f.setCancelado('S');
+                                            f.setFechaPago(pago.getFechaPago());
+                                            f.setTotalPagado(montoPagoDetalle);
+                                            getFinanciacionFacade().setEntity(f);
+                                            getFinanciacionFacade().guardar();
+                                            pg.setDetalle(detalle);
+                                            pagosDesarrollo.add(pg);
+                                            break;
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else if (pago.getMontoEntrega() < montoCuotaFija) {
+                                //EL PAGO ES MENOR A LA CUOTA
+                                categoriaPago = pagoParcial;
+                                for (Financiacion f : listaCuotas) {
+                                    if (f.getCancelado().equals('N')) {
+                                        // SE PROCEDE A PAGAR PARCIALMENTE LA CUOTA
+                                        if (f.getTotalPagado() == null) {
+                                            f.setTotalPagado(BigDecimal.ZERO);
+                                        }
+                                        faltaParaCancelarCuota = BigDecimal.valueOf(montoCuotaFija).subtract(f.getTotalPagado());
+                                        numeroCuota = f.getNumeroCuota();
+                                        montoPagoDetalle = BigDecimal.valueOf(pago.getMontoEntrega());
+                                        //Calcular si el pago salda la cuota
+                                        int diferenciaDeSaldo = montoPagoDetalle.compareTo(faltaParaCancelarCuota);
+                                        switch (diferenciaDeSaldo) {
+                                            case -1: {
+                                                //El pago es insuficiente para saldar la cuota. Se registra un pago parcial.
+                                                categoriaPago = pagoParcial;
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                                f.setCancelado('N');
+                                                f.setFechaPago(pago.getFechaPago());
+                                                f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                pg.setDetalle(detalle);
+                                                pagosDesarrollo.add(pg);
+                                                break;
+                                            }
+                                            case 0: {
+                                                //El pago salda la cuota. Se procede a cancelar la cuota.
+                                                categoriaPago = pagoTotal;
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                                f.setCancelado('S');
+                                                f.setFechaPago(pago.getFechaPago());
+                                                f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                pg.setDetalle(detalle);
+                                                pagosDesarrollo.add(pg);
+                                                break;
+                                            }
+                                            case 1: {
+                                                //El pago supera el saldo de la cuota. Se procedera a cancelar la cuota y realizar un nuevo pago
+                                                //parcial para la siguiente cuota.
+                                                categoriaPago = pagoTotal;
+                                                saldoParaSiguienteCuota = montoPagoDetalle.subtract(faltaParaCancelarCuota);
+                                                fechaUltimoPago = pago.getFechaPago();
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                                detalle.add(new DetallePago(pagoParcial, pg, pagoParcial.getDescripcion() + " " + (numeroCuota + 1), saldoParaSiguienteCuota, Short.valueOf("" + (numeroCuota + 1)), 'S', new Date(), Boolean.FALSE));
+                                                f.setCancelado('S');
+                                                f.setFechaPago(pago.getFechaPago());
+                                                f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                pg.setDetalle(detalle);
+                                                pagosDesarrollo.add(pg);
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else if (pago.getMontoEntrega() > montoCuotaFija) {
+                                //EL PAGO ES MAYOR AL DE LA CUOTA
+                                categoriaPago = pagoParcial;
+                                BigDecimal saldoDelPago = BigDecimal.valueOf(pago.getMontoEntrega());
+                                montoPagoDetalle = BigDecimal.valueOf(pago.getMontoEntrega());
+                                numeroCuota = null;
+                                for (Financiacion f : listaCuotas) {
+                                    if (f.getCancelado().equals('N')) {
+                                        numeroCuota = f.getNumeroCuota();
+                                        if (f.getFechaPago() != null) {
+                                            // SE PROCEDE A PAGAR PARCIALMENTE LA CUOTA
+                                            faltaParaCancelarCuota = BigDecimal.valueOf(montoCuotaFija).subtract(f.getTotalPagado());
+                                            categoriaPago = pagoParcial;
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            f.setCancelado('S');
+                                            f.setFechaPago(pago.getFechaPago());
+                                            f.setTotalPagado(f.getTotalPagado().add(faltaParaCancelarCuota));
+                                            getFinanciacionFacade().setEntity(f);
+                                            getFinanciacionFacade().guardar();
+                                            //Restar del pago, lo que se uso
+                                            saldoDelPago = saldoDelPago.subtract(faltaParaCancelarCuota);
+                                        } else {
+                                            // SE PROCEDE A CANCELAR LA CUOTA
+                                            numeroCuota = f.getNumeroCuota();
+                                            categoriaPago = pagoTotal;
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, f.getTotalAPagar(), numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            f.setCancelado('S');
+                                            f.setFechaPago(pago.getFechaPago());
+                                            f.setTotalPagado(f.getTotalAPagar());
+                                            getFinanciacionFacade().setEntity(f);
+                                            getFinanciacionFacade().guardar();
+                                            //Restar del pago, lo que se uso
+                                            saldoDelPago = saldoDelPago.subtract(f.getTotalAPagar());
+                                        }
+                                        saldoParaSiguienteCuota = saldoDelPago;
+                                        fechaUltimoPago = pago.getFechaPago();
+                                        do {
+                                            int saldoDisponible = saldoDelPago.compareTo(f.getTotalAPagar());
+                                            numeroCuota++;
+                                            BigDecimal saldoParaUtilizar = BigDecimal.ZERO;
+                                            switch (saldoDisponible) {
+                                                case -1: {
+                                                    //Da para un pago parcial
+                                                    categoriaPago = pagoParcial;
+                                                    saldoParaUtilizar = saldoDelPago;
+                                                    break;
+                                                }
+                                                case 0: {
+                                                    //Da para un ultimo pago total
+                                                    categoriaPago = pagoTotal;
+                                                    saldoParaUtilizar = f.getTotalAPagar();
+                                                    break;
+
+                                                }
+                                                case 1: {
+                                                    //Da para mas pagos
+                                                    categoriaPago = pagoTotal;
+                                                    saldoParaUtilizar = f.getTotalAPagar();
+                                                    break;
+                                                }
+                                            }
+                                            LOGGER.log(Level.INFO, "El numero de cuota es {0}", numeroCuota);
+                                            LOGGER.log(Level.INFO, "El monto de la cuota es {0}", saldoParaUtilizar);
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, saldoParaUtilizar, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            saldoDelPago = saldoDelPago.subtract(saldoParaUtilizar);
+                                        } while (saldoDelPago.compareTo(BigDecimal.ZERO) > 0);
+                                        pg.setDetalle(detalle);
+                                        pagosDesarrollo.add(pg);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        for (Pago px : pagosDesarrollo) {
+                            montoTotalPagado = montoTotalPagado.add(px.getTotalPagado());
+                        }
+                        totalPagosImportados = getPagoFacade().cargaMasiva(pagosDesarrollo);
+                        //Actualizar el credito
+                        //Fecha ultimo Pago
+                        credito.setFechaUltimoPago(fechaUltimoPago);
+                        //Monto total pagado
+                        if (credito.getCreditoTotal().equals(montoTotalPagado) || credito.getCreditoTotal().equals(credito.getCreditoTotal().min(montoTotalPagado))) {
+                            BigDecimal totalAmortizacion = BigDecimal.ZERO;
+                            BigDecimal totalInteres = BigDecimal.ZERO;
+                            for (Financiacion f : credito.getFinanciacions()) {
+                                if (f.getActivo() == 'S') {
+                                    totalAmortizacion = totalAmortizacion.add(f.getCapital());
+                                    totalInteres = totalInteres.add(f.getInteres());
+                                    f.setCancelado('S');
+                                }
+                            }
+                            credito.setTotalAmortizadoPagado(totalAmortizacion);
+                            credito.setTotalInteresesPagado(totalInteres);
+                            credito.setEstado(new Categoria(CategoriaEnum.CERRADO.getSymbol()));
+                        } else {
+                            credito.setTotalAmortizadoPagado(montoTotalPagado);
+                        }
+                        getCreditoFacade().setEntity(credito);
+                        getCreditoFacade().guardar();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         setInfoMessage(null, "Total de Pagos Importados : " + totalPagosImportados);
         return "listaventamotos";

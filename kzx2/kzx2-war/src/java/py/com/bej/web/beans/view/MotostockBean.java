@@ -256,7 +256,7 @@ public class MotostockBean extends AbstractPageBean<Motostock> {
         int totalAfectado = 0;
         totalAfectado = getFacade().asignarPrecioGrupal(motoFiltro, precioCosto, precioContado, precioBase);
         setInfoMessage(null, "Total de motos afectadas con los nuevos precios: " + totalAfectado);
-        return todos();
+        return listar();
         
     }
     

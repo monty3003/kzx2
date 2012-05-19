@@ -4,8 +4,6 @@
  */
 package py.com.bej.web.beans.view;
 
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,8 +70,6 @@ public class CreditoBean extends AbstractPageBean<Credito> {
     private String fechaUltimoPago;
     private String cuotasAtrasadas;
     private Integer estado;
-    private SimpleDateFormat df;
-    private NumberFormat nf;
 
     /** Creates a new instance of CreditoBean */
     public CreditoBean() {

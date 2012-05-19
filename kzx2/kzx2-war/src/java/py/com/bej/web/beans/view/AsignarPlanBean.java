@@ -4,9 +4,18 @@
  */
 package py.com.bej.web.beans.view;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
+import ar.com.fdvs.dj.domain.Style;
+import ar.com.fdvs.dj.domain.builders.FastReportBuilder;
+import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
+import ar.com.fdvs.dj.domain.constants.Page;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,6 +26,9 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Plan;
@@ -25,6 +37,7 @@ import py.com.bej.orm.session.MotostockFacade;
 import py.com.bej.orm.session.PlanFacade;
 import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.web.servlets.security.LoginBean;
+import py.com.bej.web.utils.GeneradorReporte;
 import py.com.bej.web.utils.JsfUtils;
 import py.com.bej.web.utils.PlanWrapper;
 
@@ -52,8 +65,16 @@ public class AsignarPlanBean implements Serializable {
     private Moto moto;
     private Motostock motostock;
     private Plan plan;
+    @NotNull(message = "Seleccione un valor")
+    @Min(value = 1, message = "Seleccione un valor")
     private Integer planId;
+    @NotNull(message = "Seleccione un valor")
+    @Min(value = 1, message = "Seleccione un valor")
     private Integer stockId;
+    @NotNull(message = "Ingrese un valor")
+    @Min(value = 1, message = "Ingrese un valor positivo")
+    @Max(value = 25, message = "Valor fuera de rango")
+    private Integer cantidadEntregas;
     //Patterns
     private String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
     private String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
@@ -84,6 +105,9 @@ public class AsignarPlanBean implements Serializable {
     }
 
     public String consultarPlan() {
+        stockId = null;
+        planId = null;
+        cantidadEntregas = null;
         moto = new Moto();
         motostock = new Motostock();
         plan = new Plan();
@@ -102,6 +126,11 @@ public class AsignarPlanBean implements Serializable {
     }
 
     public void asignarPlan() {
+        //Validar
+        if (moto.getModelo() == null || moto.getModelo().equals("X")) {
+            setErrorMessage("frm:modelo", "Seleccione un valor");
+            return;
+        }
         //Buscar Plan
         plan = getPlanFacade().find(planId);
         //Buscar Stock
@@ -121,70 +150,20 @@ public class AsignarPlanBean implements Serializable {
                 //Manda el monto Entrega Minimo
                 entregaMinX = plan.getMontoEntregaMinimo();
             }
-            BigDecimal aumento = entregaMaxX.subtract(entregaMinX).divide(BigDecimal.valueOf(12), RoundingMode.HALF_DOWN);
+            BigDecimal aumento = entregaMaxX.subtract(entregaMinX).divide(BigDecimal.valueOf(cantidadEntregas), RoundingMode.HALF_DOWN);
             BigDecimal cienMil = BigDecimal.valueOf(100000);
             BigDecimal doscientosMil = BigDecimal.valueOf(200000);
             BigDecimal quinientosMil = BigDecimal.valueOf(500000);
             BigDecimal faltaPara = entregaMaxX;
             listaDeEntrega.add(entregaMinX);
-            for (int i = 0; i < 11; i++) {
-                BigDecimal parteEntera = BigDecimal.valueOf(entregaMinX.intValue());
-                if (cienMil.equals(quinientosMil.subtract(parteEntera).max(cienMil))) {
-                    //es 400.000
-                    entregaMinX = entregaMinX.add(cienMil);
-                    faltaPara = faltaPara.subtract(cienMil);
-                    if (faltaPara.equals(faltaPara.max(cienMil))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
-                } else if (cienMil.equals(quinientosMil.multiply(BigDecimal.valueOf(2)).subtract(parteEntera).max(cienMil))) {
-                    //es 900.000
-                    entregaMinX = quinientosMil.multiply(BigDecimal.valueOf(2));
-                    faltaPara = faltaPara.subtract(cienMil);
-                    if (faltaPara.equals(faltaPara.max(cienMil))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
-
-                } else if (cienMil.equals(quinientosMil.multiply(BigDecimal.valueOf(3)).subtract(parteEntera).max(cienMil))) {
-                    //es 1.400.000
-                    entregaMinX = quinientosMil.multiply(BigDecimal.valueOf(3));
-                    faltaPara = faltaPara.subtract(cienMil);
-                    if (faltaPara.equals(faltaPara.max(cienMil))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
-                } else if (cienMil.equals(quinientosMil.multiply(BigDecimal.valueOf(4)).subtract(parteEntera).max(cienMil))) {
-                    //es 1.900.000
-                    entregaMinX = quinientosMil.multiply(BigDecimal.valueOf(4));
-                    faltaPara = faltaPara.subtract(cienMil);
-                    if (faltaPara.equals(faltaPara.max(cienMil))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
-                } else if (cienMil.equals(quinientosMil.multiply(BigDecimal.valueOf(5)).subtract(parteEntera).max(cienMil))) {
-                    //es 2.400.000
-                    entregaMinX = quinientosMil.multiply(BigDecimal.valueOf(5));
-                    faltaPara = faltaPara.subtract(cienMil);
-                    if (faltaPara.equals(faltaPara.max(cienMil))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
-                } else {
-                    entregaMinX = entregaMinX.add(aumento);
-                    faltaPara = faltaPara.subtract(aumento);
-                    if (faltaPara.equals(faltaPara.max(aumento))) {
-                        listaDeEntrega.add(entregaMinX);
-                    } else {
-                        listaDeEntrega.add(entregaMaxX);
-                    }
+            for (int i = 0; i < cantidadEntregas; i++) {
+                entregaMinX = entregaMinX.add(aumento);
+                faltaPara = faltaPara.subtract(aumento);
+                if (faltaPara.equals(faltaPara.max(aumento))) {
+                    listaDeEntrega.add(entregaMinX.setScale(-5, RoundingMode.HALF_DOWN));
                 }
             }
+            listaDeEntrega.add(entregaMaxX.setScale(-5, RoundingMode.HALF_DOWN));
         }
         BigDecimal precioContadoX = motostock.getPrecioContado();
         BigDecimal precioBaseX = motostock.getPrecioBase();
@@ -268,6 +247,35 @@ public class AsignarPlanBean implements Serializable {
         }
         setInfoMessage(null, "Se asigno el plan " + plan.getlabel() + " a " + totalMigrado + " motos.");
         return "moto";
+    }
+
+    public void generarReporte() throws Exception {
+        NumberFormat nf = new DecimalFormat(ConfiguracionEnum.MONEDA_PATTERN.getSymbol());
+        FastReportBuilder drb = new FastReportBuilder();
+        Style s = new Style();
+        s.setHorizontalAlign(HorizontalAlign.CENTER);
+        String n = null;
+        for (int i = 0; i < listaDeEntrega.size(); i++) {
+            if (listaDeEntrega.get(i) == null) {
+                drb.addColumn(" ", "numeroCuota", Short.class.getName(), 5, s);
+            } else {
+                n = nf.format(listaDeEntrega.get(i).longValue());
+                drb.addColumn(n, "entrega" + (i), String.class.getName(), 10, s);
+            }
+        }
+        drb.setTitle("Plan de Cuotas - " + motostock.getMoto().getMarca() + " " + motostock.getMoto().getModelo());
+        drb.setSubtitle(plan.getNombre() + "                  Precio Contado: " + nf.format(motostock.getPrecioContado()));
+        drb.setPrintBackgroundOnOddRows(true);
+        Page p = new Page(612, 936, Boolean.FALSE);
+        drb.setPageSizeAndOrientation(p);
+        drb.setUseFullPageWidth(Boolean.TRUE); //make colums to fill the page width  
+        DynamicReport dr = drb.build();
+
+        net.sf.jasperreports.engine.JRDataSource ds = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(listaDePlanes);
+        net.sf.jasperreports.engine.JasperPrint jp =
+                DynamicJasperHelper.generateJasperPrint(dr, new ClassicLayoutManager(), ds);
+//        JasperViewer.viewReport(jp);    //finally display the report report   
+        new GeneradorReporte().generarReportePdf(jp);
     }
 
     protected void setErrorMessage(String component, String summary) {
@@ -387,4 +395,17 @@ public class AsignarPlanBean implements Serializable {
         this.planId = planId;
     }
 
+    /**
+     * @return the cantidadEntregas
+     */
+    public Integer getCantidadEntregas() {
+        return cantidadEntregas;
+    }
+
+    /**
+     * @param cantidadEntregas the cantidadEntregas to set
+     */
+    public void setCantidadEntregas(Integer cantidadEntregas) {
+        this.cantidadEntregas = cantidadEntregas;
+    }
 }
