@@ -90,6 +90,10 @@ and open the template in the editor.
                                             <f:selectItems value="#{motostockBean.listaUbicacion}"/>
                                         </h:selectOneMenu>&#160;<rich:messages for="frm:ubicacion"/></div>
                                 </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="activo">Activo: </label></div>
+                                    <div class="cont"><h:selectBooleanCheckbox id="activo" value="#{motostockBean.activo}"/>&#160;<rich:messages for="frm:activo"/></div>
+                                </div>
                             </div>
                             <div class="botonera">
                                 <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{motostockBean.guardar}"/>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Pagos</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{pagoBean.agregar eq true or pagoBean.modificar eq true}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+
+                            <div class="botonera">
+                                <h:commandButton styleClass="submit" value="Guardar" action="#{pagoBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{pagoBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{pagoBean.agregar eq false and pagoBean.modificar eq false}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="codigoFiltro">Nº Recibo:</label>
+                                        <h:inputText id="numeroDocumentoFiltro" styleClass="d_num" value="#{pagoBean.numeroDocumentoFiltro}" size="5" maxlength="14"/>
+                                    </td>
+                                    <td>
+                                        <label for="fechaFiltro">Fecha: </label>
+                                        <rich:calendar value="#{pagoBean.fechaFiltro}" id="fechaFiltro"
+                                                       locale="en/US" popup="true"
+                                                       datePattern="dd/MM/yyyy"
+                                                       showApplyButton="true"
+                                                       />
+                                    </td>
+                                    <td colspan="2">
+                                        <label for="nombreClienteFiltro">Cliente: </label>
+                                        <h:inputText id="nombreClienteFiltro" value="#{pagoBean.clienteFiltro}" size="50" maxlength="50"/>
+                                    </td>                                    
+                                    <td>
+                                        <label for="activoFiltro">Pago parcial: </label>
+                                        <h:selectBooleanCheckbox id="pagoParcialFiltro" value="#{pagoBean.pagoParcialFiltro}"/>
+                                    </td>
+                                    <td>
+                                        <label for="activoFiltro">Activo: </label>
+                                        <h:selectBooleanCheckbox id="activoFiltro" value="#{pagoBean.activoFiltro}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <input id="btnBuscar" class="submit" type="submit" jsfc="h:commandButton" value="Buscar" action="#{pagoBean.buscar}"/>
+                                <h:commandButton styleClass="submit" value="Todos" action="#{pagoBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup rendered="#{not empty pagoBean.lista }">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <tr>
+                                            <th width="2%"></th>
+                                            <th width="20%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Nº Recibo
+                                                        <f:setPropertyActionListener value="numeroDocumento" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'numeroRecibo'}"/></p></th>
+                                            <th width="20%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Fecha
+                                                        <f:setPropertyActionListener value="fecha" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'fecha'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Cliente
+                                                        <f:setPropertyActionListener value="cliente" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'cliente'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Total Pagado
+                                                        <f:setPropertyActionListener value="totalPagado" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'totalPagado'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Pago Parcial
+                                                        <f:setPropertyActionListener value="esPagoParcial" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'esPagoParcial'}"/></p></th>
+                                            <th width="25%"><p>
+                                                    <h:commandLink action="#{pagoBean.listar}">Activo
+                                                        <f:setPropertyActionListener value="activo" target="#{pagoBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{pagoBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(pagoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{pagoBean.facade.orden.columna eq 'activo'}"/></p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat var="row" value="#{pagoBean.lista}">
+                                            <tr>
+                                                <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                                <td><h:outputText value="#{row.numeroDocumento}"/></td>
+                                                <td><h:outputText value="#{row.fecha}">
+                                                        <f:convertDateTime pattern="#{pagoBean.fechaHoraPattern}"/>
+                                                    </h:outputText></td>
+                                                <td><h:outputText value="#{row.credito.transaccion.comprador.nombre}"/></td>
+                                                <td><h:outputText value="#{row.totalPagado}"/>
+                                                </td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{row.esPagoParcial}">
+                                                        <b><h:outputText value="P"/></b>
+                                                    </h:panelGroup>
+                                                </td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                    <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7">
+                                                <h:commandLink action="#{pagoBean.anterior}">Anterior</h:commandLink>
+                                                &#160;|&#160;#{pagoBean.desde + 1}..#{pagoBean.facade.ultimo} de #{pagoBean.facade.contador}&#160;|&#160;
+                                                <h:commandLink action="#{pagoBean.siguiente}">Siguiente</h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton id="btnNuevo" value="Nuevo" action="#{pagoBean.nuevo}" styleClass="submit"/>
+                                <h:commandButton id="btnModificar" value="Modificar" action="#{pagoBean.modificar}" styleClass="submit" rendered="#{not empty pagoBean.lista }"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
