@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Consultar Plan</title>
@@ -22,32 +23,38 @@
                                     <div class="cont"><h:selectOneMenu id="modelo" value="#{asignarPlanBean.moto.modelo}">
                                             <f:selectItems value="#{asignarPlanBean.listaMoto}"/>
                                             <f:ajax listener="#{asignarPlanBean.obtenerListaStock()}" render="stock"/>
-                                        </h:selectOneMenu></div>
+                                        </h:selectOneMenu><rich:messages for="modelo"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="stock">Seleccione una Moto</label></div>
                                     <div class="cont"><h:selectOneMenu id="stock" value="#{asignarPlanBean.stockId}">
                                             <f:selectItems value="#{asignarPlanBean.listaStock}"/>
-                                            <f:ajax event="blur"/>
-                                        </h:selectOneMenu></div>
+                                            <f:ajax event="blur" render="@this"/>
+                                            <rich:validator/>
+                                        </h:selectOneMenu><rich:messages for="stock"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"><label for="modelo">Seleccione un Plan</label></div>
+                                    <div class="etiq"><label for="plan">Seleccione un Plan</label></div>
                                     <div class="cont"><h:selectOneMenu id="plan" value="#{asignarPlanBean.planId}">
                                             <f:selectItems value="#{asignarPlanBean.listaPlan}"/>
-                                            <f:ajax event="blur" listener="#{asignarPlanBean.asignarPlan()}" render="panelGrilla"/>
-                                        </h:selectOneMenu></div>
+                                            <f:ajax render="@this"/>
+                                            <rich:validator/>
+                                        </h:selectOneMenu><rich:messages for="plan"/></div>
                                 </div>
                                 <div class="fila">
-                                    <div class="etiq"></div>
-                                    <div class="cont"></div>
+                                    <div class="etiq"><label for="cantidadEntrega" >Cantidad de Opciones:</label></div>
+                                    <div class="cont"><h:inputText id="cantidadEntrega" size="4" maxlength="2" styleClass="d_num" value="#{asignarPlanBean.cantidadEntregas}">
+                                            <rich:validator/>
+                                            <f:ajax render="@this"/>
+                                        </h:inputText><rich:messages for="cantidadEntrega"/>
+                                    </div>
                                 </div>
                             </div>
                             <div>
                                 <h:panelGroup id="panelGrilla">
                                     <h:panelGroup rendered="#{empty asignarPlanBean.listaDePlanes}">
-                                        <div>
-                                            <h3>Seleccione los datos de arriba y haga clic aqui</h3>
+                                        <div class="botonera">
+                                            <h:commandButton id="asignar" value="Generar Grilla" action="#{asignarPlanBean.asignarPlan()}"/>
                                         </div>
                                     </h:panelGroup>
                                     <h:panelGroup rendered="#{not empty asignarPlanBean.listaDePlanes}">
@@ -86,9 +93,10 @@
                                                 </ui:repeat>
                                             </tbody>
                                         </table>
+                                        <h:commandLink target="_blank" action="#{asignarPlanBean.generarReporte()}">Imprimir...</h:commandLink>
                                         <div class="botonera">
                                             <h:commandButton value="Asignar" action="#{asignarPlanBean.asignar}"/>
-                                            <h:commandButton value="Imprimir" action="#{asignarPlanBean.imprimirGrilla}"/>
+                                            <h:commandButton value="Cancelar" immediate="true" action="main"/>
                                         </div>
                                     </h:panelGroup>
                                 </h:panelGroup>

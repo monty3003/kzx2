@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Resumen</title>
+    </head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <fieldset>
+                        <div class="resumen">
+                            <table>
+                                <tr>
+                                    <th>Número</th><td><h:outputText value="#{ventaMotosBean.venta.id}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Tipo</th><td><h:outputText value="#{ventaMotosBean.venta.codigo.descripcion}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha</th><td><h:outputText value="#{ventaMotosBean.venta.fechaOperacion}">
+                                            <f:convertDateTime pattern="#{ventaMotosBean.fechaHoraPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Estado</th><td>
+                                        <h:panelGroup rendered="#{ventaMotosBean.venta.fechaEntrega ne null}">
+                                            <h:outputText value="Entregado el: "/>&#160;
+                                            <h:outputText id="entrega" value="#{ventaMotosBean.venta.fechaEntrega}">
+                                                <f:convertDateTime pattern="#{ventaMotosBean.fechaHoraPattern}"/>
+                                            </h:outputText>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{ventaMotosBean.venta.fechaEntrega eq null}">
+                                            <h:outputText style="color:red;" value="Falta Entregar"/>&#160;<h:commandButton value="Entregar" action="#{ventaMotosBean.entregarMoto}"/>
+                                        </h:panelGroup>
+                                        <h:messages for="entrega"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table>
+                                <thead><h3>Datos del Comprador</h3></thead>
+                                <tr>
+                                    <th>Documento</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.documento}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Nombre</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.nombre}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección 1</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.direccion1}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección 2</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.direccion2}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono Fijo</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.telefonoFijo}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono Móvil</th><td><h:outputText value="#{ventaMotosBean.venta.comprador.telefonoMovil}"/></td>
+                                </tr>
+                            </table>
+
+                            <table>
+                                <thead><h3>Datos del Vendedor</h3></thead>
+                                <tr>
+                                    <th>Documento</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.documento}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Nombre</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.nombre}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección 1</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.direccion1}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección 2</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.direccion2}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono Fijo</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.telefonoFijo}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono Móvil</th><td><h:outputText value="#{ventaMotosBean.venta.vendedor.telefonoMovil}"/></td>
+                                </tr>
+                            </table>
+
+                            <table>
+                                <thead><h3>Datos de la Moto</h3></thead>
+                                <tr>
+                                    <th>Nº</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Color</th>
+                                    <th>Chasis</th>
+                                    <th>Motor</th>
+                                    <th>Activo</th>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.id}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.moto.marca}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.moto.modelo}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.moto.color}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.chasis}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.motor}"/></td>
+                                    <td><h:outputText value="#{ventaMotosBean.motoVendida.activo}"/></td>
+                                </tr>
+                            </table>
+                            <h:panelGroup rendered="#{ventaMotosBean.credito ne null}">
+                                <table>
+                                    <thead><h3>Datos del Crédito</h3></thead>
+                                    <tr>
+                                        <th>Nº</th><td><h:outputText value="#{ventaMotosBean.credito.id}"/></td>
+                                        <th>Categoría</th><td><h:outputText value="#{ventaMotosBean.credito.categoria.descripcion}"/></td>
+                                        <th>Capital</th><td><h:outputText value="#{ventaMotosBean.credito.capital}">
+                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                            </h:outputText></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tasa Anual</th><td><h:outputText value="#{ventaMotosBean.credito.tanString}"/></td>
+                                        <th>Tasa Efectiva</th><td><h:outputText value="#{ventaMotosBean.credito.taeString}"/></td>
+                                        <th>Tasa Moratoria</th><td><h:outputText value="#{ventaMotosBean.credito.interesMoratorioString}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Capital</th><td><h:outputText value="#{ventaMotosBean.credito.capital}">
+                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Amortización</th><td><h:outputText value="#{ventaMotosBean.credito.amortizacion}"/></td>
+                                        <th>Crédito Total</th><td><h:outputText value="#{ventaMotosBean.credito.creditoTotal}">
+                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                            </h:outputText>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fecha Inicio</th><td><h:outputText value="#{ventaMotosBean.credito.fechaInicio}">
+                                                <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Fecha Fin</th><td><h:outputText value="#{ventaMotosBean.credito.fechaFin}">
+                                                <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Ultimo Pago el</th><td><h:outputText value="#{ventaMotosBean.credito.fechaUltimoPago}">
+                                                <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                    </tr>
+                                    <tr><th colspan="6">Datos del Garante</th></tr>
+                                    <tr>
+                                        <td colspan="6" style="padding:0px;">
+                                            <table style="margin: 0px; border: none;">
+                                                <tr>
+                                                    <th>Documento</th><td><h:outputText value="#{ventaMotosBean.credito.garante.documento}"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Nombre</th><td><h:outputText value="#{ventaMotosBean.credito.garante.nombre}"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Dirección 1</th><td><h:outputText value="#{ventaMotosBean.credito.garante.direccion1}"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Dirección 2</th><td><h:outputText value="#{ventaMotosBean.credito.garante.direccion2}"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Teléfono Fijo</th><td><h:outputText value="#{ventaMotosBean.credito.garante.telefonoFijo}"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Teléfono Móvil</th><td><h:outputText value="#{ventaMotosBean.credito.garante.telefonoMovil}"/></td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </h:panelGroup>
+                            <table>
+                                <thead><h3>Datos de la Factura</h3></thead>
+                                <tr>
+                                    <th>Número</th><td><h:outputText value="#{ventaMotosBean.venta.factura.numero}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Vencimiento</th><td><h:outputText value="#{ventaMotosBean.venta.factura.validoHasta}">
+                                            <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Precio Unitario</th><td><h:outputText value="#{ventaMotosBean.venta.factura.subTotal}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Exentas</th><td><h:outputText value="#{ventaMotosBean.venta.factura.subTotalExentas}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Gravadas 10%</th><td><h:outputText value="#{ventaMotosBean.venta.factura.subTotalGravadas10}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Descuento</th><td><h:outputText value="#{ventaMotosBean.venta.factura.descuento}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Sub Total</th><td><h:outputText value="#{ventaMotosBean.venta.factura.subTotal}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Total</th><td><h:outputText value="#{ventaMotosBean.venta.factura.totalPagado}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                            </table>
+                            <table>
+                                <thead><h3>Generar Documentos</h3></thead>
+                                <tr>
+                                    <td>
+                                        <h:commandLink target="_blank" action="#{ventaMotosBean.imprimirDocumento()}">
+                                            <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                            <h:outputText value=" Contrato de Venta"/>
+                                        </h:commandLink>
+                                    </td>
+                                    <h:panelGroup rendered="#{ventaMotosBean.venta.fechaEntrega ne null}">
+                                        <td>
+                                            <h:commandLink target="_blank" action="#{ventaMotosBean.imprimirResponsabilidadCivil()}">
+                                                <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                                <h:outputText value=" Responsabilidad Civil"/>
+                                            </h:commandLink>
+                                        </td>                             
+                                    </h:panelGroup>
+                                    <h:panelGroup rendered="#{ventaMotosBean.venta.fechaEntrega eq null}">
+                                        <td>
+                                            <h:outputText value="Falta Entregar"/>
+                                        </td>                             
+                                    </h:panelGroup>
+                                    <td>
+                                        <h:commandLink target="_blank" action="#{ventaMotosBean.imprimirReciboInicial}">
+                                            <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                            <h:outputText value=" Recibo Inicial"/>
+                                        </h:commandLink>
+                                    </td>
+                                    <h:panelGroup rendered="#{ventaMotosBean.credito ne null}">
+                                        <td>
+                                            <h:commandLink target="_blank" action="#{ventaMotosBean.imprimirPagare}">
+                                                <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                                <h:outputText value="Pagare"/>
+                                            </h:commandLink>
+                                        </td>    
+                                    </h:panelGroup>
+                                </tr>
+                            </table>
+                        </div>
+                    </fieldset>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

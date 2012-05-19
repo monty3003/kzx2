@@ -26,22 +26,8 @@
                                     <rich:calendar value="#{ventaMotosBean.venta.fechaOperacion}" id="fechaOperacion"
                                                    locale="en/US" popup="true"
                                                    datePattern="dd/MM/yyyy - HH:mm"
-                                                   showApplyButton="true">
-                                        <rich:validator/>
-                                    </rich:calendar>
-                                    <rich:messages for="fechaOperacion"/>
-                                </div>
-                            </div>
-                            <div class="fila">
-                                <div class="etiq"><label for="fechaEntrega">Fecha Entrega: </label></div>
-                                <div class="cont">
-                                    <h:selectBooleanCheckbox id="fechaEntregaAhora" title="Ahora" value="#{ventaMotosBean.usarFechaEntregaAhora}" label="Ahora">
-                                        <f:ajax render="fechaEntrega"/>
-                                    </h:selectBooleanCheckbox>Ahora<br/>
-                                    <rich:calendar value="#{ventaMotosBean.venta.fechaEntrega}" id="fechaEntrega" enableManualInput="true"
-                                                   locale="en/US" popup="true"
-                                                   datePattern="dd/MM/yyyy - HH:mm"
-                                                   showApplyButton="true">
+                                                   showApplyButton="true"
+                                                   disabled="#{ventaMotosBean.usarFechaAhora}">
                                         <rich:validator/>
                                     </rich:calendar>
                                     <rich:messages for="fechaOperacion"/>
@@ -239,11 +225,23 @@
                                 <div class="cont">                                            
                                     <h:inputText id="nMoto" styleClass="d_num" value="#{ventaMotosBean.idMotoVendida}">
                                         <rich:validator/>
-                                        <f:ajax event="blur" listener="#{ventaMotosBean.buscarMotoVendida()}" render="@this panelMoto panelPrecios panelCredito"/>
+                                        <f:ajax event="blur" 
+                                                listener="#{ventaMotosBean.buscarMotoVendida()}" 
+                                                render="@this panelMoto panelPrecios panelCredito"/>
                                     </h:inputText>&#160;<rich:message for="frm:nMoto"/>
                                 </div>
                             </div>
                             <h:panelGroup id="panelMoto">
+                                <div class="fila">
+                                    <div class="etiq"><label for="motor">Motor: </label></div>
+                                    <div class="cont">
+                                        <h:inputText id="motor" styleClass="textMayus" value="#{ventaMotosBean.motoVendida.motor}" 
+                                                     disabled="#{ventaMotosBean.motoVendida.motor ne null and ventaMotosBean.motoVendida.motor ne ''}">
+                                            <f:ajax event="blur" render="@this"/>
+                                        </h:inputText>
+                                        <rich:messages for="frm:motor"/>
+                                    </div>
+                                </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
                                     <div class="cont"><h:outputText id="codigoFabrica" value="#{ventaMotosBean.motoVendida.moto.codigoFabrica}"/></div>
@@ -310,6 +308,27 @@
                                                         <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                         <f:ajax event="blur" render="@this"/>
                                                     </h:inputText><rich:message for="frm:montoCuotaIgual"/>
+                                                </div>
+                                            </div>
+                                            <div class="fila">
+                                                <div class="etiq">
+                                                    <label for="vencimientoEnPagare">Imprimir fecha de Vencimiento en los Pagares</label>
+                                                </div>
+                                                <div class="cont">
+                                                    <h:panelGroup id="panelVencimientoEnPagare">
+                                                        <h:selectBooleanCheckbox id="vencimientoEnPagare" value="#{ventaMotosBean.imprimirVencimientoEnPagare}">
+                                                            <f:ajax render="panelVencimientoEnPagare"/>
+                                                        </h:selectBooleanCheckbox>
+                                                        &#160;<rich:message for="frm:vencimientoEnPagare"/>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                            <div class="fila">
+                                                <div class="etiq"><label for="opcionPagare">Opciones del Pagare: </label></div>
+                                                <div class="cont">
+                                                    <select id="opcionPagare" name="opcionPagare" jsfc="h:selectOneMenu" value="#{ventaMotosBean.opcionPagare}">
+                                                        <f:selectItems value="#{ventaMotosBean.listaOpcionesPagare}"/>
+                                                    </select>&#160;<rich:message for="frm:opcionPagare"/>
                                                 </div>
                                             </div>
                                             <br/>

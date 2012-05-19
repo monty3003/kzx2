@@ -11,7 +11,7 @@ and open the template in the editor.
       xmlns:rich="http://richfaces.org/rich">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>Categorias</title>
+        <title>Categorías</title>
     </head>
     <body>
 
@@ -20,8 +20,8 @@ and open the template in the editor.
             <ui:define name="content">
                 <h:form id="frm">
                     <h:panelGroup rendered="#{categoriaBean.agregar eq true or categoriaBean.modificar eq true}">
-                        <h5><h:outputText value="#{categoriaBean.titulo}"/></h5>
                         <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
                             <div class="tablaForm">
                                 <div class="fila">
                                     <div class="etiq"><label for="codigo">Código: </label></div>

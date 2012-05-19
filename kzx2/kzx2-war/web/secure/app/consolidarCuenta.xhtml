@@ -1,0 +1,290 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Resumen</title>
+    </head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <fieldset>
+                        <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                        <div class="tablaForm">
+                            <div class="fila">
+                                <div class="etiq"><label for="documento">Nº de Documento: </label></div>
+                                <div class="cont"><h:inputText id="documento" size="11" maxlength="11"
+                                                               value="#{pagoBean.pago.cliente}">
+                                        <f:ajax render="@this"/>
+                                    </h:inputText><rich:messages for="frm:documento"/>
+                                    <h:commandButton id="consultarCliente" styleClass="submit" type="button" value="Consultar">
+                                        <f:ajax event="click" listener="#{pagoBean.obtenerCreditosParaElCobro()}" render="panelCredito"/>
+                                    </h:commandButton></div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <h:panelGroup id="panelCredito">
+<h:panelGroup rendered="#{not empty pagoBean.creditos}">
+                                    <div class="centrado">
+                                        <table class="tablaDatos">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Nº</th>
+                                                    <th>Venta</th>
+                                                    <th>Fecha Inicio</th>
+                                                    <th>Fecha Fin</th>
+                                                    <th>Crédito Total</th>
+                                                    <th>Total Pagado</th>
+                                                    <th>Último Pago el</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <ui:repeat value="#{pagoBean.creditos}" var="row">
+                                                    <tr>
+                                                        <td>
+                                                            <h:commandLink value="Seleccionar" action="#{pagoBean.seleccionarCredito()}">
+                                                                <f:setPropertyActionListener target="#{pagoBean.creditoSeleccionado}" value="#{row.id}"/>
+                                                            </h:commandLink>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.id}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.transaccion.id}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.fechaInicio}">
+                                                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.fechaFin}">
+                                                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.creditoTotal}">
+                                                                <f:convertNumber pattern="#{pagoBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.totalAmortizadoPagado+row.totalInteresesPagado}">
+                                                                <f:convertNumber pattern="#{pagoBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.fechaUltimoPago}">
+                                                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                    </tr>
+                                                </ui:repeat>
+                                            </tbody>
+                                        </table>
+                                        <hr/>
+                                    </div>
+                                </h:panelGroup>
+                        </h:panelGroup>
+                        <div class="resumen">
+                            <table>
+                                <thead><h3>Datos del Crédito</h3></thead>
+                                <tr>
+                                    <th>Nº</th><td><h:outputText value="#{ventaMotosBean.credito.id}"/></td>
+                                    <th>Categoría</th><td><h:outputText value="#{ventaMotosBean.credito.categoria.descripcion}"/></td>
+                                    <th>Capital</th><td><h:outputText value="#{ventaMotosBean.credito.capital}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Tasa Anual</th><td><h:outputText value="#{ventaMotosBean.credito.tanString}"/></td>
+                                    <th>Tasa Efectiva</th><td><h:outputText value="#{ventaMotosBean.credito.taeString}"/></td>
+                                    <th>Tasa Moratoria</th><td><h:outputText value="#{ventaMotosBean.credito.interesMoratorioString}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Capital</th><td><h:outputText value="#{ventaMotosBean.credito.capital}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                    <th>Amortización</th><td><h:outputText value="#{ventaMotosBean.credito.amortizacion}"/></td>
+                                    <th>Crédito Total</th><td><h:outputText value="#{ventaMotosBean.credito.creditoTotal}">
+                                            <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                        </h:outputText>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha Inicio</th><td><h:outputText value="#{ventaMotosBean.credito.fechaInicio}">
+                                            <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                        </h:outputText></td>
+                                    <th>Fecha Fin</th><td><h:outputText value="#{ventaMotosBean.credito.fechaFin}">
+                                            <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                        </h:outputText></td>
+                                    <th>Ultimo Pago el</th><td><h:outputText value="#{ventaMotosBean.credito.fechaUltimoPago}">
+                                            <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr><th colspan="6">Datos del Garante</th></tr>
+                                <tr>
+                                    <td colspan="6" style="padding:0px;">
+                                        <table style="margin: 0px; border: none;">
+                                            <tr>
+                                                <th>Documento</th><td><h:outputText value="#{ventaMotosBean.credito.garante.documento}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nombre</th><td><h:outputText value="#{ventaMotosBean.credito.garante.nombre}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Dirección 1</th><td><h:outputText value="#{ventaMotosBean.credito.garante.direccion1}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Dirección 2</th><td><h:outputText value="#{ventaMotosBean.credito.garante.direccion2}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Teléfono Fijo</th><td><h:outputText value="#{ventaMotosBean.credito.garante.telefonoFijo}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Teléfono Móvil</th><td><h:outputText value="#{ventaMotosBean.credito.garante.telefonoMovil}"/></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="resumen">
+                            <div class="tablaCompartida">
+                                <table>
+                                    <thead>
+                                        <h4>Financiación</h4>
+                                    </thead>
+                                    <th>
+                                        <tr>
+                                            <td width="5px">Nº</td>
+                                            <td width="10px">Vencimiento</td>
+                                            <td width="10px">Monto</td>
+                                            <td width="5px">Pago</td>
+                                        </tr>
+                                    </th>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>10</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>11</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td>10/10/2011</td>
+                                            <td>120.000</td>
+                                            <td><input type="text" size="5"/></td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                            <div class="tablaCompartida">
+                                <table>
+                                    <thead>
+                                        <h4>Pagos</h4>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><b>1354</b></td>
+                                            <td>10/10/2011</td>
+                                            <td>500.000</td>
+                                            <td>P</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                            </td>
+                                            <td colspan="3">
+                                                <table class="tablaDetallePago">
+                                                    <tr>
+                                                        <td>Pago Cuota Nº 1</td>
+                                                        <td>120.000</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Pago Cuota Nº 2</td>
+                                                        <td>120.000</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Pag Parcial Cuota Nº 3</td>
+                                                        <td>10.000</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr></tbody>
+                                </table>
+                            </div>    
+                        </div>
+                    </fieldset>             
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

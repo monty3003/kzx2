@@ -173,6 +173,7 @@
                         <div class="botonera">
                             <h:commandButton id="btnNuevo" value="Nuevo" action="#{ventaMotosBean.nuevo}" styleClass="submit"/>
                             <h:commandButton id="btnModificar" value="Modificar" action="#{ventaMotosBean.modificar}" styleClass="submit" rendered="#{not empty ventaMotosBean.lista }"/>
+                            <h:commandButton id="btnResumen" value="Resumen" action="#{ventaMotosBean.resumenVenta()}" styleClass="submit" rendered="#{not empty ventaMotosBean.lista }"/>
                         </div>
                     </fieldset>
                 </h:form>
