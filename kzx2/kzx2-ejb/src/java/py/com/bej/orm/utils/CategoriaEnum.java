@@ -39,8 +39,18 @@ public enum CategoriaEnum {
     FACTURA_COMPRA_MCR(75, "Factura de Compra de Moto a Credito"),
     FACTURA_VENTA_MCO(76, "Factura de Venta de Moto al Contado"),
     FACTURA_VENTA_MCR(79, "Factura de Venta de Moto a Credito"),
+    DEVOLUCION_DESDE(80, "Devolucion Desde"),
+    DEVOLUCION_HASTA(85, "Devolucion Hasta"),
+    DEVOLUCION_SIMPLE(80, "Devolucion Simple"),
+    CANJE_DESDE(90, "Canje Desde"),
+    CANJE_HASTA(95, "Canje Hasta"),
+    CANJE_SIMPLE(90, "Canje Simple"),
     ABIERTO(101, "Abierto"),
-    CERRADO(102, "Cerrado");
+    CERRADO(102, "Cerrado"),
+    PAGO_CUOTA(110, "Pago Cuota"),
+    PAGO_PARCIAL_CUOTA(111, "Pago Parcial Cuot."),
+    PAGO_CANCELACION(115, "Pago Cancelacion"),
+    PAGO_INTERES_MORATORIO(120, "Interes Moratorio");
     private int symbol;
     private String label;
 

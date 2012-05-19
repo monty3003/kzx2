@@ -10,8 +10,8 @@ package py.com.bej.orm.utils;
  */
 public enum ParametroEnum {
 
-    AUMENTO1(1.21, "Aumento para el precio base"),
-    AUMENTO2(1.18, "Aumento para el precio de costo"),
+    AUMENTO1(1.17, "Aumento para el precio base"),
+    AUMENTO2(1.12, "Aumento para el precio de costo"),
     VARIABLE(50000.00, "Variable de aumento por insumos");
     private Double valor;
     private String descripcion;

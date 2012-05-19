@@ -19,7 +19,10 @@ public enum ConfiguracionEnum {
     INDICE_REDONDEO("-3", "Indice de Redondeo en calculos de precios"),
     MONEDA_PATTERN("#,###,##0", "Formato de moneda local"),
     NUMBER_PATTERN("#,###,##0.00", "Formato de numero en general"),
-    PROPIETARIO("1275758","Documento del propietario del negocio");
+    PROPIETARIO("1275758", "Documento del propietario del negocio"),
+    LIMITE_MINIMO_PAGARE("150000", "Limite minimo del monto por Pagare"),
+    LIMITE_MAXIMO_PAGARE("5000000", "Limite maximo del monto por Pagare"),
+    DESCUENTO_CANCELACION("0.02", "Porcentaje del Descuento por cuota cancelada");
     private String symbol;
     private String label;
 
