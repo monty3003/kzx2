@@ -3,11 +3,27 @@
   <persistence-unit name="kzx2-ejbPU" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <jta-data-source>jdbc/bej</jta-data-source>
+    <class>py.com.bej.orm.entities.Categoria</class>
+    <class>py.com.bej.orm.entities.Credito</class>
+    <class>py.com.bej.orm.entities.DetallePago</class>
+    <class>py.com.bej.orm.entities.Documento</class>
+    <class>py.com.bej.orm.entities.Factura</class>
+    <class>py.com.bej.orm.entities.Financiacion</class>
+    <class>py.com.bej.orm.entities.Moto</class>
+    <class>py.com.bej.orm.entities.Motostock</class>
+    <class>py.com.bej.orm.entities.Pagare</class>
+    <class>py.com.bej.orm.entities.Pago</class>
+    <class>py.com.bej.orm.entities.Password</class>
+    <class>py.com.bej.orm.entities.Persona</class>
+    <class>py.com.bej.orm.entities.Plan</class>
+    <class>py.com.bej.orm.entities.Rol</class>
+    <class>py.com.bej.orm.entities.Transaccion</class>
+    <class>py.com.bej.orm.entities.Ubicacion</class>
+    <class>py.com.bej.orm.entities.Usuario</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="eclipselink.jdbc.native-sql" value="true"/>
       <property name="eclipselink.logging.level" value="WARNING"/>
-      <property name="show_sql" value="true"/>
-      <property name="eclipselink.ddl-generation" value="create-tables"/>
     </properties>
   </persistence-unit>
 </persistence>
