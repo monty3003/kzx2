@@ -26,7 +26,7 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Moto", catalog = "bej")
+@Table(name = "moto", catalog = "bej")
 @XmlRootElement
 public class Moto extends WithId<String> {
 
@@ -49,7 +49,7 @@ public class Moto extends WithId<String> {
     @NotNull(message = "Color: Ingrese un valor")
     @Column(name = "color", nullable = false, length = 20)
     private String color;
-    @JoinColumn(name = "fabricante", referencedColumnName = "id", insertable = true, updatable = false, nullable = false)
+    @JoinColumn(name = "fabricante", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Persona fabricante;
     @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
@@ -60,7 +60,7 @@ public class Moto extends WithId<String> {
     @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
-    @OneToMany(mappedBy = "moto", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "moto")
     private List<Motostock> motostocks;
 
     public Moto() {

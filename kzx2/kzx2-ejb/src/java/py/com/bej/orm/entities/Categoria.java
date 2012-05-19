@@ -14,9 +14,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -24,7 +24,7 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Categoria", catalog = "bej")
+@Table(name = "categoria", catalog = "bej")
 @XmlRootElement
 public class Categoria extends WithId<Integer> {
 
@@ -32,7 +32,7 @@ public class Categoria extends WithId<Integer> {
     @Column(name = "id", nullable = false)
     private Integer id;
     @Size(max = 50)
-    @NotEmpty(message = "Ingrese un valor")
+    @NotNull(message = "Ingrese un valor")
     @Column(name = "descripcion", length = 50, nullable = false)
     private String descripcion;
     @Column(name = "activo", length = 1, nullable = false)

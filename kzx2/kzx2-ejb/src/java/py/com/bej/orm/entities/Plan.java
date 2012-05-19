@@ -20,8 +20,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
@@ -40,7 +40,7 @@ public class Plan extends WithId<Integer> {
     @JoinColumn(name = "categoria", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoria;
-    @NotEmpty(message = "Ingrese un nombre")
+    @NotNull(message = "Ingrese un nombre")
     @Column(name = "nombre", length = 50, nullable = false, unique = true)
     private String nombre;
     @Min(value = 1000, message = "Ingrese un valor positivo")

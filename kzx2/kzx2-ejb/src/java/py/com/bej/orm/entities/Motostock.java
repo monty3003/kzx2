@@ -20,15 +20,14 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 
 /**
  *
  * @author Diego_M
  */
-@Entity
-@Table(name = "Motostock", catalog = "bej")
+    @Entity
+@Table(name = "motostock", catalog = "bej")
 @XmlRootElement
 public class Motostock extends WithId<Integer> {
 
@@ -131,11 +130,11 @@ public class Motostock extends WithId<Integer> {
     }
 
     public String getMotor() {
-        return motor;
+        return motor != null ? motor.toUpperCase() : motor;
     }
 
     public void setMotor(String motor) {
-        this.motor = motor;
+        this.motor = motor != null ? motor.toUpperCase() : motor;
     }
 
     public String getChasis() {

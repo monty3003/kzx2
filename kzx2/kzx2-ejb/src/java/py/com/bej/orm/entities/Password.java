@@ -5,7 +5,6 @@
 package py.com.bej.orm.entities;
 
 import java.util.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,7 +23,7 @@ import py.com.bej.orm.interfaces.WithId;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Password", catalog = "bej")
+@Table(name = "password", catalog = "bej")
 @XmlRootElement
 public class Password extends WithId<Integer> {
 

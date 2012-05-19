@@ -19,8 +19,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.Conversor;
 
 /**
  *
@@ -54,6 +56,8 @@ public class Credito extends WithId<Integer> {
     private float tan;
     @Column(name = "tae", nullable = false)
     private float tae;
+    @Column(name = "interes_moratorio", nullable = false)
+    private float interesMoratorio;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "capital", nullable = false, precision = 11, scale = 2)
     private BigDecimal capital;
@@ -85,6 +89,18 @@ public class Credito extends WithId<Integer> {
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL)
     private List<Financiacion> financiacions;
+    @Transient
+    private BigDecimal saldoActual;
+    @Transient
+    private String fechaInicioString;
+    @Transient
+    private String tanString;
+    @Transient
+    private String taeString;
+    @Transient
+    private String interesMoratorioString;
+    @Transient
+    private Boolean selected;
 
     public Credito() {
         this.categoria = new Categoria();
@@ -98,7 +114,7 @@ public class Credito extends WithId<Integer> {
         this.id = id;
     }
 
-    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, BigDecimal totalInteresesPagadoMulta, Date fechaUltimoPago, Short cuotasAtrasadas, Categoria estado, Character activo, Date ultimaModificacion) {
+    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, float interesMoratorio, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, BigDecimal totalInteresesPagadoMulta, Date fechaUltimoPago, Short cuotasAtrasadas, Categoria estado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.categoria = categoria;
         this.transaccion = transaccion;
@@ -107,6 +123,7 @@ public class Credito extends WithId<Integer> {
         this.sistemaCredito = sistemaCredito;
         this.tan = tan;
         this.tae = tae;
+        this.interesMoratorio = interesMoratorio;
         this.capital = capital;
         this.amortizacion = amortizacion;
         this.creditoTotal = creditoTotal;
@@ -338,4 +355,71 @@ public class Credito extends WithId<Integer> {
     public void setGarante(Persona garante) {
         this.garante = garante;
     }
+
+    /**
+     * @return the saldoActual
+     */
+    public BigDecimal getSaldoActual() {
+        if (saldoActual == null) {
+            saldoActual = creditoTotal.subtract(totalAmortizadoPagado.add(totalInteresesPagado));
+        }
+        return saldoActual;
+    }
+
+    public String getFechaInicioString() {
+        if (fechaInicioString == null) {
+            fechaInicioString = Conversor.deDateToString(fechaInicio, "EEEEE, d 'de' MMMMM   'de' yyyy");
+        }
+        return fechaInicioString;
+    }
+
+    /**
+     * @return the interesMoratorio
+     */
+    public float getInteresMoratorio() {
+        return interesMoratorio;
+    }
+
+    /**
+     * @param interesMoratorio the interesMoratorio to set
+     */
+    public void setInteresMoratorio(float interesMoratorio) {
+        this.interesMoratorio = interesMoratorio;
+    }
+
+    /**
+     * @return the tanString
+     */
+    public String getTanString() {
+        if (tanString == null) {
+            tanString = Conversor.numberToStringPattern(this.tan * 100) + "%";
+        }
+        return tanString;
+    }
+
+    /**
+     * @return the taeString
+     */
+    public String getTaeString() {
+        if (taeString == null) {
+            taeString = Conversor.numberToStringPattern(this.tae * 100) + "%";
+        }
+        return taeString;
+    }
+
+    public String getInteresMoratorioString() {
+        if (interesMoratorioString == null) {
+            interesMoratorioString = Conversor.numberToStringPattern(this.interesMoratorio * 100) + "%";
+        }
+        return interesMoratorioString;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
+    
 }

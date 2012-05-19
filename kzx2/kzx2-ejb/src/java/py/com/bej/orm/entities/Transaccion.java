@@ -23,7 +23,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.validator.constraints.NotEmpty;
 import py.com.bej.orm.interfaces.WithId;
 import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Conversor;
@@ -33,7 +32,7 @@ import py.com.bej.orm.utils.Conversor;
  * @author Diego_M
  */
 @Entity
-@Table(name = "Transaccion", catalog = "bej")
+@Table(name = "transaccion", catalog = "bej")
 @XmlRootElement
 public class Transaccion extends WithId<Integer> {
 
@@ -52,7 +51,7 @@ public class Transaccion extends WithId<Integer> {
     @Column(name = "fechaOperacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaOperacion;
-    @Column(name = "fechaEntrega", nullable = false)
+    @Column(name = "fechaEntrega", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaEntrega;
     @JoinColumn(name = "vendedor", referencedColumnName = "id", nullable = false)

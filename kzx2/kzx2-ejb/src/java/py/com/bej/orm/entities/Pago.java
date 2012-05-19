@@ -6,6 +6,8 @@ package py.com.bej.orm.entities;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,18 +15,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConversorDeNumeroALetra;
 
 /**
  *
  * @author Diego_M
  */
 @Entity
-@Table(name = "Pago", catalog = "bej")
+@Table(name = "pago", catalog = "bej")
 @XmlRootElement
 public class Pago extends WithId<Integer> {
 
@@ -38,16 +43,22 @@ public class Pago extends WithId<Integer> {
     @JoinColumn(name = "credito", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Credito credito;
+    @Column(name = "n_documento", nullable = false)
+    private String numeroDocumento;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "total_pagado", nullable = false, precision = 11, scale = 2)
     private BigDecimal totalPagado;
-    @Column(name = "es_pago_parcial", nullable = false)
-    private Boolean esPagoParcial;
     @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
     @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @OneToMany(mappedBy = "pago", cascade = CascadeType.ALL)
+    private List<DetallePago> detalle;
+    @Transient
+    private String totalPagadoString;
+    @Transient
+    private String cliente;
 
     public Pago() {
     }
@@ -56,12 +67,12 @@ public class Pago extends WithId<Integer> {
         this.id = id;
     }
 
-    public Pago(Integer id, Date fecha, Credito credito, BigDecimal totalPagado, Boolean esPagoParcial, Character activo, Date ultimaModificacion) {
+    public Pago(Integer id, Date fecha, Credito credito, String numeroDocumento, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.fecha = fecha;
         this.credito = credito;
+        this.numeroDocumento = numeroDocumento;
         this.totalPagado = totalPagado;
-        this.esPagoParcial = esPagoParcial;
         this.activo = activo;
         this.ultimaModificacion = ultimaModificacion;
     }
@@ -100,14 +111,6 @@ public class Pago extends WithId<Integer> {
         this.totalPagado = totalPagado;
     }
 
-    public Boolean getEsPagoParcial() {
-        return esPagoParcial;
-    }
-
-    public void setEsPagoParcial(Boolean esPagoParcial) {
-        this.esPagoParcial = esPagoParcial;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -130,7 +133,7 @@ public class Pago extends WithId<Integer> {
 
     @Override
     public String toString() {
-        return "py.com.bej.orm.entities.Pago[ id=" + id + " ]";
+        return "py.com.bej.orm.entities.Pago[ id=" + id + "," + numeroDocumento + " ]";
     }
 
     @Override
@@ -156,5 +159,36 @@ public class Pago extends WithId<Integer> {
     @Override
     public String getlabel() {
         return this.id + " " + this.getCredito().getlabel();
+    }
+
+    public List<DetallePago> getDetalle() {
+        return detalle;
+    }
+
+    public void setDetalle(List<DetallePago> detalle) {
+        this.detalle = detalle;
+    }
+
+    public String getNumeroDocumento() {
+        return numeroDocumento;
+    }
+
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
+    }
+
+    public String getTotalPagadoString() {
+        if (totalPagadoString == null) {
+            totalPagadoString = new ConversorDeNumeroALetra().getStringOfCurrency(totalPagado.floatValue());
+        }
+        return totalPagadoString;
+    }
+
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
     }
 }
