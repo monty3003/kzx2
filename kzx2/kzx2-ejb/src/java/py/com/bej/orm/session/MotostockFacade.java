@@ -6,6 +6,7 @@ package py.com.bej.orm.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -17,8 +18,10 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Plan;
+import py.com.bej.orm.utils.CategoriaEnum;
 
 /**
  *
@@ -37,6 +40,15 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
         cq.where(cb.and(cb.equal(r.get("venta").get("id"), transaccion), cb.equal(r.get("activo"), "S")));
         TypedQuery<Motostock> q = getEm().createQuery(cq);
         res = q.getSingleResult();
+        return res;
+    }
+
+    public List<Motostock> findByEstado(Integer estado) throws Exception {
+        List<Motostock> res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("estado").get("id"), estado), cb.equal(r.get("activo"), "S")));
+        TypedQuery<Motostock> q = getEm().createQuery(cq);
+        res = q.getResultList();
         return res;
     }
 
@@ -104,6 +116,12 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
                 } else {
                     cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
                 }
+            } else if (getOrden().getColumna().equals("estado")) {
+                if (getOrden().getAsc()) {
+                    cq.orderBy(cb.asc(r.get(getOrden().getColumna()).get("descripcion")));
+                } else {
+                    cq.orderBy(cb.desc(r.get(getOrden().getColumna()).get("descripcion")));
+                }
             } else {
                 if (getOrden().getAsc()) {
                     cq.orderBy(cb.asc(r.get(getOrden().getColumna())));
@@ -124,6 +142,16 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
         setDesde(getRango()[0]);
         setUltimo(getRango()[0] + getRango()[1] > getContador() ? getContador() : getRango()[0] + getRango()[1]);
         return q.getResultList();
+    }
+
+    public List<Motostock> findStockActual() {
+        List<Motostock> res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("activo"), 'S'), cb.lessThanOrEqualTo(r.get("estado").get("id"), 5)));
+        cq.orderBy(cb.asc(r.get("ubicacion").get("id")), cb.asc(r.get("id")), cb.asc(r.get("estado").get("id")));
+        TypedQuery<Motostock> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
     }
 
     @Override
@@ -147,6 +175,7 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
     @Override
     public void guardar() {
         try {
+            getEntity().setUltimaModificacion(new Date());
             getEm().merge(getEntity());
         } catch (ConstraintViolationException cve) {
             Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
@@ -158,6 +187,26 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
         } catch (Exception ex) {
             Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public int guardar(List<Motostock> listaMotostock) {
+        int res = 0;
+        try {
+            for (Motostock m : listaMotostock) {
+                getEm().merge(m);
+                res++;
+            }
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, "{0},{1},{2}",
+                        new Object[]{cv.getConstraintDescriptor(), cv.getMessageTemplate(), cv.getMessage()});
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(MotostockFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return res;
     }
 
     @Override
@@ -297,12 +346,18 @@ public class MotostockFacade extends AbstractFacade<Motostock> {
 
     public int asignarPrecioGrupal(String modelo, BigDecimal precioCosto, BigDecimal precioContado, BigDecimal precioBase) {
         int res = 0;
-        Query q = getEm().createQuery("UPDATE Motostock m SET m.costo =:costo , m.precioContado =:precioContado , m.precioBase =:precioBase"
-                + " where m.venta is null and m.activo = 'S' and m.moto.modelo =:modelo");
+        Query q = getEm().createQuery("UPDATE Motostock m SET m.costo =:costo , m.precioContado =:precioContado , m.precioBase =:precioBase ,"
+                + " m.estado =:estado"
+                + " where m.venta is null"
+                + " and m.activo = 'S'"
+                + " and m.moto.modelo =:modelo"
+                + " and m.estado !=:estadoBloqueado");
         q.setParameter("costo", precioCosto);
         q.setParameter("precioContado", precioContado);
         q.setParameter("precioBase", precioBase);
         q.setParameter("modelo", modelo);
+        q.setParameter("estado", new Categoria(CategoriaEnum.GUARDADO.getSymbol()));
+        q.setParameter("estadoBloqueado", new Categoria(CategoriaEnum.BLOQUEADO.getSymbol()));
         res = q.executeUpdate();
         return res;
     }

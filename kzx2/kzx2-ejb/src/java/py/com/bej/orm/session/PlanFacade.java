@@ -6,11 +6,16 @@ package py.com.bej.orm.session;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Plan;
 
 /**
@@ -20,6 +25,8 @@ import py.com.bej.orm.entities.Plan;
 @Stateless
 @LocalBean
 public class PlanFacade extends AbstractFacade<Plan> {
+
+    private final static Logger LOGGER = Logger.getLogger(PlanFacade.class.getName());
 
     public PlanFacade() {
         super(Plan.class);
@@ -87,8 +94,17 @@ public class PlanFacade extends AbstractFacade<Plan> {
     public void guardar() {
         try {
             getEm().merge(getEntity());
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            LOGGER.log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
         }
     }
 

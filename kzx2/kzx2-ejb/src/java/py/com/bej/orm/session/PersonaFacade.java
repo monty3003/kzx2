@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
+import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.utils.ConfiguracionEnum;
 
@@ -103,6 +105,29 @@ public class PersonaFacade extends AbstractFacade<Persona> {
         } catch (Exception ex) {
             Logger.getLogger(PersonaFacade.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public List<Persona> findByNombre(String nombre) {
+        List<Persona> res = null;
+        inicio();
+        cq.where(cb.and(cb.like(cb.lower(
+                r.get("nombre")), "%"
+                + nombre.trim() + "%"), cb.equal(r.get("activo"), 'S')));
+        TypedQuery q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public Persona findByNumeroMoto(Integer nMoto) {
+        Persona res = null;
+        Motostock m = null;
+        m = new MotostockFacade().find(nMoto);
+        if (m != null) {
+            if (m.getVenta() != null) {
+                res = m.getVenta().getComprador();
+            }
+        }
+        return res;
     }
 
     public List<Persona> findByPersona(Integer categoria) {

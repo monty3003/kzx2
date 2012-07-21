@@ -53,7 +53,7 @@ public abstract class AbstractFacade<T extends WithId> {
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
-        this.orden = new Orden(entityClass.getDeclaredFields()[1].getName(), Boolean.FALSE);
+        this.orden = new Orden(entityClass.getDeclaredFields()[0].getName(), Boolean.FALSE);
     }
 
     protected EntityManager getEm() {
@@ -162,7 +162,7 @@ public abstract class AbstractFacade<T extends WithId> {
         int res = 0;
         try {
             for (T e : lista) {
-                LOGGER.log(Level.INFO, "Se va a guardar el registro {0}", e.toString());
+                LOGGER.log(Level.FINE, "Se va a guardar el registro {0}", e.toString());
                 getEm().persist(e);
                 res++;
             }

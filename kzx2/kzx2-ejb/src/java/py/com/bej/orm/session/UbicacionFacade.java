@@ -44,7 +44,7 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
             cq.select(cq.from(getEntityClass()));
             cq.select(cb.count(r.get("id")));
             TypedQuery<Integer> q1 = setearConsulta();
-            setContador(Long.parseLong(""+q1.getSingleResult()));
+            setContador(Long.parseLong("" + q1.getSingleResult()));
         }
         q.setMaxResults(getRango()[1].intValue());
         q.setFirstResult(getRango()[0].intValue());
@@ -111,9 +111,10 @@ public class UbicacionFacade extends AbstractFacade<Ubicacion> {
         Ubicacion res = null;
         inicio();
         if (descripcion != null) {
-            cq.select(cq.from(getEntityClass())).where(cb.like(cb.lower(
+            cq.where(cb.like(cb.lower(
                     r.get("descripcion")), descripcion.toLowerCase()));
-            res = (Ubicacion) getEm().createQuery(cq).getResultList().get(0);
+            TypedQuery<Ubicacion> q = getEm().createQuery(cq);
+            res = q.getSingleResult();
         }
         return res;
     }

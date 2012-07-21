@@ -5,9 +5,9 @@
 package py.com.bej.orm.session;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -15,13 +15,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Credito;
+import py.com.bej.orm.entities.DetallePago;
 import py.com.bej.orm.entities.Financiacion;
+import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.utils.CategoriaEnum;
 
@@ -32,10 +35,19 @@ import py.com.bej.orm.utils.CategoriaEnum;
 @Stateless
 public class FinanciacionFacade extends AbstractFacade<Financiacion> {
 
+    @EJB
+    private DetallePagoFacade detallePagoFacade;
     private final static Logger LOGGER = Logger.getLogger(FinanciacionFacade.class.getName());
 
     public FinanciacionFacade() {
         super(Financiacion.class);
+    }
+
+    public DetallePagoFacade getDetallePagoFacade() {
+        if (detallePagoFacade == null) {
+            detallePagoFacade = new DetallePagoFacade();
+        }
+        return detallePagoFacade;
     }
 
     public List<Financiacion> findByTransaccion(Integer id) {
@@ -58,25 +70,67 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
         return res;
     }
 
-    public List<Financiacion> buscarCuotasPendientesPorCliente(Integer cliente, Date fechaLimite) {
+    public List<Financiacion> findByCredito(Integer id) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("credito").get("id"), id), cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasProximasAVencer(int codigoTransaccionDesde, int codigoTransaccionHasta) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(cb.greaterThanOrEqualTo(r.get("credito").get("transaccion").get("codigo").get("id"), codigoTransaccionDesde),
+                cb.lessThanOrEqualTo(r.get("credito").get("transaccion").get("codigo").get("id"), codigoTransaccionHasta),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("fechaVencimiento")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        q.setMaxResults(10);
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasPendientesPorCliente(Integer credito, Date fechaLimite) throws Exception {
         List<Financiacion> res = null;
         inicio();
         cq.where(cb.and(
-                cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("credito").get("id"), credito),
                 cb.equal(r.get("cancelado"), 'N'),
                 cb.and(cb.or(cb.lessThan(r.get("fechaVencimiento"), fechaLimite), cb.equal(r.get("fechaVencimiento"), fechaLimite))),
                 cb.equal(r.get("activo"), 'S')));
         cq.orderBy(cb.asc(r.get("numeroCuota")));
         TypedQuery<Financiacion> q = getEm().createQuery(cq);
         res = q.getResultList();
+        if (res == null || res.isEmpty()) {
+            res = Arrays.asList(buscarProximaCuotaAVencer(credito));
+        }
         return res;
     }
 
-    public List<Financiacion> buscarCuotasPendientesPorCliente(Integer cliente) {
-        List<Financiacion> res = null;
+    public Financiacion buscarProximaCuotaAVencerPorCliente(Integer cliente, Date fechaLimite) throws Exception {
+        Financiacion res = null;
         inicio();
         cq.where(cb.and(
                 cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.and(cb.or(cb.greaterThan(r.get("fechaVencimiento"), fechaLimite), cb.equal(r.get("fechaVencimiento"), fechaLimite))),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        q.setMaxResults(1);
+        res = q.getSingleResult();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasPendientesPorCredito(Integer credito) {
+        List<Financiacion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("credito").get("id"), credito),
                 cb.equal(r.get("cancelado"), 'N'),
                 cb.equal(r.get("activo"), 'S')));
         cq.orderBy(cb.asc(r.get("numeroCuota")));
@@ -85,29 +139,113 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
         return res;
     }
 
-    public List<Financiacion> buscarProximaCuotaAVencer(Integer cliente, Date fechaLimite) {
+    public List<Financiacion> buscarCuotasPendientesPorClienteyCredito(Integer cliente, Integer credito) {
         List<Financiacion> res = null;
         inicio();
         cq.where(cb.and(
-                cb.equal(r.get("credito").get("transaccion").get("comprador").get("id"), cliente),
+                cb.equal(r.get("credito").get("id"), credito),
                 cb.equal(r.get("cancelado"), 'N'),
-                cb.and(cb.greaterThan(r.get("fechaVencimiento"), fechaLimite)),
                 cb.equal(r.get("activo"), 'S')));
         cq.orderBy(cb.asc(r.get("numeroCuota")));
         TypedQuery<Financiacion> q = getEm().createQuery(cq);
         res = q.getResultList();
+        return res;
+    }
+
+    public Financiacion buscarProximaCuotaAVencer(Integer credito) throws Exception {
+        Financiacion res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.equal(r.get("credito").get("id"), credito),
+                cb.equal(r.get("cancelado"), 'N'),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("numeroCuota")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        q.setFirstResult(0);
+        q.setMaxResults(1);
+        res = q.getSingleResult();
         return res;
     }
 
     public Financiacion cancelarCuotaConPagoAsignado(Financiacion f) {
         Pago pago = null;
-        pago = new PagoFacade().find(f.getPagoAsignado());
-        if (pago != null) {
-            f.setTotalPagado(pago.getTotalPagado());
+        List<DetallePago> detallePago = null;
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal totalPagado = BigDecimal.ZERO;
+        if (f.getPagoAsignado() != null) {
+            pago = new PagoFacade().find(f.getPagoAsignado());
+            detallePago = pago.getDetalle();
+        } else {
+            detallePago = getDetallePagoFacade().findByNroCuota(f);
+            if (detallePago != null && !detallePago.isEmpty()) {
+                pago = detallePago.get(0).getPago();
+            } else {
+                return f;
+            }
+        }
+        if (detallePago != null && !detallePago.isEmpty()) {
+            for (DetallePago dp : detallePago) {
+                if (dp.getNumeroCuota() == f.getNumeroCuota()) {
+                    totalPagado = totalPagado.add(dp.getImporte());
+                    if (dp.getCodigo().getId().equals(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol())) {
+                        f.setInteresMora(f.getInteresMora().add(dp.getImporte()));
+                    } else if (dp.getCodigo().getId().equals(CategoriaEnum.DESCUENTO.getSymbol())) {
+                        f.setDescuento(f.getDescuento().add(dp.getImporte()));
+                    } else if (dp.getCodigo().getId().equals(CategoriaEnum.PAGO_CUOTA.getSymbol())
+                            || dp.getCodigo().getId().equals(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol())) {
+                        f.setTotalPagado(f.getTotalPagado().add(dp.getImporte()));
+                        total = total.add(dp.getImporte());
+                    }
+                }
+            }
+            f.setTotalPagado(totalPagado);
             f.setFechaPago(pago.getFecha());
-            f.setCancelado('S');
+            if (f.getTotalAPagar().compareTo(total) == 0) {
+                f.setCancelado('S');
+            } else {
+                f.setCancelado('N');
+            }
         }
         return f;
+    }
+
+    public List<Financiacion> buscarCuotasQueVencen(Date fechaDesde, Date fechaHasta, int maxResults) throws Exception {
+        List<Financiacion> res = null;
+        inicio();
+        List<Predicate> criteria = new ArrayList<Predicate>();
+        criteria.add(cb.equal(r.get("cancelado"), 'N'));
+        criteria.add(cb.equal(r.get("activo"), 'S'));
+        if (fechaDesde != null) {
+            criteria.add(cb.between(r.get("fechaVencimiento"), fechaDesde, fechaHasta));
+        } else {
+            criteria.add(cb.lessThanOrEqualTo(r.get("fechaVencimiento"), fechaHasta));
+        }
+        cq.where(cb.and(criteria.toArray(new Predicate[0])));
+        cq.orderBy(cb.desc(r.get("fechaVencimiento")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        if (maxResults > 0) {
+            q.setMaxResults(maxResults);
+        }
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Financiacion> buscarCuotasPorEstado(Date fechaDesde, Date fechaHasta, Character cancelado) {
+        List<Financiacion> res = null;
+        inicio();
+        List<Predicate> criteria = new ArrayList<Predicate>();
+        criteria.add(cb.equal(r.get("cancelado"), cancelado));
+        criteria.add(cb.equal(r.get("activo"), 'S'));
+        if (fechaHasta != null) {
+            criteria.add(cb.between(r.get("fechaPago"), fechaDesde, fechaHasta));
+        } else {
+            criteria.add(cb.lessThanOrEqualTo(r.get("fechaPago"), fechaDesde));
+        }
+        cq.where(cb.and(criteria.toArray(new Predicate[0])));
+        cq.orderBy(cb.desc(r.get("fechaPago")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
     }
 
     public void cancelarCuotas() throws Exception {
@@ -127,6 +265,13 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
     @Override
     public List<Financiacion> siguiente() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void guardarCambiosEnCuotas(List<Financiacion> listaCuotas) {
+        for (Financiacion f : listaCuotas) {
+            setEntity(f);
+            guardar();
+        }
     }
 
     @Override
@@ -163,23 +308,34 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
         Calendar unoEnero = new GregorianCalendar(2012, Calendar.JANUARY, 1);
         Calendar unoMayo = new GregorianCalendar(2012, Calendar.MAY, 1);
         Calendar navidad = new GregorianCalendar(2012, Calendar.DECEMBER, 25);
+        Motostock motoVendida = null;
+        try {
+            motoVendida = new MotostockFacade().findByVenta(credito.getTransaccion().getId());
+        } catch (Exception ex) {
+            Logger.getLogger(FinanciacionFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
+        int indiceRedondeo = motoVendida.getPlan().getIndiceRedondeo();
         BigDecimal saldoCapital = credito.getCapital();
         int contarCuotas = credito.getAmortizacion();
-        BigDecimal saldoFinal = saldoCapital;
-        BigDecimal interesAnualEfectivo = new BigDecimal(credito.getTae());
         BigDecimal cuotaCapital = saldoCapital.divide(BigDecimal.valueOf(contarCuotas), 0, RoundingMode.HALF_DOWN);
-        BigDecimal interesAnualNeto = new BigDecimal(credito.getTan());
-        BigDecimal cuotaInteres = cuotaCapital.multiply(interesAnualNeto).setScale(0, RoundingMode.HALF_DOWN);
+        BigDecimal interesAcumulado = BigDecimal.valueOf((credito.getTan() * contarCuotas) / (contarCuotas >= 12 ? 12 : 1)).setScale(4, RoundingMode.HALF_DOWN);
+        BigDecimal cuotaInteres = cuotaCapital.multiply(interesAcumulado).setScale(0, RoundingMode.HALF_DOWN);
         BigDecimal cuotaNeta = cuotaCapital.add(cuotaInteres);
-        BigDecimal totalAPagar = credito.getTransaccion().getMontoCuotaIgual();
+        BigDecimal totalAPagar = cuotaCapital.add(cuotaInteres).setScale(indiceRedondeo, RoundingMode.HALF_UP);
         BigDecimal ajusteRedondeo = totalAPagar.subtract(cuotaNeta);
         GregorianCalendar fecha = new GregorianCalendar();
         fecha.setTime(credito.getFechaInicio());
+        if (credito.getTransaccion().getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol())) {
+            //Ajustar para que la primera cuota corrida actue como entrega inicial
+            fecha.add(Calendar.DAY_OF_MONTH, -30);
+        }
         int dia_vencimiento = fecha.get(Calendar.DAY_OF_MONTH);
-        BigDecimal cuotaExacta;
         for (short i = 0; i < credito.getAmortizacion(); i++) {
             Financiacion f = new Financiacion();
+            f.setCancelado('N');
+            f.setInteresMora(BigDecimal.ZERO);
+            f.setDescuento(BigDecimal.ZERO);
             f.setCredito(credito);
             f.setNumeroCuota((short) (i + 1));
             f.setCuotaNeta(cuotaNeta);
@@ -197,24 +353,9 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
                 fecha.add(Calendar.DAY_OF_MONTH, -2);
             }
             f.setFechaVencimiento(fecha.getTime());
-            if (credito.getCategoria().getId().equals(CategoriaEnum.S_ALE.getSymbol())) {
-                f.setCapital(credito.getCapital());
-                f.setInteres(BigDecimal.ZERO);
-            } else if (credito.getSistemaCredito().getId().equals(CategoriaEnum.S_FRANCES.getSymbol())) {
-                BigDecimal x = BigDecimal.ONE.add(interesAnualEfectivo);
-                BigDecimal y = x.pow(contarCuotas, MathContext.DECIMAL64);
-                BigDecimal z = y.subtract(BigDecimal.ONE);
-                BigDecimal aux = z.divide(interesAnualEfectivo, 8, RoundingMode.HALF_UP);
-                BigDecimal result = saldoFinal.divide(aux, 8, RoundingMode.HALF_UP);
-                f.setCapital(result);
-                f.setInteres(cuotaNeta.subtract(result));
-                saldoFinal = saldoFinal.subtract(result);
-                contarCuotas--;
-            } else {
-                f.setCapital(cuotaCapital);
-                f.setInteres(cuotaInteres);
-                f.setAjusteRedondeo(ajusteRedondeo);
-            }
+            f.setCapital(cuotaCapital);
+            f.setInteres(cuotaInteres);
+            f.setAjusteRedondeo(ajusteRedondeo);
             f.setActivo('S');
             f.setUltimaModificacion(new Date());
             Logger.getLogger(FinanciacionFacade.class.getName()).log(Level.INFO, "_{0}______________{1}_______{2}______{3}_____{4}_____{5}",
@@ -222,5 +363,41 @@ public class FinanciacionFacade extends AbstractFacade<Financiacion> {
             res.add(f);
         }
         return res;
+    }
+
+    public Financiacion buscarLaCuotaPendienteMasAntigua() {
+        Financiacion res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("activo"), 'S'),
+                cb.equal(r.get("cancelado"), 'N')));
+        cq.orderBy(cb.asc(r.get("fechaVencimiento")));
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        q.setFirstResult(0);
+        q.setMaxResults(1);
+        res = q.getSingleResult();
+        return res;
+
+    }
+
+    public Financiacion buscarLaCuotaPendientePorFechaVencimiento(Boolean asc) {
+        Financiacion res = null;
+//        Calendar c = new GregorianCalendar(2010, 0, 1);
+        inicio();
+//        cq.where(cb.and(cb.equal(r.get("activo"), 'S'),
+//                cb.equal(r.get("cancelado"), 'N'),
+//                cb.greaterThanOrEqualTo(r.get("fechaVencimiento"), c.getTime())));
+        cq.where(cb.and(cb.equal(r.get("activo"), 'S'),
+                cb.equal(r.get("cancelado"), 'N')));
+        if (asc) {
+            cq.orderBy(cb.asc(r.get("fechaVencimiento")));
+        } else {
+            cq.orderBy(cb.desc(r.get("fechaVencimiento")));
+        }
+        TypedQuery<Financiacion> q = getEm().createQuery(cq);
+        q.setFirstResult(0);
+        q.setMaxResults(1);
+        res = q.getSingleResult();
+        return res;
+
     }
 }
