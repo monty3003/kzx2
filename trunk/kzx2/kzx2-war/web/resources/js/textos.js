@@ -23,3 +23,9 @@ function pasarMayusculas(cadena) {
     }
     alert(result); //return(result);
 }
+
+function imprimir(){
+    window.print();
+    window.close();
+    window.location = document.URL;
+}

@@ -18,28 +18,39 @@ root {
 }
 h3{font-size: 18px;
    color: #000099;
-   font-family: Arial,Helvetica,sans-serif;
+   font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 }
 
 body{
     background-image: url("./../images/page-bkg2.jpg");
     text-align:center;
-    font: 12px Arial,Helvetica,sans-serif;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
     margin: 10px 50px 50px;
 }
 body input, select{
     padding: 5px;
+
+    background: #ededed; /* Old browsers */
+    background: -moz-linear-gradient(top,  #ededed 0%, #f6f6f6 53%, #ffffff 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ededed), color-stop(53%,#f6f6f6), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #ededed 0%,#f6f6f6 53%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #ededed 0%,#f6f6f6 53%,#ffffff 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #ededed 0%,#f6f6f6 53%,#ffffff 100%); /* IE10+ */
+    background: linear-gradient(top,  #ededed 0%,#f6f6f6 53%,#ffffff 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ededed', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+
 }
 body hr{
     clear: both;
 }
-div {
+/*div {
     margin: .4em 0;
-}
+}*/
 
 .lock{
     width: 100%;
-    height: 200px;
+    height: 100px;
     display: block;
     clear: both;
     text-align: center;
@@ -120,7 +131,7 @@ fieldset{
 
 .submit{
     margin: 5px;
-    padding: 5px;
+    padding: 10px;
 }
 
 input:focus {
@@ -209,7 +220,7 @@ input:focus {
 .tablaDatos{width: 100%; clear: both; overflow: hidden;}
 .tablaDatos thead{
     font-weight: bold;
-    padding: 2px;
+    padding: 4px;
     background-color: #deddec;
     border:solid #f9f9f9;
 }
@@ -228,6 +239,53 @@ input:focus {
     font-size: smaller; color: #cbcad0;
 }
 .tablaDatos td{padding: 5px;}
+
+/*--------------COLOREADO------------------------*/
+.verde td{
+    background-color: #abfac3 !important;
+}
+.amarillo td {
+    background-color: #fcfcd7 !important;
+}
+.rojo td{
+    background-color: #ffdad7 !important;
+}
+
+.azul td{
+    background-color: #9999ff !important;
+}
+
+.estado0{background-color: #cccccc; font-weight: bolder; color: #000; }
+.estado1{background-color: #ff9900; font-weight: bolder; color: #000; }
+.estado2{background-color: #000099; font-weight: bolder; color: #FFF; }
+.estado3{background-color: #000; font-weight: bolder; color: #FFF; }
+.estado4{background-color: #009933; font-weight: bolder; color: #FFF; }
+.estado5{background-color: #ff0000; font-weight: bolder; color: #FFF; }
+.estado6{background-color: #9999ff; font-weight: bolder; color: #000; }
+.estado8{background-color: #333300; font-weight: bolder; color: #FFF; }
+.estado9{background-color: #ffff00; font-weight: bolder; color: #000; }
+
+/*--------------TABLA DE LA GRILLA DE CREDITOS---------------------*/
+.tablaGrillaCreditos{
+    width: 1024px;
+    border: 1px solid #000;
+    border-collapse: collapse;
+    margin: 0px auto;
+    padding: 0px;
+}
+.tablaGrillaCreditos th{
+    font-weight: bold;
+    background-color: #e0eff9;  
+    border: 1px solid #000;
+}
+.tablaGrillaCreditos td{
+    background-color: #fff;
+    border: 1px solid #000;
+}
+
+.tablaGrillaCreditos tr:hover{
+    border: 1px solid  #ff0066;
+}
 
 /*--------------TABLA DE DATOS PARA INGRESO TIPO GRILLA---------------------*/
 .tablaGrilla{width: 100%; clear: both; overflow: hidden;}
@@ -320,7 +378,7 @@ input:focus {
     border:2px solid whitesmoke;
     background-color: #e9e2e2;
     text-align:right;
-    font-size: medium;
+    /*    font-size: medium;*/
 }
 
 .num_out{
@@ -340,6 +398,515 @@ input:focus {
     clear: both;
     margin: 10px auto;
 }
+.botonera input, button{
+    padding: 10px;
+    margin: 5px;
+
+    background: #f2f6f8; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f2f6f8 0%, #d8e1e7 50%, #b5c6d0 51%, #e0eff9 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f6f8), color-stop(50%,#d8e1e7), color-stop(51%,#b5c6d0), color-stop(100%,#e0eff9)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* IE10+ */
+    background: linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f6f8', endColorstr='#e0eff9',GradientType=0 ); /* IE6-9 */
+
+}
+
+
+.botonera input:hover{
+    background: #e0eff9; /* Old browsers */
+    background: -moz-linear-gradient(top,  #e0eff9 0%, #b5c6d0 49%, #d8e1e7 50%, #f2f6f8 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e0eff9), color-stop(49%,#b5c6d0), color-stop(50%,#d8e1e7), color-stop(100%,#f2f6f8)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* IE10+ */
+    background: linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e0eff9', endColorstr='#f2f6f8',GradientType=0 ); /* IE6-9 */
+}
+
+.tablaPlan{
+    width: 70%;
+    padding: 5px;
+    margin: 5px auto;
+    vertical-align: middle;
+}
+.tablaPlan th{
+    border: 1px solid #000;
+    padding: 5px;
+    background-color: #cccccc;
+    width: 20%;
+    text-align: center;
+}
+.tablaPlan td{
+    border: 1px solid #000;
+    padding: 5px;
+    text-align: left;
+}
 
 
 
+.rf-cal-extr {
+    border: 1px solid #C4C0B9;
+}
+
+.rf-cal-popup {
+    cursor: default;
+}
+
+.rf-cal-btn {
+    cursor: pointer;
+}
+
+.rf-cal-hdr-optnl {
+    background-color: #F1EEE9;
+    border-bottom: 1px solid #C4C0B9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 22px;
+    padding: 7px;
+}
+
+.rf-cal-hdr {
+    background-color: #F1EEE9;
+    border-bottom: 1px solid #C4C0B9;
+    border-right: 0px solid;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+}
+
+.rf-cal-c-cnt-overflow {
+    height: 22px;
+    width: 25px;
+}
+
+.rf-cal-c-cnt {
+    overflow: hidden;
+}
+
+.rf-cal-c {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #C4C0B9;
+    border-right: 1px solid #C4C0B9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    padding: 0px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.rf-cal-hdr-month {
+    background-color: #D4CFC7;
+    color: #000000;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 22px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.rf-cal-tl {
+    background-color: #D4CFC7;
+    color: #000000;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 22px;
+    text-align: center;
+    vertical-align: middle;
+    width: 20px;
+}
+
+.rf-cal-day-lbl {
+    background-color: #F1EEE9;
+    border-bottom: 1px solid #C4C0B9;
+    border-right: 0px solid #C4C0B9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    height: 22px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.rf-cal-week {
+    background-color: #F1EEE9;
+    border-bottom: 1px solid #C4C0B9;
+    border-right: 1px solid #C4C0B9;
+    color: red;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    text-align: center;
+    vertical-align: middle;
+    width: 25px;
+}
+
+.rf-cal-right-c {
+    border-right: 0px none;
+}
+
+.rf-btm-c {
+    border-bottom: 0px none;
+}
+
+.rf-cal-tl-ftr {
+    background: url("/bej-motos-web/rfRes/calendarSeparator.png.bej?v=4.0.0.Final&db=eAH7z8DAAAAEAAEA&ln=org.richfaces.images") no-repeat scroll right center #F1EEE9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    height: 22px;
+    padding: 1px 2px 1px 1px;
+}
+
+.rf-cal-ftr-optnl {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-right: 0px solid #C4C0B9;
+    border-top: 1px solid #C4C0B9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 22px;
+    padding: 7px;
+}
+
+.rf-cal-ftr {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-right: 0px solid #C4C0B9;
+    border-top: 1px solid #C4C0B9;
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+}
+
+.rf-cal-sp-inp {
+    background: none repeat scroll 0% 0% transparent;
+    border: 0px none;
+    font-family: Arial,Verdana,sans-serif;
+    padding: 0px 0px 0px 3px;
+    width: 18px;
+}
+
+.rf-cal-sp-inp-cntr {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #FFFFFF;
+    background-image: url("/bej-motos-web/rfRes/inputBackgroundImage.png.bej?v=4.0.0.Final&db=eAFjZL!AyMDN-P8!4!-P714C6f!!GZgAYeQKqw__&ln=org.richfaces.images");
+    background-position: left top;
+    background-repeat: repeat-x;
+    border-color: #C4C0B9 #FFFFFF #FFFFFF #C4C0B9;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.rf-cal-sp-btn {
+    background-color: #D4CFC7;
+    background-image: url("/bej-motos-web/rfRes/buttonBackgroundImage.png.bej?v=4.0.0.Final&db=eAFjZGBkZOBm!P-f8f!bV88Y!185f5yBCQBPWAk3&ln=org.richfaces.images");
+    background-position: left top;
+    background-repeat: repeat-x;
+    border-color: #D4CFC7;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 0px;
+}
+
+.rf-cal-spec {
+    background-color: #F1EEE9;
+}
+
+.rf-cal-holiday {
+    background-color: #FFEBDA;
+    color: #FF7800;
+}
+
+.rf-cal-boundary-day {
+    color: #A0A0A0;
+}
+
+.rf-cal-today {
+    background-color: #FF7800;
+    color: #FFEBDA;
+    font-weight: bold;
+}
+
+.rf-cal-sel {
+    background-color: #D4CFC7;
+    color: #000000;
+    font-weight: bold;
+}
+
+.rf-cal-hov {
+    background-color: #F1EEE9;
+}
+
+.rf-cal-tl-btn {
+    cursor: pointer;
+    padding: 2px 3px;
+    white-space: nowrap;
+}
+
+.rf-cal-tl-btn-dis {
+    cursor: pointer;
+    padding: 2px 3px;
+}
+
+.rf-cal-tl-btn-hov {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #F1EEE9;
+    border-color: #FFFFFF #C4C0B9 #C4C0B9 #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+    color: #000000;
+    padding: 1px 2px;
+}
+
+.rf-cal-btn-press {
+    border-color: #C4C0B9 #FFFFFF #FFFFFF #C4C0B9;
+}
+
+.rf-cal-btn-close {
+    background-image: url("/bej-motos-web/rfRes/calendarSeparator.png.bej?v=4.0.0.Final&db=eAH7z8DAAAAEAAEA&ln=org.richfaces.images");
+    background-position: left center;
+    background-repeat: no-repeat;
+    padding: 2px 2px 2px 4px;
+}
+
+.rf-cal-btn {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.rf-cal-edtr-shdw {
+    background: none repeat scroll 0% 0% #FFFFFF;
+    opacity: 0.5;
+}
+
+.rf-cal-timepicker-cnt {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border: 1px solid #C4C0B9;
+    position: relative;
+}
+
+.rf-cal-monthpicker-cnt {
+    background: none repeat scroll 0% 0% #FFFFFF;
+    border: 1px solid #C4C0B9;
+    position: relative;
+}
+
+.rf-cal-timepicker-cnt, .rf-cal-monthpicker-cnt, .rf-cal-timepicker-cnt input {
+    font-family: Arial,Verdana,sans-serif;
+    font-size: 11px;
+}
+
+.rf-cal-timepicker-inp {
+    padding: 7px 7px 5px;
+    white-space: nowrap;
+}
+
+.rf-cal-timepicker-cancel {
+    padding: 0px 7px 7px 1px;
+}
+
+.rf-cal-timepicker-ok {
+    padding: 0px 1px 7px 7px;
+}
+
+.rf-cal-monthpicker-cancel {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-top: 1px solid #C4C0B9;
+    padding: 5px 5px 5px 1px;
+}
+
+.rf-cal-monthpicker-ok {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-top: 1px solid #C4C0B9;
+    padding: 5px 1px 5px 5px;
+}
+
+.rf-cal-monthpicker-split {
+    border-right: 1px solid #C4C0B9;
+}
+
+.rf-cal-time-btn {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-color: #FFFFFF #C4C0B9 #C4C0B9 #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    padding: 2px;
+    text-align: center;
+    white-space: nowrap;
+    width: 45px;
+}
+
+.rf-cal-time-btn-press {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #F1EEE9;
+    border-color: #C4C0B9 #FFFFFF #FFFFFF #C4C0B9;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.rf-cal-time-inp {
+    margin: 0px 2px;
+    width: 22px;
+}
+
+.rf-cal-sp-up, .rf-cal-sp-down {
+    background-position: 50% 40%;
+    background-repeat: no-repeat;
+    height: 7px;
+    margin: 0px 1px 1px 0px;
+    width: 14px;
+}
+
+.rf-cal-sp-up {
+    background-image: url("/bej-motos-web/rfRes/spinnerArrowTop.png.bej?v=4.0.0.Final&db=eAH7z8DAAAAEAAEA&ln=org.richfaces.images");
+}
+
+.rf-cal-sp-down {
+    background-image: url("/bej-motos-web/rfRes/spinnerArrowBottom.png.bej?v=4.0.0.Final&db=eAH7z8DAAAAEAAEA&ln=org.richfaces.images");
+}
+
+.rf-cal-sp-press {
+    margin: 1px 0px 0px 1px;
+}
+
+.rf-cal-sp-btn {
+    background-color: #D4CFC7;
+    background-image: url("/bej-motos-web/rfRes/buttonBackgroundImage.png.bej?v=4.0.0.Final&db=eAFjZGBkZOBm!P-f8f!bV88Y!185f5yBCQBPWAk3&ln=org.richfaces.images");
+    border-color: #D4CFC7;
+}
+
+.rf-cal-edtr-layout-shdw {
+    background-color: #000000;
+    opacity: 0.3;
+    position: absolute;
+}
+
+.rf-cal-edtr-btn {
+    cursor: pointer;
+    margin: 2px;
+    padding: 2px;
+    text-align: center;
+    width: 36px;
+}
+
+.rf-cal-edtr-btn-over {
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border: 1px solid #C4C0B9;
+    padding: 1px;
+}
+
+.rf-cal-edtr-btn-sel {
+    background-color: #FF7800;
+    border: 0px none;
+    color: #FFEBDA;
+    cursor: default;
+    font-weight: bold;
+    padding: 2px;
+}
+
+.rf-cal-edtr-tl-over {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-color: #FFFFFF #C4C0B9 #C4C0B9 #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+    padding: 1px;
+}
+
+.rf-cal-edtr-tl-press {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: none repeat scroll 0% 0% #F1EEE9;
+    border-color: #C4C0B9 #FFFFFF #FFFFFF #C4C0B9;
+    border-style: solid;
+    border-width: 1px;
+    padding: 1px;
+}
+
+input.rf-cal-dflt-lbl {
+    color: #B3B3B3;
+}
+
+
+/*-------------------Panel de Inicio-------------------------*/
+#centro{
+    margin: 0 0 0 8px;
+    clear: both;
+}
+#centro a, a:link:hover, #top a:visited:hover  {
+    color: black;
+    text-decoration: none;
+}
+/*-------------------FIN Panel de Inicio-------------------------*/
+
+/*-------------------Botones de inicio-------------------------*/
+#centro a{
+    font-size: 20px;
+    padding: 50px 0px 50px 0px;
+    display: inline-block;
+    float: left;
+    width: 49%;
+    border: 1px solid black;
+    background: #f2f6f8; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f2f6f8 0%, #d8e1e7 50%, #b5c6d0 51%, #e0eff9 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f6f8), color-stop(50%,#d8e1e7), color-stop(51%,#b5c6d0), color-stop(100%,#e0eff9)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* IE10+ */
+    background: linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f6f8', endColorstr='#e0eff9',GradientType=0 ); /* IE6-9 */
+
+}
+
+
+#centro a:hover{
+    background: #e0eff9; /* Old browsers */
+    background: -moz-linear-gradient(top,  #e0eff9 0%, #b5c6d0 49%, #d8e1e7 50%, #f2f6f8 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e0eff9), color-stop(49%,#b5c6d0), color-stop(50%,#d8e1e7), color-stop(100%,#f2f6f8)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* IE10+ */
+    background: linear-gradient(top,  #e0eff9 0%,#b5c6d0 49%,#d8e1e7 50%,#f2f6f8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e0eff9', endColorstr='#f2f6f8',GradientType=0 ); /* IE6-9 */
+}
+
+#centro span{
+    padding-top: 30px;
+    padding-left: 70px;
+    padding-bottom: 30px;
+    padding-right: 0px;
+}
+
+.btnCobrar span{background: url("../images/Paper-Money-icon.png") no-repeat -7px 5px;}
+.btnVenderMoto span{background: url("../images/motorbike-icon.png") no-repeat 10px 15px;}
+.btnRegistrarCompra span{background: url("../images/data-management-icon.png") no-repeat -6px 0px;}
+.btnVencimientos span{background: url("../images/calendar-icon.png") no-repeat -6px 0px;}
+.btnStockActual span{background: url("../images/Actions-document-edit-icon.png") no-repeat -2px 10px;}
+.btnCreditos span{background: url("../images/personal-loan-icon.png") no-repeat -2px 10px;}
+
+/*-------------------FIN Botones de Inicio-------------------------*/

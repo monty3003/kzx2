@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stock" pageWidth="612" pageHeight="936" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="2.1961500000000007"/>
+	<property name="ireport.x" value="91"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="EMPRESA" class="java.lang.String"/>
+	<parameter name="PIE_PAGINA" class="java.lang.String"/>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="moto.codigo" class="java.lang.String"/>
+	<field name="moto.modelo" class="java.lang.String"/>
+	<field name="moto.color" class="java.lang.String"/>
+	<field name="motor" class="java.lang.String"/>
+	<field name="chasis" class="java.lang.String"/>
+	<field name="estado.descripcion" class="java.lang.String"/>
+	<field name="ubicacion.descripcion" class="java.lang.String"/>
+	<variable name="id_1" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{id}]]></variableExpression>
+	</variable>
+	<variable name="id_2" class="java.lang.Integer" resetType="Group" resetGroup="modelo" calculation="Count">
+		<variableExpression><![CDATA[$F{id}]]></variableExpression>
+	</variable>
+	<group name="modelo">
+		<groupExpression><![CDATA[$F{moto.modelo}]]></groupExpression>
+		<groupHeader>
+			<band height="28">
+				<textField>
+					<reportElement x="19" y="12" width="253" height="16"/>
+					<textElement>
+						<font size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{moto.modelo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="18">
+				<textField>
+					<reportElement x="472" y="0" width="100" height="18"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="12" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{id_2}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="19" y="0" width="43" height="18"/>
+					<textElement verticalAlignment="Middle">
+						<font size="12" isBold="false"/>
+					</textElement>
+					<text><![CDATA[TOTAL]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="62" y="1" width="253" height="17"/>
+					<box leftPadding="4" rightPadding="0"/>
+					<textElement verticalAlignment="Middle">
+						<font size="12" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{moto.modelo}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="19" y="0" width="553" height="1"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="572" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{EMPRESA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="23"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[STOCK DE MOTOS POR MODELO]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="19" y="0" width="24" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nro.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="43" y="0" width="84" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Color]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="128" y="0" width="106" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[chasis]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="234" y="0" width="106" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[motor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="0" width="112" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="452" y="0" width="108" height="20"/>
+				<box topPadding="1" bottomPadding="1">
+					<topPen lineWidth="1.0" lineStyle="Double"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ubicación]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="43" y="0" width="84" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moto.color}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="128" y="0" width="106" height="12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{chasis}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="234" y="0" width="106" height="12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="340" y="0" width="112" height="12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado.descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="452" y="0" width="108" height="12"/>
+				<box rightPadding="4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ubicacion.descripcion}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="560" y="1" width="12" height="11"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="19" y="0" width="24" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="9" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="19" y="0" width="553" height="1"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="11" splitType="Stretch">
+			<line>
+				<reportElement x="19" y="0" width="553" height="1"/>
+			</line>
+		</band>
+	</columnFooter>
+	<summary>
+		<band height="37" splitType="Stretch">
+			<textField pattern="#,##0">
+				<reportElement x="472" y="15" width="100" height="22"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{id_1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="19" y="15" width="453" height="22"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL GENERAL:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>
