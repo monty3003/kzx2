@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -26,7 +27,7 @@ import py.com.bej.orm.interfaces.WithId;
  *
  * @author Diego_M
  */
-    @Entity
+@Entity
 @Table(name = "motostock", catalog = "bej")
 @XmlRootElement
 public class Motostock extends WithId<Integer> {
@@ -37,7 +38,7 @@ public class Motostock extends WithId<Integer> {
     private Integer id;
     @Column(name = "id_anterior", nullable = true)
     private Integer idAnterior;
-    @JoinColumn(name = "moto", referencedColumnName = "codigo", insertable = true, updatable = true, nullable = false)
+    @JoinColumn(name = "moto", referencedColumnName = "codigo", nullable = false)
     @ManyToOne(optional = false)
     private Moto moto;
     @Column(name = "motor", length = 25)
@@ -58,17 +59,24 @@ public class Motostock extends WithId<Integer> {
     private BigDecimal precioBase;
     @Column(name = "precio_contado", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioContado;
+    @Column(name = "gravamen", nullable = false, scale = 2)
+    private Float gravamen;
     @JoinColumn(name = "ubicacion", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Ubicacion ubicacion;
     @JoinColumn(name = "plan", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
     private Plan plan;
+    @JoinColumn(name = "estado", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Categoria estado;
     @Column(name = "activo", length = 1, nullable = false)
     private Character activo;
     @Column(name = "ultimaModificacion")
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @Transient
+    private Boolean selected;
 
     public Motostock() {
         this.moto = new Moto();
@@ -81,7 +89,7 @@ public class Motostock extends WithId<Integer> {
         this.id = id;
     }
 
-    public Motostock(Integer id, Moto moto, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Ubicacion ubicacion, Character activo) {
+    public Motostock(Integer id, Moto moto, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Float gravamen, Ubicacion ubicacion, Character activo) {
         this.id = id;
         this.moto = moto;
         this.chasis = chasis;
@@ -90,11 +98,12 @@ public class Motostock extends WithId<Integer> {
         this.costo = costo;
         this.precioBase = precioBase;
         this.precioContado = precioContado;
+        this.gravamen = gravamen;
         this.ubicacion = ubicacion;
         this.activo = activo;
     }
 
-    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Ubicacion ubicacion, Plan plan, Character activo, Date ultimaModificacion) {
+    public Motostock(Integer id, Moto moto, String motor, String chasis, Transaccion compra, Transaccion venta, BigDecimal costo, BigDecimal precioBase, BigDecimal precioContado, Float gravamen, Ubicacion ubicacion, Plan plan, Categoria estado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.idAnterior = id;
         this.moto = moto;
@@ -105,8 +114,10 @@ public class Motostock extends WithId<Integer> {
         this.costo = costo;
         this.precioBase = precioBase;
         this.precioContado = precioContado;
+        this.gravamen = gravamen;
         this.ubicacion = ubicacion;
         this.plan = plan;
+        this.estado = estado;
         this.activo = activo;
         this.ultimaModificacion = ultimaModificacion;
     }
@@ -167,6 +178,14 @@ public class Motostock extends WithId<Integer> {
 
     public void setPrecioContado(BigDecimal precioContado) {
         this.precioContado = precioContado;
+    }
+
+    public Float getGravamen() {
+        return gravamen;
+    }
+
+    public void setGravamen(Float gravamen) {
+        this.gravamen = gravamen;
     }
 
     public Ubicacion getUbicacion() {
@@ -275,5 +294,21 @@ public class Motostock extends WithId<Integer> {
 
     public void setPlan(Plan plan) {
         this.plan = plan;
+    }
+
+    public Categoria getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Categoria estado) {
+        this.estado = estado;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
     }
 }

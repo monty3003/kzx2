@@ -22,6 +22,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConfiguracionEnum;
+import py.com.bej.orm.utils.Conversor;
 import py.com.bej.orm.utils.ConversorDeNumeroALetra;
 
 /**
@@ -38,7 +40,7 @@ public class Pago extends WithId<Integer> {
     @Column(name = "id", nullable = false)
     private Integer id;
     @Column(name = "fecha", nullable = false)
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
     @JoinColumn(name = "credito", referencedColumnName = "id", insertable = false, updatable = true, nullable = false)
     @ManyToOne(optional = false)
@@ -53,14 +55,34 @@ public class Pago extends WithId<Integer> {
     @Column(name = "ultimaModificacion", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ultimaModificacion;
+    @Column(name = "fechaCreacion", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaCreacion;
+    @JoinColumn(name = "usuario_creacion", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Usuario usuarioCreacion;
+    @JoinColumn(name = "usuario_modificacion", referencedColumnName = "id", insertable = true, updatable = true, nullable = false)
+    @ManyToOne(optional = false)
+    private Usuario usuarioModificacion;
     @OneToMany(mappedBy = "pago", cascade = CascadeType.ALL)
     private List<DetallePago> detalle;
     @Transient
     private String totalPagadoString;
     @Transient
+    private String fechaString;
+    @Transient
     private String cliente;
+    @Transient
+    private String membrete;
+    @Transient
+    private String empresa;
+    @Transient
+    private String ruc;
+    @Transient
+    private String saldoActualString;
 
     public Pago() {
+        this.credito = new Credito();
     }
 
     public Pago(Integer id) {
@@ -190,5 +212,72 @@ public class Pago extends WithId<Integer> {
 
     public void setCliente(String cliente) {
         this.cliente = cliente;
+    }
+
+    public String getMembrete() {
+        return membrete;
+    }
+
+    public void setMembrete(String membrete) {
+        this.membrete = membrete;
+    }
+
+    public String getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(String empresa) {
+        this.empresa = empresa;
+    }
+
+    public String getRuc() {
+        return ruc;
+    }
+
+    public void setRuc(String ruc) {
+        this.ruc = ruc;
+    }
+
+    public String getFechaString() {
+        if (fechaString == null) {
+            fechaString = Conversor.deDateToString(fecha, ConfiguracionEnum.DATETIME_PATTERN.getSymbol());
+        }
+        return fechaString;
+    }
+
+    public void setFechaString(String fechaString) {
+        this.fechaString = fechaString;
+    }
+
+    public String getSaldoActualString() {
+        return saldoActualString;
+    }
+
+    public void setSaldoActualString(String saldoActualString) {
+        this.saldoActualString = saldoActualString;
+    }
+
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Usuario getUsuarioCreacion() {
+        return usuarioCreacion;
+    }
+
+    public void setUsuarioCreacion(Usuario usuarioCreacion) {
+        this.usuarioCreacion = usuarioCreacion;
+    }
+
+    public Usuario getUsuarioModificacion() {
+        return usuarioModificacion;
+    }
+
+    public void setUsuarioModificacion(Usuario usuarioModificacion) {
+        this.usuarioModificacion = usuarioModificacion;
     }
 }

@@ -6,7 +6,6 @@ package py.com.bej.orm.entities;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -207,7 +206,7 @@ public class Moto extends WithId<String> {
 
     @Override
     public String getlabel() {
-        return this.marca + " " + this.modelo + " " + this.color;
+        return this.marca + " " + this.modelo;
     }
 
     /**

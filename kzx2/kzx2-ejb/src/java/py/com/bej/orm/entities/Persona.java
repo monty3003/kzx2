@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -100,6 +101,8 @@ public class Persona extends WithId<Integer> {
     private String fechaIngresoString;
     @Transient
     private String fechaNacimientoString;
+    @OneToOne(mappedBy = "persona")
+    private Calificacion calificacion;
 
     public Persona() {
         this.categoria = new Categoria();
@@ -445,5 +448,13 @@ public class Persona extends WithId<Integer> {
      */
     public void setCreditos(List<Credito> creditos) {
         this.creditos = creditos;
+    }
+
+    public Calificacion getCalificacion() {
+        return calificacion;
+    }
+
+    public void setCalificacion(Calificacion calificacion) {
+        this.calificacion = calificacion;
     }
 }
