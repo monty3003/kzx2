@@ -54,14 +54,14 @@
                                 <h:panelGroup id="panelGrilla">
                                     <h:panelGroup rendered="#{empty asignarPlanBean.listaDePlanes}">
                                         <div class="botonera">
-                                            <h:commandButton id="asignar" value="Generar Grilla" action="#{asignarPlanBean.asignarPlan()}"/>
+                                            <h:commandButton id="asignar" type="submit" value="Generar Grilla" action="#{asignarPlanBean.asignarPlan()}"/>
                                         </div>
                                     </h:panelGroup>
                                     <h:panelGroup rendered="#{not empty asignarPlanBean.listaDePlanes}">
                                         <table id="tabla" class="tablaDatos">
                                             <thead>
                                                 <tr>
-                                                    <th colspan="13">
+                                                    <th colspan="20">
                                                         <div style="display: inline-block;clear: left;"><h:outputText value="#{asignarPlanBean.motostock.moto.getlabel()}"/></div>
                                                         <div style="display: inline-block;clear: right;"><h:outputText value="Precio Contado:"/>
                                                             <h:outputText value="#{asignarPlanBean.motostock.precioContado}">
@@ -71,9 +71,14 @@
                                                 <tr>
                                                     <ui:repeat value="#{asignarPlanBean.listaDeEntrega}" var="row">
                                                         <th>
-                                                            <h:outputText value="#{row}">
-                                                                <f:convertNumber pattern="#{asignarPlanBean.monedaPattern}"/>
-                                                            </h:outputText>
+                                                            <h:panelGroup rendered="#{row.intValue() eq 0}">
+                                                                <h:outputText value="Cuota Corrida"/>
+                                                            </h:panelGroup>
+                                                            <h:panelGroup rendered="#{row.intValue() gt 0}">
+                                                                <h:outputText value="#{row}">
+                                                                    <f:convertNumber pattern="#{asignarPlanBean.monedaPattern}"/>
+                                                                </h:outputText>
+                                                            </h:panelGroup>
                                                         </th>
                                                     </ui:repeat>
                                                 </tr>

@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <title>Informe de Ventas</title>
+    </h:head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3>Ventas de Motos</h3>
+                            <h4>Seleccione un rango de fechas para obtener las ventas.</h4>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="fechaDesde">Fecha Desde: </label></div>
+                                    <div class="cont">
+                                        <h:selectBooleanCheckbox id="fechaDesdeAhora" title="Ahora" value="#{ventaMotosBean.usarFechaDesdeAhora}" label="Ahora">
+                                            <f:ajax render="fechaDesde"/>
+                                        </h:selectBooleanCheckbox>Ahora<br/>
+                                        <rich:calendar value="#{ventaMotosBean.fechaDesde}" id="fechaDesde"
+                                                       locale="en/US" popup="true"
+                                                       datePattern="dd/MM/yyyy"
+                                                       showApplyButton="true"
+                                                       disabled="#{ventaMotosBean.usarFechaDesdeAhora}">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="fechaDesde"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fechaHasta">Fecha Hasta: </label></div>
+                                    <div class="cont">
+                                        <h:selectBooleanCheckbox id="fechaHastaAhora" title="Ahora" value="#{ventaMotosBean.usarFechaHastaAhora}" label="Ahora">
+                                            <f:ajax render="fechaHasta"/>
+                                        </h:selectBooleanCheckbox>Ahora<br/>
+                                        <rich:calendar value="#{ventaMotosBean.fechaHasta}" id="fechaHasta"
+                                                       locale="en/US" popup="true"
+                                                       datePattern="dd/MM/yyyy"
+                                                       showApplyButton="true"
+                                                       disabled="#{ventaMotosBean.usarFechaHastaAhora}">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="fechaHasta"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="botonera">
+                                <h:commandButton action="#{ventaMotosBean.buscarVentasPorFecha}" value="Aceptar"/>
+                            </div>
+                            <div class="centrado" style="width: 90%;">
+                                <h:panelGroup rendered="#{not empty ventaMotosBean.listaInforme}">
+                                    <table class="tablaDatos">
+                                        <thead>
+                                            <tr>
+                                                <th width="2%">Nº</th>
+                                                <th>Fecha</th>
+                                                <th>Moto</th>
+                                                <th>Cliente</th>
+                                                <th>Crédito</th>
+                                                <th>Precio Contado</th>
+                                                <th>Entrega</th>
+                                                <th width="2%">Fin.</th>
+                                                <th>Cuota</th>
+                                                <th>Precio Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <h:panelGroup rendered="#{not empty ventaMotosBean.listaInforme}">
+                                                <ui:repeat value="#{ventaMotosBean.listaInforme}" var="row">
+                                                    <tr>
+                                                        <td>
+                                                            <h:outputText value="#{row.id}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.fechaOperacion}">
+                                                                <f:convertDateTime pattern="#{ventaMotosBean.fechaHoraPattern}" timeZone="#{loginBean.timeZone}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.motoVendida.id}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.comprador.nombre}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText rendered="#{row.codigo.id eq 50}" value="N"/>
+                                                            <h:outputText rendered="#{row.codigo.id ne 50}" value="S"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.motoVendida.precioContado}">
+                                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.entregaInicial}">
+                                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.cuotas}"/>
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{row.montoCuotaIgual}">
+                                                                <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                            </h:outputText>
+                                                        </td>
+                                                        <td>
+                                                            <h:panelGroup rendered="#{row.codigo.id eq 50}">
+                                                                <h:outputText value="#{row.totalPagado}">
+                                                                    <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                                </h:outputText>
+                                                            </h:panelGroup>
+                                                            <h:panelGroup rendered="#{row.codigo.id ne 50}">
+                                                                <h:outputText value="#{row.entregaInicial + row.montoCuotaIgual * row.cuotas}">
+                                                                    <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                                </h:outputText>
+                                                            </h:panelGroup>
+                                                        </td>
+                                                    </tr>
+                                                </ui:repeat>
+                                            </h:panelGroup>
+                                        </tbody>
+                                    </table>
+                                </h:panelGroup> 
+                                <h:panelGroup rendered="#{empty ventaMotosBean.listaInforme}">
+                                    No se encontraron registros
+                                </h:panelGroup>
+                            </div>
+                            <div class="resumen">
+                                <table>
+                                    <thead><h3>Generar Documentos</h3></thead>
+                                    <tr>
+                                        <td>
+                                            <h:commandLink target="_blank" action="#{ventaMotosBean.imprimirInformeVentas()}">
+                                                <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                                <h:outputText value=" Informe de Ventas"/>
+                                            </h:commandLink>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

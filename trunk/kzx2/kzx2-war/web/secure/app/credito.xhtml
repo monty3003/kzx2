@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Créditos</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+                    <h:panelGroup rendered="#{creditoBean.agregar eq true or creditoBean.modificar eq true}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="id">Nº: </label></div>
+                                    <div class="cont"><h:inputText id="id" size="10" value="#{creditoBean.credito.id}" disabled="true"/><rich:message for="frm:codigo"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="transaccion">Venta: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="transaccion" value="#{creditoBean.transaccion}">
+                                            <f:selectItems value="#{creditoBean.listaTransaccion}"/>
+                                        </h:selectOneMenu>&#160;<rich:message for="frm:transaccion"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fechaInicio">Fecha Inicio: </label></div>
+                                    <div class="cont"> <rich:calendar value="#{creditoBean.credito.fechaInicio}" id="fechaInicio" enableManualInput="true"
+                                                                      popup="true" datePattern="dd/MM/yyyy"
+                                                                      resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="frm:fechaInicio"/>
+                                    </div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="fechaFin">Fecha Fin: </label></div>
+                                    <div class="cont"> <rich:calendar value="#{creditoBean.credito.fechaFin}" id="fechaFin" enableManualInput="true"
+                                                                      popup="true" datePattern="dd/MM/yyyy"
+                                                                      resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="frm:fechaFin"/>
+                                    </div>
+                                </div>
+                                <hr/>
+                                <div class="fila">
+                                    <div class="etiq"><label for="tan">Tasa de Interes Anual: </label></div>
+                                    <div class="cont"><h:inputText id="tan" size="4" value="#{creditoBean.credito.tan}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:tan"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="tae">Tasa de Interes Efectiva: </label></div>
+                                    <div class="cont"><h:inputText id="tae" size="4" value="#{creditoBean.credito.tan}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:tae"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="interesMoratorio">Tasa de Interes Moratorio: </label></div>
+                                    <div class="cont"><h:inputText id="interesMoratorio" size="4" value="#{creditoBean.credito.interesMoratorio}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:interesMoratorio"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="capital">Capital: </label></div>
+                                    <div class="cont"><h:inputText id="capital" size="11" value="#{creditoBean.credito.capital}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:capital"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="amortizacion">Amortizacion: </label></div>
+                                    <div class="cont"><h:inputText id="amortizacion" size="2" value="#{creditoBean.credito.amortizacion}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:amortizacion"/></div>
+                                </div>                              
+                                <div class="fila">
+                                    <div class="etiq"><label for="creditoTotal">Crédito Total: </label></div>
+                                    <div class="cont"><h:inputText id="creditoTotal" size="11" value="#{creditoBean.credito.creditoTotal}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:creditoTotal"/></div>
+                                </div>
+                                <hr/>
+                                <div class="fila">
+                                    <div class="etiq"><label for="garante">Garante: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="garante" value="#{creditoBean.credito.garante.id}">
+                                            <f:selectItems value="#{creditoBean.listaGarante}"/>
+                                        </h:selectOneMenu>&#160;<rich:message for="frm:garante"/>
+                                    </div>
+                                </div>
+                                <hr/>
+                                <div class="fila">
+                                    <div class="etiq"><label for="totalAmortizadoPagado">Total Amortizado Pagado: </label></div>
+                                    <div class="cont"><h:inputText id="totalAmortizadoPagado" size="11" value="#{creditoBean.credito.totalAmortizadoPagado}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:totalAmortizadoPagado"/></div>
+                                </div>
+                                <div class="fila">
+                                    <div class="etiq"><label for="totalInteteresesPagado">Total Intereses Pagado: </label></div>
+                                    <div class="cont"><h:inputText id="totalInteresesPagado" size="11" value="#{creditoBean.credito.totalInteresesPagado}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:totalInteresesPagado"/></div>
+                                </div>     
+                                <div class="fila">
+                                    <div class="etiq"><label for="totalInteresesPagadoMulta">Total Intereses Pagado Multa: </label></div>
+                                    <div class="cont"><h:inputText id="totalInteresesPagadoMulta" size="11" value="#{creditoBean.credito.totalInteresesPagadoMulta}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:totalInteresesPagadoMulta"/></div>
+                                </div>     
+                                <div class="fila">
+                                    <div class="etiq"><label for="fechaUltimoPago">Fecha de Ultimo Pago: </label></div>
+                                    <div class="cont"><rich:calendar value="#{creditoBean.credito.fechaUltimoPago}" id="fechaUltimoPago" enableManualInput="true"
+                                                                     popup="true" datePattern="dd/MM/yyyy"
+                                                                     resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="frm:fechaUltimoPago"/></div>
+                                </div>     
+                                <div class="fila">
+                                    <div class="etiq"><label for="cuotasAtrasadas">Cuotas atrasadas: </label></div>
+                                    <div class="cont"><h:inputText id="cuotasAtrasadas" size="2" value="#{creditoBean.credito.cuotasAtrasadas}">
+                                            <f:convertNumber pattern="#{creditoBean.numberPattern}"/>
+                                        </h:inputText>&#160;<rich:message for="frm:cuotasAtrasadas"/></div>
+                                </div> 
+                                <div class="fila">
+                                    <div class="etiq"><label for="estado">Estado: </label></div>
+                                    <div class="cont"><h:selectOneMenu id="estado" value="#{creditoBean.estado}">
+                                            <f:selectItems value="#{creditoBean.listaEstados}"/>
+                                        </h:selectOneMenu>&#160;<rich:message for="frm:estado"/></div>
+                                </div> 
+                                <div class="fila">
+                                    <div class="etiq"><label for="activo">Activo: </label></div>
+                                    <div class="cont"><h:selectBooleanCheckbox id="activo" value="#{creditoBean.activo}"/><h:message for="frm:activo"/></div>
+                                </div>
+                            </div>
+                            <div class="botonera">
+                                <h:commandButton styleClass="submit" value="Guardar" action="#{creditoBean.guardar}"/>
+                                <h:commandButton value="Cancelar" action="#{creditoBean.todos}" immediate="true"/>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{creditoBean.agregar eq false and creditoBean.modificar eq false}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="idFiltro">Nº:</label>
+                                        <h:inputText id="idFiltro" styleClass="d_num" value="#{creditoBean.idFiltro}"/>
+                                    </td>
+                                    <td colspan="2">
+                                        <label for="clienteFiltro">Cliente: </label>
+                                        <h:inputText id="clienteFiltro" value="#{creditoBean.credito.cliente}" size="50" maxlength="50"/>
+                                    </td>
+                                    <td>
+                                        <label for="estadoFiltro">Estado: </label>
+                                        <h:selectOneMenu id="estadoFiltro" value="#{creditoBean.estado}">
+                                            <f:selectItems value="#{creditoBean.listaEstados}"/>
+                                        </h:selectOneMenu>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="ventaFiltro">Venta:</label>
+                                        <h:inputText id="ventaFiltro" styleClass="d_num" value="#{creditoBean.ventaFiltro}"/>
+                                    </td>
+                                    <td>
+                                        <label for="cuotasAtrasadasFiltro">Cuotas Atrasadas: </label>
+                                        <h:inputText id="cuotasAtrasadasFiltro" styleClass="d_num" value="#{creditoBean.cuotasAtrasadasFiltro}"/>
+                                    </td>
+                                    <td>
+                                        <label for="activoFiltro">Activo: </label>
+                                        <h:selectOneMenu value="#{creditoBean.activoFiltro}">
+                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                            <f:selectItem itemLabel="Si" itemValue="S"/>
+                                            <f:selectItem itemLabel="No" itemValue="N"/>
+                                        </h:selectOneMenu>
+                                    </td>
+                                    <td>
+                                        <label for="fechaUltimopagoFiltro">Ultimo Pago: </label>
+                                        <rich:calendar value="#{creditoBean.credito.fechaUltimoPago}" id="fechaUltimopagoFiltro" enableManualInput="true"
+                                                       popup="true" datePattern="dd/MM/yyyy"
+                                                       resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <h:commandButton id="btnBuscar" styleClass="submit" value="Buscar" action="#{creditoBean.buscar()}"/>
+                                <h:commandButton styleClass="submit" value="Todos" action="#{creditoBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup id="tabla">
+                                <h:panelGroup rendered="#{not empty creditoBean.lista }">
+                                    <table class="tablaDatos">
+                                        <thead>
+                                            <tr>
+                                                <th width="2%"></th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Id">
+                                                            <f:setPropertyActionListener value="id" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'id'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="15%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Cliente">
+                                                            <f:setPropertyActionListener value="cliente" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'cliente'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Venta">
+                                                            <f:setPropertyActionListener value="venta" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'venta'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="8%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Capital">
+                                                            <f:setPropertyActionListener value="capital" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'capital'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Amortizacion">
+                                                            <f:setPropertyActionListener value="amortizacion" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'amortizacion'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="8%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Total">
+                                                            <f:setPropertyActionListener value="creditoTotal" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'creditoTotal'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="10%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Ultimo Pago">
+                                                            <f:setPropertyActionListener value="fechaUltimoPago" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'fechaUltimoPago'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="4%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Cuotas Atrasadas">
+                                                            <f:setPropertyActionListener value="cuotasAtrasadas" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'cuotasAtrasadas'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="4%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Estado">
+                                                            <f:setPropertyActionListener value="estado" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'estado'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{creditoBean.listar}" value="Activo">
+                                                            <f:setPropertyActionListener value="activo" target="#{creditoBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{creditoBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(creditoBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{creditoBean.facade.orden.columna eq 'activo'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat var="row" value="#{creditoBean.lista}">
+                                                <tr>
+                                                    <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                                    <td><h:outputText value="#{row.id}"/></td>
+                                                    <td><h:outputText value="#{row.transaccion.comprador.nombre}"/></td>
+                                                    <td><h:outputText value="#{row.transaccion.id}"/></td>
+                                                    <td><h:outputText value="#{row.capital}">
+                                                            <f:convertNumber pattern="#{creditoBean.monedaPattern}"/>
+                                                        </h:outputText></td>
+                                                    <td><h:outputText value="#{row.amortizacion}"/></td>
+                                                    <td><h:outputText value="#{row.creditoTotal}">
+                                                            <f:convertNumber pattern="#{creditoBean.monedaPattern}"/>
+                                                        </h:outputText></td>
+                                                    <td><h:outputText value="#{row.fechaUltimoPago}">
+                                                            <f:convertDateTime pattern="#{creditoBean.fechaCortaPattern}"/>
+                                                        </h:outputText></td>
+                                                    <td><h:outputText value="#{row.cuotasAtrasadas}"/></td>
+                                                    <td>
+                                                        <h:link outcome="creditoDetalle">
+                                                            <img src="../../resources/images/#{row.estado.id}.png" width="32px" height="32px" alt="#{row.estado.descripcion}"/>
+                                                            <f:param name="creditoResumen" value="#{row.id}"/>
+                                                        </h:link>
+
+                                                    </td>
+                                                    <td>
+                                                        <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                        <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="11">
+                                                    <h:commandLink action="#{creditoBean.anterior}">Anterior</h:commandLink>
+                                                    &#160;|&#160;#{creditoBean.facade.desde + 1}..#{creditoBean.facade.ultimo} de #{creditoBean.facade.contador}&#160;|&#160;
+                                                    <h:commandLink action="#{creditoBean.siguiente}">Siguiente</h:commandLink>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </h:panelGroup>
+                                <div class="botonera">
+                                    <h:commandButton id="btnNuevo" value="Nuevo" action="#{creditoBean.nuevo}" styleClass="submit"/>
+                                    <h:commandButton id="btnModificar" value="Modificar" action="#{creditoBean.modificar}" styleClass="submit" rendered="#{not empty creditoBean.lista }"/>
+                                </div>
+                            </h:panelGroup>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

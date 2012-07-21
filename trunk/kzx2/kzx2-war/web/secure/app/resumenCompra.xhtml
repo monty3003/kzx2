@@ -1,0 +1,231 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Resumen</title>
+    </head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <fieldset>
+                        <div class="resumen">
+                            <table>
+                                <tr>
+                                    <th>Número</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.id}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Tipo</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.codigo.descripcion}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.fechaOperacion}">
+                                            <f:convertDateTime pattern="#{compraMotosBean.fechaHoraPattern}" timeZone="#{loginBean.timeZone}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Estado</th><td>
+                                        <h:panelGroup rendered="#{compraMotosBean.credito.transaccion.fechaEntrega ne null}">
+                                            <h:outputText value="Entregado el: "/>&#160;
+                                            <h:outputText id="entrega" value="#{compraMotosBean.credito.transaccion.fechaEntrega}">
+                                                <f:convertDateTime pattern="#{compraMotosBean.fechaHoraPattern}"/>
+                                            </h:outputText>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{compraMotosBean.credito.transaccion.fechaEntrega eq null}">
+                                            <h:outputText style="color:red;" value="Falta Entregar"/>&#160;<h:commandButton value="Entregar" action="#{compraMotosBean.entregarMoto}"/>
+                                        </h:panelGroup>
+                                        <h:messages for="entrega"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <h:panelGroup rendered="#{compraMotosBean.credito.transaccion.codigo.id gt 50}">
+                                <table>
+                                    <thead><h3>Datos del Comprador</h3></thead>
+                                    <tr>
+                                        <th>Documento</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.documento}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Nombre</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.nombre}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dirección 1</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.direccion1}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dirección 2</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.direccion2}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Teléfono Fijo</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.telefonoFijo}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Teléfono Móvil</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.comprador.telefonoMovil}"/></td>
+                                    </tr>
+                                </table>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{compraMotosBean.credito.transaccion.codigo.id lt 50}">
+                                <table>
+                                    <thead><h3>Datos del Vendedor</h3></thead>
+                                    <tr>
+                                        <th>Documento</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.documento}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Nombre</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.nombre}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dirección 1</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.direccion1}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dirección 2</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.direccion2}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Teléfono Fijo</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.telefonoFijo}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Teléfono Móvil</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.vendedor.telefonoMovil}"/></td>
+                                    </tr>
+                                </table>
+                            </h:panelGroup>
+                            <table>
+                                <thead><h3>Datos de las Motos</h3></thead>
+                                <tr>
+                                    <th>Nº</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Color</th>
+                                    <th>Chasis</th>
+                                    <th>Motor</th>
+                                    <th>Activo</th>
+                                </tr>
+                                <ui:repeat value="#{compraMotosBean.credito.transaccion.motostocksCompra}" var="m">
+                                    <tr>
+                                        <td><h:outputText value="#{m.id}"/></td>
+                                        <td><h:outputText value="#{m.moto.marca}"/></td>
+                                        <td><h:outputText value="#{m.moto.modelo}"/></td>
+                                        <td><h:outputText value="#{m.moto.color}"/></td>
+                                        <td><h:outputText value="#{m.chasis}"/></td>
+                                        <td><h:outputText value="#{m.motor}"/></td>
+                                        <td><h:outputText value="#{m.activo}"/></td>
+                                    </tr>
+                                </ui:repeat>
+                            </table>
+                            <h:panelGroup rendered="#{compraMotosBean.credito ne null}">
+                                <table>
+                                    <thead><h3>Datos del Crédito</h3></thead>
+                                    <tr>
+                                        <th>Nº</th><td><h:outputText value="#{compraMotosBean.credito.id}"/></td>
+                                        <th>Capital</th><td><h:outputText value="#{compraMotosBean.credito.capital}">
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Amortización</th><td><h:outputText value="#{compraMotosBean.credito.amortizacion}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Saldo Actual</th><td><h:outputText value="#{compraMotosBean.credito.saldoActual}">
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Crédito Total</th><td><h:outputText value="#{compraMotosBean.credito.creditoTotal}">
+                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                            </h:outputText>
+                                        </td>
+                                        <th>Tasa Moratoria</th><td><h:outputText value="#{compraMotosBean.credito.interesMoratorioString}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fecha Inicio</th><td><h:outputText value="#{compraMotosBean.credito.fechaInicio}">
+                                                <f:convertDateTime pattern="#{compraMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Fecha Fin</th><td><h:outputText value="#{compraMotosBean.credito.fechaFin}">
+                                                <f:convertDateTime pattern="#{compraMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                        <th>Ultimo Pago el</th><td><h:outputText value="#{compraMotosBean.credito.fechaUltimoPago}">
+                                                <f:convertDateTime pattern="#{compraMotosBean.fechaCortaPattern}"/>
+                                            </h:outputText></td>
+                                    </tr>
+                                </table>
+                            </h:panelGroup>
+                            <table>
+                                <thead><h3>Datos de la Factura</h3></thead>
+                                <tr>
+                                    <th>Número</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.numero}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Vencimiento</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.validoHasta}">
+                                            <f:convertDateTime pattern="#{compraMotosBean.fechaCortaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Precio Unitario</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.subTotal}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Exentas</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.subTotalExentas}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Gravadas 10%</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.subTotalGravadas10}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Descuento</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.descuento}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Sub Total</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.subTotal}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                                <tr>
+                                    <th>Total</th><td><h:outputText value="#{compraMotosBean.credito.transaccion.factura.totalPagado}">
+                                            <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
+                                        </h:outputText></td>
+                                </tr>
+                            </table>
+                            <div class="centrado">
+                                <table class="tablaDatos">
+                                    <thead>
+                                        <h3>Financiación</h3>
+                                    </thead>
+                                    <tr>
+                                        <th width="5px">Nº</th>
+                                        <th width="10px">Vencimiento</th>
+                                        <th width="10px">Monto</th>
+                                        <th width="5px">Pagado</th>
+                                    </tr>
+                                    <tbody>
+                                        <ui:repeat value="#{compraMotosBean.credito.financiacions}" var="f">
+                                            <tr>
+                                                <td><h:outputText value="#{f.numeroCuota}"/></td>
+                                                <td><h:outputText value="#{f.fechaVencimiento}">
+                                                        <f:convertDateTime pattern="#{pagoBean.fechaCortaPattern}"/>
+                                                    </h:outputText>
+                                                </td>
+                                                <td><h:outputText value="#{f.totalAPagar}">
+                                                        <f:convertNumber pattern="#{pagoBean.monedaPattern}"/>
+                                                    </h:outputText></td>
+                                                <td><rich:calendar value="#{f.fechaPago}" id="fechaPago" enableManualInput="true"
+                                                                   popup="true" datePattern="dd/MM/yyyy"
+                                                                   resetTimeOnDateSelect="true" locale="#{loginBean.locale}" showApplyButton="false">
+                                                        <rich:validator/>
+                                                    </rich:calendar>&#160;<rich:messages for="fechaPago"/>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="botonera">
+                            <h:commandButton styleClass="submit" action="#{compraMotosBean.guardarCambiosEnLasCuotas()}" value="Guardar Cambios"/>
+                            <h:commandButton styleClass="submit" action="listacompramotos" value="Volver" immediate="true"/></div>
+                    </fieldset>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

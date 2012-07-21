@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <script src="#{facesContext.externalContext.requestContextPath}/resources/js/textos.js" type="text/javascript"></script>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/recibo.css" rel="stylesheet" type="text/css" />
+        <title>Imprimir Recibo</title>
+    </h:head>
+    <h:body onload="imprimir()">
+        <div id="recibo">
+            <table>
+                <th colspan="2" style="font-weight: bold; border-top: double 2px #000;"><h:outputText value="#{imprimirReciboBean.empresa}" escape="false"/></th>
+                <tr class="membrete" style="border-top: double 2px #000;">
+                    <td colspan="2" align="center">
+                        <h:outputText value="#{imprimirReciboBean.membrete}" escape="false"/>
+                    </td>
+                </tr>
+                <tr class="titulo"><td colspan="2" align="center"><h3>ESTADO DE CUENTA</h3></td></tr>
+                <tr><td colspan="2">Cliente:&#160;<b><h:outputText value="#{imprimirReciboBean.cliente}"/></b></td></tr>
+                <tr><td colspan="2">Crédito:&#160;<b><h:outputText value="#{imprimirReciboBean.credito.id}"/></b></td></tr>
+                <tr><td colspan="2">Fecha:&#160;<h:outputText value="#{imprimirReciboBean.fechaHoy}"/></td></tr>
+            </table>
+            <table>
+                <thead>
+                    <h3>Financiación</h3>
+                </thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Vencimiento</th>
+                    <th>Monto</th>
+                    <th>Pagado</th>
+                    <th>Parcial</th>
+                </tr>
+                <tbody>
+                    <ui:repeat value="#{imprimirReciboBean.listaFinanciacion}" var="f">
+                        <tr>
+                            <td><h:outputText value="#{f.numeroCuota}"/></td>
+                            <td>&#160;<h:outputText value="#{f.fechaVencimiento}">
+                                    <f:convertDateTime pattern="#{imprimirReciboBean.fechaCortaPattern}"/>
+                                </h:outputText>&#160;
+                            </td>
+                            <td><h:outputText value="#{f.totalAPagar}">
+                                    <f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/>
+                                </h:outputText></td>
+                            <td>&#160;<h:outputText value="#{f.fechaPago}">
+                                    <f:convertDateTime pattern="#{imprimirReciboBean.fechaCortaPattern}"/>
+                                </h:outputText>&#160;</td>
+                            <td>
+                                <h:panelGroup rendered="#{f.cancelado eq 'S'}">
+                                    &nbsp;
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{f.cancelado eq 'N' and f.totalPagado ne null}">
+                                    <b>Parcial</b>
+                                </h:panelGroup>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+            </table>
+            <table>
+                <thead>
+                    <h3>Detalle del Pago</h3>
+                    <tr>
+                        <th width="4px">Recibo</th>
+                        <th>Fecha</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{imprimirReciboBean.listaPagos}" var="pagos">
+                        <tr style="margin: 0px; padding: 0px">
+                            <td style="border: solid 1px;">
+                                <b><h:outputText value="#{pagos.numeroDocumento}"/></b>
+                            </td>
+                            <td style="border: solid 1px;">
+                                <b><h:outputText value="#{pagos.fecha}">
+                                        <f:convertDateTime pattern="#{imprimirReciboBean.fechaCortaPattern}"/>
+                                    </h:outputText></b>
+                            </td>
+                            <td style="border: solid 1px;" align="right">
+                                <b> <h:outputText value="#{pagos.totalPagado}">
+                                        <f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/>
+                                    </h:outputText></b>
+                            </td>
+                        </tr>
+                        <ui:repeat value="#{pagos.detalle}" var="d">
+                            <tr style="margin: 0px; padding: 0px">
+                                <td>&nbsp;</td>
+                                <td align="left"><h:outputText value="#{d.concepto}"/></td>
+                                <td align="right">
+                                    <h:outputText value="#{d.importe}">
+                                        <f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/>
+                                    </h:outputText>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </ui:repeat>
+                </tbody>
+            </table>
+            <table>
+                <tfoot>
+                    <tr><td>TOTAL PAGADO:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.credito.totalAmortizadoPagado + imprimirReciboBean.credito.totalInteresesPagado}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText></td></tr>
+                    <tr><td>TOTAL PAGADO MULTA:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.credito.totalInteresesPagadoMulta}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText></td></tr>
+                    <tr><td>SALDO ACTUAL:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.credito.saldoActual}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText></td></tr>
+                    <tr><td>PENDIENTE DE PAGO:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.ponerseAlDia}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText></td></tr>
+                  </tfoot>
+            </table>
+        </div>
+    </h:body>
+</html>

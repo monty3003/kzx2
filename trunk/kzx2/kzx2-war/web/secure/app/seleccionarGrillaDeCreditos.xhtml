@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Seleccionar Datos Para la Grilla de Creditos</title>
+    </h:head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3>Grilla de Créditos</h3>
+                            <h4>Seleccione una opción para ver la grilla de créditos.</h4>
+                            <div class="centrado">
+                                <h:commandLink value="Procesar" target="_blank" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="1" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                                <ul>
+                                    <li>
+                                        <h:link value="Todos"  target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="0"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="Las primeras 6 cuotas" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="1"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="De 7 a 12 cuotas" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="2"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="De 13 a 18 cuotas" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="3"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="De 19 a 25 cuotas" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="4"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="Créditos en mora 3 meses" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="5"/>
+                                        </h:link>
+                                    </li>
+                                    <li>
+                                        <h:link value="Créditos en mora mas de 3 meses" target="_blank" outcome="grillaCreditos">
+                                            <f:param name="periodo" value="6"/>
+                                        </h:link>
+                                    </li>
+                                </ul>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

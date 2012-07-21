@@ -73,7 +73,7 @@
                                 <thead>
                                     <tr>
                                         <th width="2%"></th>
-                                        <th width="15%"><p>
+                                        <th width="5%"><p>
                                                 <a id="lnkId"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Nº
                                                     <f:setPropertyActionListener value="id" target="#{compraMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
@@ -105,7 +105,7 @@
                                                 <h:outputText value="#{(compraMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{compraMotosBean.facade.orden.columna eq 'vendedor'}"/></p>
                                         </th>
-                                        <th width="10%"><p>
+                                        <th width="20%"><p>
                                                 <a id="lnkFechaOperacion"  jsfc="h:commandLink" action="#{compraMotosBean.listar}">Fecha
                                                     <f:setPropertyActionListener value="fechaOperacion" target="#{compraMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{compraMotosBean.facade.orden.asc}"/>
@@ -149,7 +149,7 @@
                                             <td><h:outputText value="#{row.codigo.descripcion}"/></td>
                                             <td><h:outputText value="#{row.vendedor.nombre}"/></td>
                                             <td><h:outputText value="#{row.fechaOperacion}">
-                                                    <f:convertDateTime pattern="dd/MM/yyyy-HH:mm:s" timeZone="GMT-3"/>
+                                                    <f:convertDateTime pattern="dd/MM/yyyy-HH:mm:s" timeZone="#{loginBean.timeZone}"/>
                                                 </h:outputText></td>
                                             <td><h:outputText value="#{row.totalPagado}">
                                                     <f:convertNumber pattern="#,##0.00"/>
@@ -173,6 +173,7 @@
                         <div class="botonera">
                             <h:commandButton id="btnNuevo" value="Nuevo" action="#{compraMotosBean.nuevo}" styleClass="submit"/>
                             <h:commandButton id="btnModificar" value="Modificar" action="#{compraMotosBean.modificar}" styleClass="submit" rendered="#{not empty compraMotosBean.lista }"/>
+                            <h:commandButton id="btnResumen" value="Resumen" action="#{compraMotosBean.resumenCompra()}" styleClass="submit" rendered="#{not empty compraMotosBean.lista }"/>
                         </div>
                     </fieldset>
                 </h:form>
