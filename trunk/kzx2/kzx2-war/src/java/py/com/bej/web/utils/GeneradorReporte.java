@@ -35,6 +35,7 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import py.com.bej.orm.entities.Credito;
+import py.com.bej.orm.entities.DetallePago;
 import py.com.bej.orm.entities.Documento;
 import py.com.bej.orm.entities.Financiacion;
 import py.com.bej.orm.entities.Motostock;
@@ -51,6 +52,7 @@ import py.com.bej.orm.utils.CategoriaEnum;
 import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Conversor;
 import py.com.bej.orm.utils.ConversorDeNumeroALetra;
+import py.com.bej.orm.utils.DocumentoEnum;
 import py.com.bej.web.servlets.security.LoginBean;
 
 /**
@@ -262,15 +264,114 @@ public class GeneradorReporte {
         return true;
     }
 
+    public boolean generarStock(List<Motostock> stock, String nombre) {
+        Map<String, String> param = new HashMap<String, String>();
+        String fileNameJasperRelative = "resources/reportes/" + nombre + ".jasper";
+        String empresa = "BEJ MOTOS";
+        String piePagina = "este documento fue impreso el "
+                + Conversor.deDateToString(new Date(), "dd/MM/yyyy")
+                + " a las " + Conversor.deDateToString(new Date(), "HH:mm:s")
+                + " hs. por el usuario " + LoginBean.getInstance().getUsuario().getNombre() + ".";
+        param.put("EMPRESA", empresa);
+        param.put("PIE_PAGINA", piePagina);
+        try {
+            generarReportePdf(fileNameJasperRelative, param, new JRBeanCollectionDataSource(stock), null);
+        } catch (Exception ex) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "Excepcion al intentar generar el reporte : ", ex);
+        } catch (Error err) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "ERROR al intentar generar el reporte : ", err);
+        }
+        return true;
+    }
+
+    public boolean generarListaPagos(List<DetallePago> lista, Date fecha) {
+        Map<String, String> param = new HashMap<String, String>();
+        String fileNameJasperRelative = "resources/reportes/listaPagos.jasper";
+        String empresa = "BEJ MOTOS";
+        String titulo = "LISTADO DE PAGOS REALIZADOS EN LA FECHA";
+        String piePagina = "este documento fue impreso el "
+                + Conversor.deDateToString(new Date(), "dd/MM/yyyy")
+                + " a las " + Conversor.deDateToString(new Date(), "HH:mm:s")
+                + " hs. por el usuario " + LoginBean.getInstance().getUsuario().getNombre() + ".";
+        param.put("EMPRESA", empresa);
+        param.put("PIE_PAGINA", piePagina);
+        param.put("TITULO", titulo);
+        param.put("FECHA", Conversor.deDateToString(fecha, "dd/MM/yyyy"));
+        try {
+            generarReportePdf(fileNameJasperRelative, param, new JRBeanCollectionDataSource(lista), null);
+        } catch (Exception ex) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "Excepcion al intentar generar el reporte : ", ex);
+        } catch (Error err) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "ERROR al intentar generar el reporte : ", err);
+        }
+        return true;
+    }
+
+    public boolean generarInformeVentas(List<Transaccion> lista, Date fechaDesde, Date fechaHasta) {
+        Map<String, String> param = new HashMap<String, String>();
+        String fileNameJasperRelative = "resources/reportes/informeVentas.jasper";
+        String empresa = "BEJ MOTOS";
+        String titulo = "LISTADO DE VENTAS DESDE EL " + Conversor.deDateToString(fechaDesde, "dd/MM/yyyy") + " HASTA EL " + Conversor.deDateToString(fechaHasta, "dd/MM/yyyy");
+        String piePagina = "este documento fue impreso el "
+                + Conversor.deDateToString(new Date(), "dd/MM/yyyy")
+                + " a las " + Conversor.deDateToString(new Date(), "HH:mm:s")
+                + " hs. por el usuario " + LoginBean.getInstance().getUsuario().getNombre() + ".";
+        param.put("EMPRESA", empresa);
+        param.put("PIE_PAGINA", piePagina);
+        param.put("TITULO", titulo);
+        try {
+            generarReportePdf(fileNameJasperRelative, param, new JRBeanCollectionDataSource(lista), null);
+        } catch (Exception ex) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "Excepcion al intentar generar el reporte : ", ex);
+        } catch (Error err) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, "ERROR al intentar generar el reporte : ", err);
+        }
+        return true;
+    }
+
     public boolean generarDocumentosDeVenta(Transaccion venta) {
-        String conjunto = "CR";
+        try {
+            credito = new CreditoFacade().findByTransaccion(venta.getId());
+        } catch (Exception ex) {
+            Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, null, ex);
+        }
         String encabezado = null;
         String pie = null;
+        List<Documento> parrafos = new ArrayList<Documento>();
+        DocumentoFacade df = new DocumentoFacade();
         if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
-            conjunto = "CO";
+            parrafos = df.findByConjunto(new String[]{
+                        DocumentoEnum.TODOS.getCodigo(),
+                        DocumentoEnum.CONTADO.getCodigo()});
+        } else if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_ENTREGA.getSymbol())) {
+            if (credito != null && credito.getGarante() != null) {
+                parrafos = df.findByConjunto(new String[]{
+                            DocumentoEnum.TODOS.getCodigo(),
+                            DocumentoEnum.CREDITO.getCodigo(),
+                            DocumentoEnum.ENTREGA_INICIAL.getCodigo(),
+                            DocumentoEnum.GARANTE.getCodigo()});
+            } else {
+                parrafos = df.findByConjunto(new String[]{
+                            DocumentoEnum.TODOS.getCodigo(),
+                            DocumentoEnum.CREDITO.getCodigo(),
+                            DocumentoEnum.ENTREGA_INICIAL.getCodigo()});
+            }
+        } else if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol())) {
+            if (credito != null && credito.getGarante() != null) {
+                parrafos = df.findByConjunto(new String[]{
+                            DocumentoEnum.TODOS.getCodigo(),
+                            DocumentoEnum.CREDITO.getCodigo(),
+                            DocumentoEnum.CUOTA_CORRIDA.getCodigo(),
+                            DocumentoEnum.GARANTE.getCodigo()});
+            } else {
+                parrafos = df.findByConjunto(new String[]{
+                            DocumentoEnum.TODOS.getCodigo(),
+                            DocumentoEnum.CREDITO.getCodigo(),
+                            DocumentoEnum.CUOTA_CORRIDA.getCodigo()});
+            }
         }
         try {
-            List<Documento> parrafos = new DocumentoFacade().findByConjunto(new String[]{conjunto, "A"});
+
             Map<String, String> params = obtenerParametrosDelContrato(venta);
             short x = 0;
             for (Documento p : parrafos) {
@@ -302,7 +403,7 @@ public class GeneradorReporte {
                     + " hs. por el usuario " + LoginBean.getInstance().getUsuario().getNombre() + ".";
             Map param = new HashMap();
             Set<JasperPrint> anexos = new HashSet<JasperPrint>();
-            if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+            if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
                 param.put("TITULO", "CONTRATO DE VENTA A CRÉDITO");
                 //Obtener la financiacion
                 financiacion = new FinanciacionFacade().findByTransaccion(venta.getId());
@@ -378,7 +479,7 @@ public class GeneradorReporte {
         stock = null;
         try {
             stock = new MotostockFacade().findByVenta(venta.getId());
-            if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+            if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
                 credito = new CreditoFacade().findByTransaccion(venta.getId());
             }
         } catch (Exception ex) {
@@ -402,12 +503,20 @@ public class GeneradorReporte {
         res.put("16", stock.getMoto().getColor());
         res.put("17", stock.getChasis());
         res.put("18", stock.getMotor());
-        res.put("19", Conversor.numberToStringPattern(venta.getTotal()));
-        res.put("20", letras.getStringOfCurrency(venta.getTotal().floatValue()));
+        if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
+            res.put("19", Conversor.numberToStringPattern(venta.getTotal()));
+            res.put("20", letras.getStringOfCurrency(venta.getTotal().floatValue()));
+        } else if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_ENTREGA.getSymbol())) {
+            res.put("19", Conversor.numberToStringPattern(venta.getEntregaInicial().add(credito.getCreditoTotal())));
+            res.put("20", letras.getStringOfCurrency(venta.getEntregaInicial().add(credito.getCreditoTotal()).floatValue()));
+        } else {
+            res.put("19", Conversor.numberToStringPattern(credito.getCreditoTotal()));
+            res.put("20", letras.getStringOfCurrency(credito.getCreditoTotal().floatValue()));
+        }
         res.put("21", Conversor.numberToStringPattern(venta.getEntregaInicial()));
         res.put("22", letras.getStringOfCurrency(venta.getEntregaInicial().floatValue()));
         if (credito != null) {
-            res.put("23", Conversor.numberToStringPattern(credito.getCapital()));
+            res.put("23", Conversor.numberToStringPattern(credito.getCreditoTotal()));
             res.put("24", letras.getStringOfCurrency(credito.getCapital().floatValue()));
             res.put("25", String.valueOf(credito.getAmortizacion()));
             res.put("26", letras.getStringOfNumber(credito.getAmortizacion()));
@@ -420,8 +529,9 @@ public class GeneradorReporte {
             res.put("33", credito.getGarante().getNombre());
             res.put("34", credito.getGarante().getDocumento());
             res.put("35", credito.getGarante().getDireccion1());
-            res.put("36", Conversor.numberToStringPattern(stock.getPlan().getTae()));
-            res.put("37", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresMoratorio()));
+            res.put("36", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresMoratorio() * 100));
+            res.put("37", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresPunitorio() * 100));
+
         }
         return res;
     }
@@ -434,30 +544,34 @@ public class GeneradorReporte {
         credito = null;
         stock = null;
         try {
-            stock = new MotostockFacade().findByVenta(venta.getId());
-            if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+            if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
                 credito = new CreditoFacade().findByTransaccion(venta.getId());
+
+
+                stock = new MotostockFacade().findByVenta(venta.getId());
+
+                res.put("1", null);
+                res.put("2", (venta.getVendedor().getSexo().equals('H') ? "El " : "La ")
+                        + venta.getVendedor().getTratamiento()
+                        + " " + venta.getVendedor().getNombre());
+                res.put("3", venta.getVendedor().getDireccion1());
+                res.put("4", null);
+                res.put("5", stock.getMoto().getMarca());
+                res.put("6", stock.getMoto().getModelo());
+                res.put("7", stock.getMoto().getColor());
+                res.put("8", stock.getChasis());
+                res.put("9", stock.getMotor());
+
+                res.put("10", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresMoratorio() * 100));
+                res.put("11", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresPunitorio() * 100));
+                res.put("12", venta.getVendedor().getNombre());
+                res.put("13", "Pilar");
+            } else {
+                return res;
             }
         } catch (Exception ex) {
             Logger.getLogger(GeneradorReporte.class.getName()).log(Level.SEVERE, null, ex);
         }
-        res.put("1", null);
-        res.put("2", (venta.getVendedor().getSexo().equals('H') ? "El " : "La ")
-                + venta.getVendedor().getTratamiento()
-                + " " + venta.getVendedor().getNombre());
-        res.put("3", venta.getVendedor().getDireccion1());
-        res.put("4", null);
-        res.put("5", stock.getMoto().getMarca());
-        res.put("6", stock.getMoto().getModelo());
-        res.put("7", stock.getMoto().getColor());
-        res.put("8", stock.getChasis());
-        res.put("9", stock.getMotor());
-
-        res.put("10", Conversor.numberToStringPattern(credito.getTae()));
-        res.put("11", Conversor.numberToStringPattern(stock.getPlan().getTasaInteresMoratorio()));
-        res.put("12", venta.getVendedor().getNombre());
-        res.put("13", "Pilar");
-
         return res;
     }
 
@@ -593,13 +707,20 @@ public class GeneradorReporte {
                 + " hs. por el usuario " + LoginBean.getInstance().getUsuario().getNombre() + ".";
         try {
             stock = new MotostockFacade().findByVenta(venta.getId());
-
+            String concepto;
+            if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol())) {
+                venta.setEntregaInicial(venta.getMontoCuotaIgual());
+                concepto = "En concepto de pago por Pago de Cuota Inicial de una Moto";
+            } else {
+                concepto = "En concepto de pago por Entrega Inicial de una Moto";
+            }
             Map param2 = new HashMap();
             param2.put("IMAGEN_URL", context.getRealPath("/resources/images/logo_bej.gif"));
             param2.put("EMPRESA", empresa);
+            param2.put("FACTURA", venta.getFactura().getNumero());
             param2.put("TOTAL_NUMERO", "Gs. " + Conversor.numberToStringPattern(venta.getEntregaInicial()));
             param2.put("TOTAL_LETRA", "La suma de " + letras.getStringOfCurrency(venta.getEntregaInicial().floatValue()));
-            param2.put("CONCEPTO", "En concepto de pago por Entrega Inicial de una Moto"
+            param2.put("CONCEPTO", concepto
                     + " Marca <b>" + stock.getMoto().getMarca().toUpperCase()
                     + "</b> Modelo <b>" + stock.getMoto().getModelo()
                     + "</b> Color <b>" + stock.getMoto().getColor()

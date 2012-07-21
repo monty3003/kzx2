@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import py.com.bej.orm.entities.Password;
 import py.com.bej.orm.entities.Usuario;
 import py.com.bej.orm.session.PasswordFacade;
 import py.com.bej.orm.session.UsuarioFacade;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 
 /**
  *
@@ -47,6 +49,20 @@ public class LoginBean implements Serializable {
     private Password passwordActivo;
     private Boolean necesitaCambiarPassword;
     private TimeZone timeZone = TimeZone.getDefault();
+    private Locale locale = Locale.getDefault();
+    private String numberPattern = ConfiguracionEnum.NUMBER_PATTERN.getSymbol();
+    private String monedaPattern = ConfiguracionEnum.MONEDA_PATTERN.getSymbol();
+    private String fechaHoraPattern = ConfiguracionEnum.DATETIME_PATTERN.getSymbol();
+    private String fechaCortaPattern = ConfiguracionEnum.DATE_PATTERN_CORTO.getSymbol();
+    //Importacion
+    private Boolean proveedoresImportados;
+    private Boolean clientesImportados;
+    private Boolean motosImportadas;
+    private Boolean comprasImportadas;
+    private Boolean stockImportado;
+    private Boolean ventasImportadas;
+    private Boolean pagosImportados;
+    private Boolean consolidarCreditos;
 
     public UsuarioFacade getUsuarioFacade() {
         if (this.usuarioFacade == null) {
@@ -138,6 +154,10 @@ public class LoginBean implements Serializable {
             SessionBean.getInstance().registrarSesion(req.getSession().getId(), userName);
             setUbicacion("Inicio");
             loginDesde = new Date();
+
+            clientesImportados = Boolean.FALSE;
+            proveedoresImportados = Boolean.FALSE;
+
             return "./secure/app/main.bej";
         } else {
             return null;
@@ -358,5 +378,93 @@ public class LoginBean implements Serializable {
 
     public TimeZone getTimeZone() {
         return timeZone;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public String getFechaCortaPattern() {
+        return fechaCortaPattern;
+    }
+
+    public String getFechaHoraPattern() {
+        return fechaHoraPattern;
+    }
+
+    public String getMonedaPattern() {
+        return monedaPattern;
+    }
+
+    public String getNumberPattern() {
+        return numberPattern;
+    }
+
+    public Boolean getClientesImportados() {
+        return clientesImportados;
+    }
+
+    public void setClientesImportados(Boolean clientesImportados) {
+        this.clientesImportados = clientesImportados;
+    }
+
+    public Boolean getComprasImportadas() {
+        return comprasImportadas;
+    }
+
+    public void setComprasImportadas(Boolean comprasImportadas) {
+        this.comprasImportadas = comprasImportadas;
+    }
+
+    public Boolean getConsolidarCreditos() {
+        return consolidarCreditos;
+    }
+
+    public void setConsolidarCreditos(Boolean consolidarCreditos) {
+        this.consolidarCreditos = consolidarCreditos;
+    }
+
+    public Boolean getMotosImportadas() {
+        return motosImportadas;
+    }
+
+    public void setMotosImportadas(Boolean motosImportadas) {
+        this.motosImportadas = motosImportadas;
+    }
+
+    public Boolean getPagosImportados() {
+        return pagosImportados;
+    }
+
+    public void setPagosImportados(Boolean pagosImportados) {
+        this.pagosImportados = pagosImportados;
+    }
+
+    public Boolean getProveedoresImportados() {
+        return proveedoresImportados;
+    }
+
+    public void setProveedoresImportados(Boolean proveedoresImportados) {
+        this.proveedoresImportados = proveedoresImportados;
+    }
+
+    public Boolean getStockImportado() {
+        return stockImportado;
+    }
+
+    public void setStockImportado(Boolean stockImportado) {
+        this.stockImportado = stockImportado;
+    }
+
+    public Boolean getVentasImportadas() {
+        return ventasImportadas;
+    }
+
+    public void setVentasImportadas(Boolean ventasImportadas) {
+        this.ventasImportadas = ventasImportadas;
     }
 }

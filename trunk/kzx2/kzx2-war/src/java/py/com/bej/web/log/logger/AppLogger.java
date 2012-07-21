@@ -18,11 +18,11 @@ public class AppLogger {
     static public void setup() throws IOException {
         // Create Logger
         Logger logger = Logger.getLogger("");
-        logger.setLevel(Level.WARNING);
+        logger.setLevel(Level.INFO);
         fileTxt = new FileHandler("C:\\kzx2\\docs\\logs\\Logging.txt");
         fileHTML = new FileHandler("C:\\kzx2\\docs\\logs\\Logging.html");
 //        fileTxt = new FileHandler("/var/kzx2/Logging.txt");
-//        fileHTML = new FileHandler("/var/www/html/20120516/bej-motos-web-logging.html");
+//        fileHTML = new FileHandler("/var/www/html/20120626/bej-motos-web-logging.html");
 
         // Create txt Formatter
         formatterTxt = new SimpleFormatter();

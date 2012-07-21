@@ -62,6 +62,10 @@ public class PlanBean extends AbstractPageBean<Plan> {
     private Double tasaMoratoria;
     @NotNull(message = "Ingrese un valor")
     @Min(value = 0, message = "Ingrese un valor positivo")
+    @Max(value = 4, message = "Valor fuera de rango")
+    private Double tasaPunitoria;
+    @NotNull(message = "Ingrese un valor")
+    @Min(value = 0, message = "Ingrese un valor positivo")
     @Max(value = 100, message = "Valor fuera de rango")
     private Double porcentajeDescuento;
 
@@ -149,6 +153,7 @@ public class PlanBean extends AbstractPageBean<Plan> {
         setModificar(Boolean.FALSE);
         obtenerListas();
         plan = new Plan();
+        plan.setCategoria(new Categoria(CategoriaEnum.S_PER.getSymbol()));
         return "plan";
     }
 
@@ -175,6 +180,7 @@ public class PlanBean extends AbstractPageBean<Plan> {
             tasaAnual = Double.valueOf(plan.getTan() * 100);
             tasaEfectiva = Double.valueOf(plan.getTae() * 100);
             tasaMoratoria = Double.valueOf(plan.getTasaInteresMoratorio() * 100);
+            tasaPunitoria = Double.valueOf(plan.getTasaInteresPunitorio() * 100);
             return "plan";
         } else {
             setErrorMessage(null, getFacade().sel);
@@ -188,6 +194,7 @@ public class PlanBean extends AbstractPageBean<Plan> {
         plan.setTan(new Float((tasaAnual / 100)));
         plan.setTae(new Float((tasaEfectiva / 100)));
         plan.setTasaInteresMoratorio(new Float((tasaMoratoria / 100)));
+        plan.setTasaInteresPunitorio(new Float((tasaPunitoria / 100)));
         plan.setPorcentajeDescuento(new Float((porcentajeDescuento / 100)));
         return true;
     }
@@ -327,5 +334,13 @@ public class PlanBean extends AbstractPageBean<Plan> {
 
     public void setTasaMoratoria(Double tasaMoratoria) {
         this.tasaMoratoria = tasaMoratoria;
+    }
+
+    public Double getTasaPunitoria() {
+        return tasaPunitoria;
+    }
+
+    public void setTasaPunitoria(Double tasaPunitoria) {
+        this.tasaPunitoria = tasaPunitoria;
     }
 }

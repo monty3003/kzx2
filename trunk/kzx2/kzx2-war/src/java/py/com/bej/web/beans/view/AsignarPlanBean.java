@@ -48,7 +48,7 @@ import py.com.bej.web.utils.PlanWrapper;
 @ManagedBean
 @SessionScoped
 public class AsignarPlanBean implements Serializable {
-
+    
     @EJB
     private PlanFacade planFacade;
     @EJB
@@ -82,28 +82,28 @@ public class AsignarPlanBean implements Serializable {
     /** Creates a new instance of AsignarPlanBean */
     public AsignarPlanBean() {
     }
-
+    
     public MotoFacade getMotoFacade() {
         if (motoFacade == null) {
             motoFacade = new MotoFacade();
         }
         return motoFacade;
     }
-
+    
     public MotostockFacade getMotostockFacade() {
         if (motostockFacade == null) {
             motostockFacade = new MotostockFacade();
         }
         return motostockFacade;
     }
-
+    
     public PlanFacade getPlanFacade() {
         if (planFacade == null) {
             planFacade = new PlanFacade();
         }
         return planFacade;
     }
-
+    
     public String consultarPlan() {
         stockId = null;
         planId = null;
@@ -117,19 +117,19 @@ public class AsignarPlanBean implements Serializable {
         obtenerListas();
         return "consultarPlan";
     }
-
+    
     private void obtenerListas() {
         listaStock = new ArrayList<SelectItem>();
         listaStock.add(new SelectItem("-1", "-SELECCIONAR-"));
         listaPlan = JsfUtils.getSelectItems(getPlanFacade().findAll(), true);
         obtenerListaMoto();
     }
-
-    public void asignarPlan() {
+    
+    public String asignarPlan() {
         //Validar
         if (moto.getModelo() == null || moto.getModelo().equals("X")) {
             setErrorMessage("frm:modelo", "Seleccione un valor");
-            return;
+            return null;
         }
         //Buscar Plan
         plan = getPlanFacade().find(planId);
@@ -138,10 +138,13 @@ public class AsignarPlanBean implements Serializable {
         //Generar Entregas
         BigDecimal entregaMinX;
         BigDecimal entregaMaxX;
+        //Minimo de cuota
+        BigDecimal montoMinimo = new BigDecimal(ConfiguracionEnum.MONTO_MINIMO_CUOTA.getSymbol());
         Float porcentajeEntregaMinX;
         listaDePlanes = new ArrayList<PlanWrapper>();
         listaDeEntrega = new ArrayList<BigDecimal>();
         listaDeEntrega.add(null);
+        listaDeEntrega.add(BigDecimal.ZERO);
         entregaMaxX = plan.getMontoEntregaMaximo();
         porcentajeEntregaMinX = plan.getPorcentajeMontoEntrega();
         if (porcentajeEntregaMinX != null && porcentajeEntregaMinX > 0) {
@@ -151,43 +154,59 @@ public class AsignarPlanBean implements Serializable {
                 entregaMinX = plan.getMontoEntregaMinimo();
             }
             BigDecimal aumento = entregaMaxX.subtract(entregaMinX).divide(BigDecimal.valueOf(cantidadEntregas), RoundingMode.HALF_DOWN);
-            BigDecimal cienMil = BigDecimal.valueOf(100000);
-            BigDecimal doscientosMil = BigDecimal.valueOf(200000);
-            BigDecimal quinientosMil = BigDecimal.valueOf(500000);
             BigDecimal faltaPara = entregaMaxX;
             listaDeEntrega.add(entregaMinX);
             for (int i = 0; i < cantidadEntregas; i++) {
                 entregaMinX = entregaMinX.add(aumento);
                 faltaPara = faltaPara.subtract(aumento);
-                if (faltaPara.equals(faltaPara.max(aumento))) {
+                if (faltaPara.subtract(aumento).compareTo(aumento) > 0 && entregaMinX.compareTo(entregaMaxX) < 0) {
                     listaDeEntrega.add(entregaMinX.setScale(-5, RoundingMode.HALF_DOWN));
                 }
             }
             listaDeEntrega.add(entregaMaxX.setScale(-5, RoundingMode.HALF_DOWN));
         }
-        BigDecimal precioContadoX = motostock.getPrecioContado();
         BigDecimal precioBaseX = motostock.getPrecioBase();
         BigDecimal cuotaX;
-        BigDecimal interesMensual = BigDecimal.valueOf(plan.getTan() / 12).setScale(2, RoundingMode.HALF_DOWN);
         BigDecimal interesAcumulado;
+        BigDecimal cuotaCapital;
+        BigDecimal cuotaConInteres;
         List<BigDecimal> listaCuotas;
         PlanWrapper pwr;
         for (short x = plan.getFinanciacionMinima(); x <= plan.getFinanciacionMaxima(); x++) {
             listaCuotas = new ArrayList<BigDecimal>();
-            interesAcumulado = interesMensual.multiply(BigDecimal.valueOf(x)).setScale(2, RoundingMode.HALF_DOWN);
+            interesAcumulado = BigDecimal.valueOf((plan.getTan() * x) / (x >= 12 ? 12 : 1)).setScale(4, RoundingMode.HALF_DOWN);
             for (BigDecimal entrega : listaDeEntrega) {
                 if (entrega != null) {
-                    BigDecimal saldo = precioBaseX.subtract(entrega);
-                    BigDecimal saldoConInteres = saldo.multiply(interesAcumulado.add(BigDecimal.ONE));
-                    cuotaX = saldoConInteres.divide(BigDecimal.valueOf(x), RoundingMode.HALF_DOWN).setScale(plan.getIndiceRedondeo(), RoundingMode.HALF_DOWN);
-                    listaCuotas.add(cuotaX);
+                    if (entrega.compareTo(BigDecimal.ZERO) == 0) {
+                        //Columna de Cuotas Corridas
+                        if (x >= plan.getCuotaCorridaDesde() && x <= plan.getCuotaCorridaHasta()) {
+                            cuotaCapital = precioBaseX.divide(BigDecimal.valueOf(x), 0, RoundingMode.HALF_DOWN);
+                            cuotaConInteres = cuotaCapital.multiply(interesAcumulado.add(BigDecimal.ONE));
+                            cuotaX = cuotaConInteres.setScale(plan.getIndiceRedondeo(), RoundingMode.HALF_UP);
+                        } else {
+                            cuotaX = null;
+                        }
+                        listaCuotas.add(cuotaX);
+                    } else {
+                        BigDecimal saldo = precioBaseX.subtract(entrega);
+                        Logger.getLogger(AsignarPlanBean.class.getName()).log(Level.INFO, "El saldo es {0} y las cuotas son {1}", new Object[]{saldo, x});
+                        cuotaCapital = saldo.divide(BigDecimal.valueOf(x), 4, RoundingMode.HALF_DOWN);
+                        cuotaConInteres = cuotaCapital.multiply(interesAcumulado.add(BigDecimal.ONE));
+                        cuotaX = cuotaConInteres.setScale(plan.getIndiceRedondeo(), RoundingMode.HALF_UP);
+                        if (cuotaX.compareTo(montoMinimo) >= 0) {
+                            listaCuotas.add(cuotaX);
+                        } else {
+                            listaCuotas.add(null);
+                        }
+                    }
                 }
             }
             pwr = new PlanWrapper(x, listaCuotas);
             listaDePlanes.add(pwr);
         }
+        return null;
     }
-
+    
     private void obtenerListaMoto() {
         listaMoto = new ArrayList<SelectItem>();
         listaMoto.add(new SelectItem("X", "-SELECCIONAR-"));
@@ -199,7 +218,7 @@ public class AsignarPlanBean implements Serializable {
             }
         }
     }
-
+    
     public void obtenerListaStock() {
         listaStock = new ArrayList<SelectItem>();
         listaStock.add(new SelectItem(-1, "-TODOS-"));
@@ -217,7 +236,7 @@ public class AsignarPlanBean implements Serializable {
             }
         }
     }
-
+    
     public String asignar() {
         int totalMigrado = 0;
         try {
@@ -248,20 +267,24 @@ public class AsignarPlanBean implements Serializable {
         setInfoMessage(null, "Se asigno el plan " + plan.getlabel() + " a " + totalMigrado + " motos.");
         return "moto";
     }
-
+    
     public void generarReporte() throws Exception {
         NumberFormat nf = new DecimalFormat(ConfiguracionEnum.MONEDA_PATTERN.getSymbol());
         FastReportBuilder drb = new FastReportBuilder();
         Style s = new Style();
         s.setHorizontalAlign(HorizontalAlign.CENTER);
         String n = null;
-        for (int i = 0; i < listaDeEntrega.size(); i++) {
-            if (listaDeEntrega.get(i) == null) {
+        listaDeEntrega.remove(1);
+        int i = 0;
+        for (BigDecimal entrega : listaDeEntrega) {
+            if (entrega == null) {
                 drb.addColumn(" ", "numeroCuota", Short.class.getName(), 5, s);
+                drb.addColumn("Cuota Corrida", "cuotaCorrida", String.class.getName(), 10, s);
             } else {
-                n = nf.format(listaDeEntrega.get(i).longValue());
-                drb.addColumn(n, "entrega" + (i), String.class.getName(), 10, s);
+                n = nf.format(entrega.longValue());
+                drb.addColumn(n, "entrega" + i, String.class.getName(), 10, s);
             }
+            i++;
         }
         drb.setTitle("Plan de Cuotas - " + motostock.getMoto().getMarca() + " " + motostock.getMoto().getModelo());
         drb.setSubtitle(plan.getNombre() + "                  Precio Contado: " + nf.format(motostock.getPrecioContado()));
@@ -270,18 +293,18 @@ public class AsignarPlanBean implements Serializable {
         drb.setPageSizeAndOrientation(p);
         drb.setUseFullPageWidth(Boolean.TRUE); //make colums to fill the page width  
         DynamicReport dr = drb.build();
-
+        
         net.sf.jasperreports.engine.JRDataSource ds = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(listaDePlanes);
         net.sf.jasperreports.engine.JasperPrint jp =
                 DynamicJasperHelper.generateJasperPrint(dr, new ClassicLayoutManager(), ds);
 //        JasperViewer.viewReport(jp);    //finally display the report report   
         new GeneradorReporte().generarReportePdf(jp);
     }
-
+    
     protected void setErrorMessage(String component, String summary) {
         FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, null));
     }
-
+    
     protected void setInfoMessage(String component, String summary) {
         FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null));
     }
@@ -362,35 +385,35 @@ public class AsignarPlanBean implements Serializable {
     public void setPlan(Plan plan) {
         this.plan = plan;
     }
-
+    
     public String getMonedaPattern() {
         return monedaPattern;
     }
-
+    
     public String getNumberPattern() {
         return numberPattern;
     }
-
+    
     public Integer getStockId() {
         return stockId;
     }
-
+    
     public void setStockId(Integer stockId) {
         this.stockId = stockId;
     }
-
+    
     public List<BigDecimal> getListaDeEntrega() {
         return listaDeEntrega;
     }
-
+    
     public void setListaDeEntrega(List<BigDecimal> listaDeEntrega) {
         this.listaDeEntrega = listaDeEntrega;
     }
-
+    
     public Integer getPlanId() {
         return planId;
     }
-
+    
     public void setPlanId(Integer planId) {
         this.planId = planId;
     }
