@@ -20,6 +20,7 @@
     <class>py.com.bej.orm.entities.Transaccion</class>
     <class>py.com.bej.orm.entities.Ubicacion</class>
     <class>py.com.bej.orm.entities.Usuario</class>
+    <class>py.com.bej.orm.entities.Calificacion</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="eclipselink.jdbc.native-sql" value="true"/>
