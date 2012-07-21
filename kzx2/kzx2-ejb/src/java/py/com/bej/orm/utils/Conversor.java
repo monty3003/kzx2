@@ -16,9 +16,12 @@ import java.util.Date;
  */
 public class Conversor {
 
+    private static DateFormat df = new SimpleDateFormat();
+    private static NumberFormat nf = new DecimalFormat();
+
     public static Date deStringToDate(String date, String pattern) {
         Date result = null;
-        DateFormat df = new SimpleDateFormat(pattern);
+        df = new SimpleDateFormat(pattern);
         try {
             result = df.parse(date);
         } catch (Exception e) {
@@ -30,7 +33,7 @@ public class Conversor {
 
     public static String deDateToString(Date date, String pattern) {
         String result = null;
-        DateFormat df = new SimpleDateFormat(pattern);
+        df = new SimpleDateFormat(pattern);
         try {
             result = df.format(date);
         } catch (Exception e) {
@@ -63,7 +66,7 @@ public class Conversor {
     }
 
     public static String numberToStringPattern(Object number) {
-        NumberFormat nf = new DecimalFormat(ConfiguracionEnum.MONEDA_PATTERN.getSymbol());
+        nf = new DecimalFormat(ConfiguracionEnum.MONEDA_PATTERN.getSymbol());
         return nf.format(number);
     }
 }

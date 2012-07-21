@@ -12,6 +12,7 @@ public enum ConfiguracionEnum {
 
     PAG_DESDE("0", "Paginacion desde"),
     PAG_MAX("10", "Paginacion desde"),
+    MONTO_MINIMO_CUOTA("150000", "Monto minimo de la cuota"),
     DATE_PATTERN_CORTO("dd/MM/yyyy", "Formato de Fecha corta"),
     DATE_PATTERN_MES("MM/yyyy", "Formato de Fecha solo mes y año"),
     DATETIME_PATTERN("dd/MM/yyyy - HH:mm:s", "Formato de Fecha y Hora"),
@@ -22,7 +23,8 @@ public enum ConfiguracionEnum {
     PROPIETARIO("1275758", "Documento del propietario del negocio"),
     LIMITE_MINIMO_PAGARE("150000", "Limite minimo del monto por Pagare"),
     LIMITE_MAXIMO_PAGARE("5000000", "Limite maximo del monto por Pagare"),
-    DESCUENTO_CANCELACION("0.02", "Porcentaje del Descuento por cuota cancelada");
+    DESCUENTO_CANCELACION("0.02", "Porcentaje del Descuento por cuota cancelada"),
+    DIAS_DE_GRACIA("10", "Dias de gracia para el pago sin intereses de la cuota vencida");
     private String symbol;
     private String label;
 
