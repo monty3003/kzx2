@@ -12,6 +12,7 @@
     <class>py.com.bej.base.prod.entity.Vmplanmoto</class>
     <class>py.com.bej.base.prod.entity.Vmresfuerzos</class>
     <class>py.com.bej.base.prod.entity.Vmventamotos</class>
+    <class>py.com.bej.base.prod.entity.Vmintereses</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
     </properties>

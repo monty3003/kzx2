@@ -2,16 +2,7 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/session/MotostockProduccionFacade.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/entity/Vmmotostock.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/session/ClientesProduccionFacade.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/session/VentaMotosProduccionFacade.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/session/ComprasProduccionFacade.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/setup/glassfish-resources.xml</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/entity/Vmcompras.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/entity/Vmventamotos.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/entity/Vmplanmoto.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/entity/Vmpagomotos.java</file>
-        <file>file:/C:/Users/Diego_M/Documents/NetBeansProjects/sqlserver-ejb/src/java/py/com/bej/base/prod/session/PlanMotosProduccionFacade.java</file>
+        <file>file:/C:/kzx2/kzx2/sqlserver-ejb/src/java/py/com/bej/base/prod/session/VentaMotosProduccionFacade.java</file>
+        <file>file:/C:/kzx2/kzx2/sqlserver-ejb/setup/glassfish-resources.xml</file>
     </open-files>
 </project-private>

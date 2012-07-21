@@ -4,6 +4,7 @@
  */
 package py.com.bej.base.prod.session;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -20,7 +21,7 @@ import javax.persistence.metamodel.EntityType;
  *
  * @author diego
  */
-public abstract class AbstractFacade<T> {
+public abstract class AbstractFacade<T> implements Serializable {
 
     @PersistenceContext(unitName = "sqlserver-ejbPU")
     private EntityManager em;
@@ -40,6 +41,7 @@ public abstract class AbstractFacade<T> {
     public String ex2 = "El registro se ha modificado con éxito";
     public String ex3 = "El registro se ha eliminado con éxito";
     public String sel = "Seleccione un registro para modificar";
+    private static final long serialVersionUID = 1L;
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
