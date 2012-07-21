@@ -118,9 +118,7 @@ and open the template in the editor.
                                     </td>
                                     <td>
                                         <label for="compraFiltro">Compra: </label>
-                                        <h:selectOneMenu id="compraFiltro" value="#{motostockBean.compraFiltro}">
-                                            <f:selectItems value="#{motostockBean.listaCompra}"/>
-                                        </h:selectOneMenu>
+                                        <h:inputText id="compraFiltro" styleClass="d_num" value="#{motostockBean.compraFiltro}" maxlength="11"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -138,9 +136,7 @@ and open the template in the editor.
                                     </td>      
                                     <td>
                                         <label for="modeloFiltro">Venta:</label>
-                                        <h:selectOneMenu id="ventaFiltro" value="#{motostockBean.ventaFiltro}">
-                                            <f:selectItems value="#{motostockBean.listaVenta}"/>
-                                        </h:selectOneMenu>
+                                        <h:inputText id="ventaFiltro" styleClass="d_num" value="#{motostockBean.ventaFiltro}" maxlength="11"/>
                                     </td>
                                 </tr>
                             </table>
@@ -179,14 +175,21 @@ and open the template in the editor.
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'chasis'}"/></p></th>
-                                            <th width="15%"><p>
+                                            <th><p>
+                                                    <h:commandLink action="#{motostockBean.listar}">Motor
+                                                        <f:setPropertyActionListener value="motor" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motostockBean.facade.orden.columna eq 'motor'}"/></p></th>
+                                            <th width="5%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Compra
                                                         <f:setPropertyActionListener value="compra" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
                                                     </h:commandLink>
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'compra'}"/></p></th>
-                                            <th width="15%"><p>
+                                            <th width="5%"><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Venta
                                                         <f:setPropertyActionListener value="venta" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
@@ -208,6 +211,13 @@ and open the template in the editor.
                                                     <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
                                                                   rendered="#{motostockBean.facade.orden.columna eq 'ubicacion.descripcion'}"/></p></th>
                                             <th><p>
+                                                    <h:commandLink action="#{motostockBean.listar}">Estado
+                                                        <f:setPropertyActionListener value="estado" target="#{motostockBean.facade.orden.columna}"/>
+                                                        <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
+                                                    </h:commandLink>
+                                                    <h:outputText value="#{(motostockBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                  rendered="#{motostockBean.facade.orden.columna eq 'estado'}"/></p></th>
+                                            <th><p>
                                                     <h:commandLink action="#{motostockBean.listar}">Activo
                                                         <f:setPropertyActionListener value="activo" target="#{motostockBean.facade.orden.columna}"/>
                                                         <f:setPropertyActionListener value="true" target="#{motostockBean.facade.orden.asc}"/>
@@ -224,15 +234,12 @@ and open the template in the editor.
                                                 <td><h:outputText value="#{row.id}"/></td>
                                                 <td><h:outputText value="#{row.moto.codigo}"/></td>
                                                 <td><h:outputText value="#{row.chasis}"/></td>
+                                                <td><h:outputText value="#{row.motor}"/></td>
                                                 <td>
-                                                    <h:outputText value="#{row.compra.id}"/>&#160;&#45;&#160;
-                                                    <h:outputText value="#{row.compra.fechaOperacionString}"/>
+                                                    <h:commandLink value="#{row.compra.id}" rendered="#{row.compra.id ne null}" action="#{compraMotosBean.resumenCompra(row.compra.id)}"/>
                                                 </td>
                                                 <td>
-                                                    <h:panelGroup rendered="#{row.venta ne null}">
-                                                        <h:outputText value="#{row.venta.id}"/>&#160;&#45;&#160;
-                                                        <h:outputText value="#{row.venta.fechaOperacionString}"/>
-                                                    </h:panelGroup>
+                                                    <h:commandLink value="#{row.venta.id}" rendered="#{row.venta.id ne null}" action="#{ventaMotosBean.resumenVenta(row.venta.id)}"/>
                                                 </td>
                                                 <td>
                                                     <h:panelGroup rendered="#{row.precioContado lt 1}">
@@ -247,6 +254,7 @@ and open the template in the editor.
                                                     </h:panelGroup>
                                                 </td>
                                                 <td><h:outputText value="#{row.ubicacion.descripcion}"/></td>
+                                                <td class="estado#{row.estado.id}"><h:outputText value="#{row.estado.descripcion}"/></td>
                                                 <td>
                                                     <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
                                                     <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
@@ -256,9 +264,9 @@ and open the template in the editor.
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="9">
+                                            <td colspan="10">
                                                 <h:commandLink action="#{motostockBean.anterior}">Anterior</h:commandLink>
-                                                &#160;|&#160;#{motostockBean.desde + 1}..#{motostockBean.facade.ultimo} de #{motostockBean.facade.contador}&#160;|&#160;
+                                                &#160;|&#160;#{motostockBean.facade.desde + 1}..#{motostockBean.facade.ultimo} de #{motostockBean.facade.contador}&#160;|&#160;
                                                 <h:commandLink action="#{motostockBean.siguiente}">Siguiente</h:commandLink>
                                             </td>
                                         </tr>

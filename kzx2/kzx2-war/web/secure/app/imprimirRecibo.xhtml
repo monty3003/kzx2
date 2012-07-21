@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <script src="#{facesContext.externalContext.requestContextPath}/resources/js/textos.js" type="text/javascript"></script>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/recibo.css" rel="stylesheet" type="text/css" />
+        <title>Imprimir Recibo</title>
+    </h:head>
+    <h:body onload="imprimir()">
+        <div id="recibo">
+            <table>
+                <th colspan="2" style="border-top: double 2px #000;"><h:outputText value="#{imprimirReciboBean.empresa}" escape="false"/></th>
+                <tr class="membrete" style="border-top: double 2px #000;">
+                    <td colspan="2" align="center">
+                        <h:outputText value="#{imprimirReciboBean.membrete}" escape="false"/>
+                    </td>
+                </tr>
+                <tr class="titulo"><td colspan="2" align="center"><h3>RECIBO DE DINERO</h3></td></tr>
+                <tr><td>RUC:&#160;<h:outputText value="#{imprimirReciboBean.ruc}"/></td><td align="right">Nº:&#160;<h:outputText value="#{imprimirReciboBean.pago.numeroDocumento}"/></td></tr>
+                <tr><td colspan="2">Cliente:&#160;<h:outputText value="#{imprimirReciboBean.cliente}"/></td></tr>
+                <tr><td colspan="2">Crédito:&#160;<h:outputText value="#{imprimirReciboBean.pago.credito.id}"/></td></tr>
+                <tr><td colspan="2">Factura:&#160;<h:outputText value="#{imprimirReciboBean.pago.credito.transaccion.factura.numero}"/></td></tr>
+                <tr><td colspan="2">Fecha:&#160;<h:outputText value="#{imprimirReciboBean.pago.fechaString}"/></td></tr>
+                <tr style="border-top: double 1px; border-bottom: double 1px;"><td align="center">Concepto</td><td align="center">Importe</td></tr>
+                <ui:repeat value="#{imprimirReciboBean.pago.detalle}" var="detalle">
+                    <tr>
+                        <td>
+                            <h:outputText value="#{detalle.concepto}"/>
+                        </td>
+                        <td align="right">
+                            <h:outputText value="#{detalle.importe}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText>
+                        </td>
+                    </tr>
+                </ui:repeat>
+                <tfoot>
+                    <tr><td>TOTAL PAGADO:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.pago.totalPagado}"><f:convertNumber pattern="#{imprimirReciboBean.monedaPattern}"/></h:outputText></td></tr>
+                    <tr><td colspan="2"><h:outputText value="#{imprimirReciboBean.pago.totalPagadoString}"/></td></tr>
+                    <tr><td>Saldo Actual:</td><td class="totalPagado"><h:outputText value="#{imprimirReciboBean.pago.saldoActualString}"/></td></tr>
+                    <tr><td colspan="2" align="center">Obs: el saldo actual puede verse modificado por interes moratorios.</td></tr>
+                    <tr><td class="firma" colspan="2"><br/><br/><br/></td></tr>
+                    <tr><td style="border-bottom: solid 1px #000;" colspan="2" align="center"><h:outputText value="#{loginBean.usuario.nombre}"/><br/><br/>
+                        </td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </h:body>
+</html>

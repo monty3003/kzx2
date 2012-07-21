@@ -57,65 +57,54 @@
                                             <f:ajax event="blur" render="@this"/>
                                         </h:selectOneMenu>&#160;<rich:messages for="frm:vendedor"/></div>
                                     <div class="etiq"><label for="categoria">Categoria: </label></div>
-                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{compraMotosBean.compra.codigo.id}">
+                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{compraMotosBean.idCategoria}">
                                             <f:selectItems value="#{compraMotosBean.listaCategoria}"/>
                                             <f:ajax event="blur" render="panelCategoria"/>
                                         </h:selectOneMenu>&#160;<rich:messages for="frm:categoria"/></div>
                                 </div>
+                                <hr/>
+                                <div class="fila">
+                                    <div class="etiq"><label for="gravamen">Impuesto:</label></div>
+                                    <div class="cont"><h:inputText id="gravamen" styleClass="d_num" size="2" value="#{compraMotosBean.gravamen}"/>&#160;%
+                                        &#160;<h:message errorClass="msgError" for="frm:gravamen"/></div>
+                                </div>
                             </div>
                             <hr/>
-                            <div style="margin: 0px auto; width: 70%;">
+                            <div style="margin: 0px auto; width: 40%;">
                                 <table class="tablaGrilla">
                                     <tr>
-                                        <td width="50%">&nbsp;</td>                                       
-                                        <td>Exentas</td>                                       
-                                        <td>Gravadas 5%</td>                                       
+                                        <td width="30%">&nbsp;</td>                                       
+                                        <td>Exentas</td>                                            
                                         <td>Gravadas 10%</td>     
                                     </tr>
                                     <tr>
-                                        <td width="50%" align="left">Sub Total
+                                        <td align="left">Sub Total
                                             &nbsp;<rich:messages for="frm:subTotalExentas"/>
-                                            &nbsp;<rich:messages for="frm:subTotalGravadas5"/>
                                             &nbsp;<rich:messages for="frm:subTotalGravadas10"/></td>                                       
                                         <td>
-                                            <h:inputText id="subTotalExentas" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalExentas}">
+                                            <h:inputText id="subTotalExentas" styleClass="d_num" size="5" maxlength="13" value="#{compraMotosBean.compra.subTotalExentas}">
                                                 <f:ajax event="blur" render="subTotalExentas"/>
                                                 <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
                                             </h:inputText>
                                         </td>                                       
                                         <td>
-                                            <h:inputText id="subTotalGravadas5" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalGravadas5}">
-                                                <f:ajax event="blur" render="subTotalGravadas5"/>
-                                                <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
-                                            </h:inputText>
-                                        </td>                                       
-                                        <td>
-                                            <h:inputText id="subTotalGravadas10" styleClass="d_num" size="13" maxlength="13" value="#{compraMotosBean.compra.subTotalGravadas10}">
+                                            <h:inputText id="subTotalGravadas10" styleClass="d_num" size="5" maxlength="13" value="#{compraMotosBean.compra.subTotalGravadas10}">
                                                 <f:ajax event="blur" render="subTotalGravadas10"/>
                                                 <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
                                             </h:inputText>
                                         </td>     
                                     </tr>
-                                    <tr>
-                                        <td colspan="3" align="left">Total&nbsp;<rich:messages for="frm:total"/></td>                                       
-                                        <td><h:inputText styleClass="d_num" id="total" size="13" maxlength="13" value="#{compraMotosBean.compra.totalPagado}">
+                                    <tr> <td align="left">Total:</td><td>&nbsp;</td>                                   
+                                        <td><h:inputText styleClass="d_num" id="total" size="5" maxlength="13" value="#{compraMotosBean.compra.totalPagado}">
                                                 <f:ajax event="blur" render="total"/>
                                                 <f:convertNumber pattern="#{compraMotosBean.monedaPattern}"/>
                                             </h:inputText>
                                         </td>            
                                     </tr>
-                                    <tr>
-                                        <td colspan="4">
-                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalExentas"/>
-                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas5"/>
-                                            &#160;&#160;<h:message errorClass="msgError" for="frm:subTotalGravadas10"/>
-                                            &#160;&#160;<h:message errorClass="msgError" for="frm:total"/>
-                                        </td>
-                                    </tr>
                                 </table>
                             </div>
                             <h:panelGroup id="panelCategoria">
-                                <h:panelGroup rendered="#{compraMotosBean.compra.codigo.id == 45}">
+                                <h:panelGroup rendered="#{compraMotosBean.idCategoria eq '45'}">
                                     <hr/>
                                     <div class="tablaForm">
                                         <div class="fila">
@@ -146,11 +135,13 @@
                                     <div class="cont"><h:inputText id="cantidadItems" styleClass="d_num" size="5" maxlength="2" value="#{compraMotosBean.compra.cantidadItems}">
                                             <f:ajax event="blur" listener="#{compraMotosBean.cargarMotosNuevas}" render="@this"/>
                                         </h:inputText>
-                                        <input class="submit" type="button" jsfc="h:commandButton" value="Cargar">
-                                            <f:ajax event="click" render="frm:tablaMotos"/>
-                                        </input>
                                         <rich:messages for="frm:cantidadItems"/>
                                     </div>
+                                </div>
+                                <div class="botonera">
+                                    <h:commandButton styleClass="submit" type="button" value="Cargar">
+                                        <f:ajax event="click" render="frm:tablaMotos"/>
+                                    </h:commandButton>
                                 </div>
                             </div>
                             <h:panelGroup id="tablaMotos">

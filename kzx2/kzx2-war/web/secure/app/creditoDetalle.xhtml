@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Cobrar Crédito</title>
+    </h:head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <f:metadata>
+                        <f:viewParam name="creditoResumen" value="#{creditoBean.creditoResumen}"
+                                     converter="#{creditoConverter}" converterMessage="Bad request. Unknown credito."
+                                     required="true" requiredMessage="Bad request. Please use a link from within the system."
+                                     />
+                    </f:metadata>
+                    <div>
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <h:panelGroup id="panelCredito">
+                                <h:panelGroup rendered="#{creditoBean.creditoResumen.id ne null}">
+                                    <div class="resumen">
+                                        <table>
+                                            <thead><h3>Datos del Cliente</h3></thead>
+                                            <tr>
+                                                <th>Documento</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.documento}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nombre</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.nombre}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Dirección 1</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.direccion1}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Dirección 2</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.direccion2}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Teléfono Fijo</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.telefonoFijo}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Teléfono Móvil</th><td><h:outputText value="#{creditoBean.creditoResumen.transaccion.comprador.telefonoMovil}"/></td>
+                                            </tr>
+                                        </table>
+                                        <table>
+                                            <thead><h3>Datos del Crédito</h3></thead>
+                                            <tr><td colspan="6"><span style="display: inline;float: left;"><img src="../../resources/images/#{creditoBean.creditoResumen.estado.id}-72.png" width="72px" height="72px"/></span>
+                                                    <font size="6px" color="#{(creditoBean.creditoResumen.estado.id eq 102 or creditoBean.creditoResumen.estado.id eq 105)?'#ffdad7':'#009933'}">
+                                                        <span style="display: inline;float: left; padding: 10px;"><h:outputText value="#{creditoBean.creditoResumen.estado.descripcion}"/></span>
+                                                    </font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nº</th><td><h:outputText value="#{creditoBean.creditoResumen.id}"/></td>
+                                                <th>Capital</th><td><h:outputText value="#{creditoBean.creditoResumen.capital}">
+                                                        <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                    </h:outputText></td>
+                                                <th>Amortización</th><td><h:outputText value="#{creditoBean.creditoResumen.amortizacion}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Capital</th><td><h:outputText value="#{creditoBean.creditoResumen.capital}">
+                                                        <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                    </h:outputText></td>
+                                                <th>Crédito Total</th><td><h:outputText value="#{creditoBean.creditoResumen.creditoTotal}">
+                                                        <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
+                                                    </h:outputText>
+                                                </td>
+                                                <th>Tasa Moratoria</th><td><h:outputText value="#{creditoBean.creditoResumen.interesMoratorioString}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Fecha Inicio</th><td><h:outputText value="#{creditoBean.creditoResumen.fechaInicio}">
+                                                        <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                                    </h:outputText></td>
+                                                <th>Fecha Fin</th><td><h:outputText value="#{creditoBean.creditoResumen.fechaFin}">
+                                                        <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                                    </h:outputText></td>
+                                                <th>Ultimo Pago el</th><td><h:outputText value="#{creditoBean.creditoResumen.fechaUltimoPago}">
+                                                        <f:convertDateTime pattern="#{ventaMotosBean.fechaCortaPattern}"/>
+                                                    </h:outputText></td>
+                                            </tr>
+                                            <h:panelGroup rendered="#{creditoBean.creditoResumen.garante ne null}">
+                                                <tr><th colspan="6">Datos del Garante</th></tr>
+                                                <tr>
+                                                    <td colspan="6" style="padding:0px;">
+                                                        <table style="margin: 0px; border: none;">
+                                                            <tr>
+                                                                <th>Documento</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.documento}"/></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Nombre</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.nombre}"/></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Dirección 1</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.direccion1}"/></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Dirección 2</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.direccion2}"/></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Teléfono Fijo</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.telefonoFijo}"/></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Teléfono Móvil</th><td><h:outputText value="#{creditoBean.creditoResumen.garante.telefonoMovil}"/></td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </h:panelGroup>
+                                        </table>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup id="panelDetalle">
+                                    <h:panelGroup rendered="#{not empty creditoBean.listaCuotas}">
+                                        <div class="dosTablas">
+                                            <div class="tablaCompartida resumen izquierda">
+                                                <table>
+                                                    <thead>
+                                                        <h3>Financiación</h3>
+                                                    </thead>
+                                                    <tr>
+                                                        <th width="3px">Nº</th>
+                                                        <th width="5px">Vencimiento</th>
+                                                        <th width="5px">Monto</th>
+                                                        <th width="5px">Pagado el</th>
+                                                    </tr>
+                                                    <tbody>
+                                                        <ui:repeat value="#{creditoBean.listaCuotas}" var="f">
+                                                            <tr class="#{f.cancelado eq 'S'?'verde':'rojo'}">
+                                                                <td><h:outputText value="#{f.numeroCuota}"/></td>
+                                                                <td><h:outputText value="#{f.fechaVencimiento}">
+                                                                        <f:convertDateTime pattern="#{creditoBean.fechaCortaPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                                <td><h:outputText value="#{f.totalAPagar}">
+                                                                        <f:convertNumber pattern="#{creditoBean.monedaPattern}"/>
+                                                                    </h:outputText></td>
+                                                                <td><h:outputText value="#{f.fechaPago}">
+                                                                        <f:convertDateTime pattern="#{creditoBean.fechaCortaPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                            </tr>
+                                                        </ui:repeat>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="tablaCompartida resumen derecha" style="clear: none;">
+                                                <table>
+                                                    <thead>
+                                                        <h3>Detalle del Pago</h3>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Recibo</th>
+                                                            <th>Fecha</th>
+                                                            <th>Importe</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <ui:repeat value="#{creditoBean.listaPagos}" var="pagos">
+                                                            <tr>
+                                                                <td><b><h:outputText value="#{pagos.id}"/></b></td>
+                                                                <td>
+                                                                    <b><h:outputText value="#{pagos.numeroDocumento}"/></b>
+                                                                </td>
+                                                                <td>
+                                                                    <b><h:outputText value="#{pagos.fecha}">
+                                                                            <f:convertDateTime pattern="#{creditoBean.fechaCortaPattern}"/>
+                                                                        </h:outputText></b>
+                                                                </td>
+                                                                <td align="right">
+                                                                    <b> <h:outputText value="#{pagos.totalPagado}">
+                                                                            <f:convertNumber pattern="#{creditoBean.monedaPattern}"/>
+                                                                        </h:outputText></b>
+                                                                </td>
+                                                            </tr>
+                                                            <ui:repeat value="#{pagos.detalle}" var="d">
+                                                                <tr>
+                                                                    <td>&nbsp;</td>
+                                                                    <td colspan="2"><h:outputText value="#{d.concepto}"/></td>
+                                                                    <td align="right">
+                                                                        <h:outputText value="#{d.importe}">
+                                                                            <f:convertNumber pattern="#{creditoBean.monedaPattern}"/>
+                                                                        </h:outputText>
+                                                                    </td>
+                                                                </tr>
+                                                            </ui:repeat>
+                                                        </ui:repeat>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <hr/>
+                                        <div class="botonera">
+                                            <h:commandButton type="submit" styleClass="submit" value="Volver" action="credito"/>
+                                        </div>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </fieldset>
+                    </div>        
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

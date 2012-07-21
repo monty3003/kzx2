@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/layout.css" rel="stylesheet" type="text/css" />
+        <title>Vencimiento de Cuotas</title>
+    </h:head> 
+    <h:body style="margin: 0px auto;">
+        <h:form>
+            <h:panelGroup rendered="#{empty grillaCreditosBean.listaCredito}">
+                <fieldset>
+                    <h3>Grilla de Créditos</h3>
+                    <h4>Seleccione una opción para ver la grilla de créditos.</h4>
+                    <div class="centrado">
+                        <ul>
+                            <li>
+                                <h:commandLink value="Lista Completa de Créditos Abiertos" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="0" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="Las primeras 6 cuotas" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="1" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="De 7 a 12 cuotas" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="2" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="De 13 a 18 cuotas" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="3" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="de 18 a 25 cuotas" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="4" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="Créditos en mora 3 meses" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="5" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                            <li>
+                                <h:commandLink value="Créditos en mora mas de 3 meses" action="#{grillaCreditosBean.verGrillaDeCreditos()}">
+                                    <f:setPropertyActionListener value="6" target="#{grillaCreditosBean.periodo}"/>
+                                </h:commandLink>
+                            </li>
+                        </ul>
+                    </div>
+                </fieldset>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{not empty grillaCreditosBean.listaCredito}">
+                <div>
+                    <table class="tablaGrillaCreditos">
+                        <thead>
+                            <tr>
+                                <ui:repeat value="#{grillaCreditosBean.listaDeCreditosCabecera}" var="cab">
+                                    <th nowrap="true">
+                                        <h:outputText value="#{cab.etiqueta}"/>
+                                    </th>
+                                </ui:repeat>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{grillaCreditosBean.listaCredito}" var="credito">
+                                <tr>
+                                    <th nowrap="true"><h:outputText value="#{credito.transaccion.comprador.nombre}"/></th>
+                                    <th><h:outputText value="#{credito.transaccion.montoCuotaIgual}">
+                                            <f:convertNumber pattern="#{grillaCreditosBean.numberPattern}"/>
+                                        </h:outputText>
+                                    </th>
+                                    <ui:repeat value="#{credito.listaGrilla}" var="detalle">
+                                        <h:panelGroup rendered="#{detalle.deHoy and detalle.colorEstado ne '#ccffff'}" styleClass="tooltip-text">
+                                            <td style="background-color:#{detalle.colorEstado}; border-left: solid 3px black; border-right: solid 3px black;">
+                                                <h:form>
+                                                    <rich:tooltip layout="block">
+                                                        <table>
+                                                            <tr align="left" nowrap="true"><td>Vencimiento:</td>
+                                                                <td align="right" nowrap="true">
+                                                                    <h:outputText value="#{detalle.fechaVencimiento}">
+                                                                        <f:convertDateTime pattern="#{grillaCreditosBean.fechaCortaPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                            </tr>
+                                                            <tr><td align="left" nowrap="true">Importe:</td>
+                                                                <td align="right"  nowrap="true">
+                                                                    <h:outputText value="#{detalle.importe}">
+                                                                        <f:convertNumber pattern="#{grillaCreditosBean.numberPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                            </tr>
+                                                            <tr><td align="left" nowrap="true">Interes Moratorio:</td>
+                                                                <td align="right" nowrap="true">
+                                                                    <h:outputText value="#{detalle.interesMoratorio}">
+                                                                        <f:convertNumber pattern="#{grillaCreditosBean.numberPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                            </tr>
+                                                            <tr><td align="left" nowrap="true">Total a Pagar:</td>
+                                                                <td align="right" nowrap="true">
+                                                                    <h:outputText value="#{detalle.totalAPagar}">
+                                                                        <f:convertNumber pattern="#{grillaCreditosBean.numberPattern}"/>
+                                                                    </h:outputText>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </rich:tooltip>
+                                                    <h:link value="#{detalle.etiqueta}" outcome="resumenCredito" onclick="window.close()">
+                                                        <f:param name="creditoResumen" value="#{detalle.credito}"/>
+                                                    </h:link>
+                                                </h:form>
+                                            </td>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{!detalle.deHoy}">
+                                            <td style="background-color:#{detalle.colorEstado};">
+                                                <h:outputText value="#{detalle.etiqueta}" rendered="#{detalle.colorEstado eq '#ccffff'}"/>
+                                                <h:link rendered="#{detalle.colorEstado ne '#ccffff'}" value="#{detalle.etiqueta}" outcome="resumenCredito">
+                                                    <f:param name="creditoResumen" value="#{detalle.credito}"/>
+                                                </h:link>
+                                            </td>
+                                        </h:panelGroup>
+                                    </ui:repeat>
+                                </tr>  
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </div>
+            </h:panelGroup>
+        </h:form>
+    </h:body>
+</html>

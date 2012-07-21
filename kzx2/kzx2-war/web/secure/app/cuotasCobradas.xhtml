@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <title>Cuotas Cobradas del día</title>
+    </h:head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3>Cuotas Cobradas</h3>
+                            <h4>Seleccione un día</h4>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="fecha">Fecha: </label></div>
+                                    <div class="cont">
+                                        <h:selectBooleanCheckbox id="fechaAhora" title="Ahora" value="#{pagoBean.usarFechaAhora}" label="Ahora">
+                                            <f:ajax render="fecha"/>
+                                        </h:selectBooleanCheckbox>Ahora<br/>
+                                        <rich:calendar value="#{pagoBean.fecha}" id="fecha"
+                                                       locale="en/US" popup="true"
+                                                       datePattern="dd/MM/yyyy"
+                                                       showApplyButton="true"
+                                                       disabled="#{pagoBean.usarFechaAhora}">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                        <rich:messages for="fechaDesde"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="botonera">
+                                <h:commandButton action="#{pagoBean.calcularCuotasCobradas}" value="Aceptar"/>
+                            </div>
+                            <div class="centrado">
+                                <h:panelGroup rendered="#{not empty pagoBean.listaDetallePagos}">
+                                    <table class="tablaDatos">
+                                        <thead>
+                                            <h3>Detalle del Pago</h3>
+                                            <tr>
+                                                <th>Recibo</th>
+                                                <th>Cliente</th>
+                                                <th>Hora</th>
+                                                <th>Concepto</th>
+                                                <th>Importe</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat value="#{pagoBean.listaDetallePagos}" var="pagos">
+                                                <tr>
+                                                    <td>
+                                                        <h:outputText value="#{pagos.pago.numeroDocumento}"/>
+                                                    </td>
+                                                    <td><h:outputText value="#{pagos.pago.credito.transaccion.comprador.nombre}"/></td>
+                                                    <td>
+                                                        <h:outputText value="#{pagos.pago.fecha}">
+                                                            <f:convertDateTime pattern="HH:mm.s" timeZone="#{loginBean.timeZone}"/>
+                                                        </h:outputText>
+                                                    </td>
+                                                    <td><h:outputText value="#{pagos.concepto}"/></td>
+                                                    <td align="right">
+                                                        <h:outputText value="#{pagos.importe}">
+                                                            <f:convertNumber pattern="#{pagoBean.monedaPattern}"/>
+                                                        </h:outputText>
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                    </table>
+                                    <div class="resumen">
+                                        <table>
+                                            <thead><h3>Generar Documento</h3></thead>
+                                            <tr>
+                                                <td>
+                                                    <h:commandLink target="_blank" action="#{pagoBean.imprimirPagos()}">
+                                                        <h:graphicImage url="./../../resources/images/acrobat.gif"/>
+                                                        <h:outputText value=" Pagos del día"/>
+                                                    </h:commandLink>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </h:panelGroup> 
+                                <h:panelGroup rendered="#{empty pagoBean.listaDetallePagos}">
+                                    No se encontraron registros
+                                </h:panelGroup>
+                            </div>
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

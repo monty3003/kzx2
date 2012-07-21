@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Pagares</title>
+    </head>
+    <body>
+
+        <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="frm">
+
+                    <h:panelGroup rendered="#{pagareBean.agregar eq true or pagareBean.modificar eq true}">
+                        <fieldset>
+                            <div class="tablaForm">
+                                <div class="fila">
+                                    <div class="etiq"><label for="fecha">Fecha: </label></div>
+                                    <div class="cont">
+                                        <h:inputText value="#{pagareBean.pago.id}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{pagareBean.agregar eq false and pagareBean.modificar eq false}">
+                        <fieldset>
+                            <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
+                            <table class="busqueda">
+                                <tr>
+                                    <td>
+                                        <label for="idFiltro">Nº:</label>
+                                        <h:inputText id="idFiltro" styleClass="d_num" value="#{pagareBean.idFiltro}"/>
+                                    </td>
+                                    <td colspan="2">
+                                        <label for="clienteFiltro">Cliente: </label>
+                                        <h:inputText id="clienteFiltro" value="#{pagareBean.pagare.cliente}" size="50" maxlength="50"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="numeroFiltro">Númeración</label>
+                                        <h:inputText id="numeroFiltro" styleClass="d_num" value="#{pagareBean.creditoFiltro}"/>
+                                    </td>
+                                    <td>
+                                        <label for="creditoFiltro">Crédito</label>
+                                        <h:inputText id="creditoFiltro" styleClass="d_num" value="#{pagareBean.creditoFiltro}"/>
+                                    </td>
+                                    <td>
+                                        <label for="activoFiltro">Activo: </label>
+                                        <h:selectOneMenu value="#{pagareBean.activoFiltro}">
+                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                            <f:selectItem itemLabel="Si" itemValue="S"/>
+                                            <f:selectItem itemLabel="No" itemValue="N"/>
+                                        </h:selectOneMenu>
+                                    </td>
+                                    <td>
+                                        <label for="fechaUltimopagoFiltro">Fecha: </label>
+                                        <rich:calendar value="#{pagareBean.pago.fecha}" id="fechaUltimopagoFiltro" enableManualInput="true"
+                                                       popup="true" datePattern="dd/MM/yyyy"
+                                                       resetTimeOnDateSelect="true">
+                                            <rich:validator/>
+                                        </rich:calendar>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="botonera">
+                                <h:commandButton id="btnBuscar" styleClass="submit" value="Buscar" action="#{pagareBean.buscar()}"/>
+                                <h:commandButton styleClass="submit" value="Todos" action="#{pagareBean.todos}"/>
+                            </div>
+                        </fieldset>
+                        <div class="mensajes">
+                            <h:messages id="messages" errorClass="messageError" infoClass="messageInfo" warnClass="messageWarn"/>
+                        </div>
+                        <fieldset>
+                            <h:panelGroup id="tabla">
+                                <h:panelGroup rendered="#{not empty pagareBean.lista }">
+                                    <table class="tablaDatos">
+                                        <thead>
+                                            <tr>
+                                                <th width="2%"></th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Id">
+                                                            <f:setPropertyActionListener value="id" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'id'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th>
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Número">
+                                                            <f:setPropertyActionListener value="numero" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'numero'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th>
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Crédito">
+                                                            <f:setPropertyActionListener value="credito" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'credito'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th>
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Cliente">
+                                                            <f:setPropertyActionListener value="cliente" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'cliente'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Fecha de Vencimiento">
+                                                            <f:setPropertyActionListener value="fechaVencimiento" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'fechaVencimiento'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th>
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Monto">
+                                                            <f:setPropertyActionListener value="monto" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'monto'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                <th>
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Vencido">
+                                                            <f:setPropertyActionListener value="vencido" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'vencido'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                                                                               <th width="5%">
+                                                    <p>
+                                                        <h:commandLink action="#{pagareBean.listar}" value="Activo">
+                                                            <f:setPropertyActionListener value="activo" target="#{pagareBean.facade.orden.columna}"/>
+                                                            <f:setPropertyActionListener value="true" target="#{pagareBean.facade.orden.asc}"/>
+                                                            <h:outputText value="#{(pagareBean.facade.orden.asc) ? '▲' : '▼'}"
+                                                                          rendered="#{pagareBean.facade.orden.columna eq 'activo'}"/>
+                                                        </h:commandLink>
+                                                    </p>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat var="row" value="#{pagareBean.lista}">
+                                                <tr>
+                                                    <td><input type="radio" id="radio" name="radio" value="#{row.id}"/></td>
+                                                    <td><h:outputText value="#{row.id}"/></td>
+                                                    <td><h:outputText value="#{row.numero}"/></td>
+                                                    <td><h:outputText value="#{row.credito.transaccion.comprador.nombre}"/></td>
+                                                    <td>
+                                                        <h:commandLink value="#{row.credito.transaccion.id}" action="#{ventaMotosBean.resumenVenta(row.credito.transaccion.id)}"/>
+                                                    </td>
+                                                    <td><h:outputText value="#{row.totalPagado}">
+                                                            <f:convertNumber pattern="#{pagareBean.monedaPattern}"/>
+                                                        </h:outputText></td>
+                                                    <td><h:outputText value="#{row.fecha}">
+                                                            <f:convertDateTime pattern="#{pagareBean.fechaHoraPattern}" timeZone="#{loginBean.timeZone}"/>
+                                                        </h:outputText></td>
+                                                    <td>
+                                                        <h:panelGroup rendered="#{row.activo eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                        <h:panelGroup rendered="#{row.activo eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="11">
+                                                    <h:commandLink action="#{pagareBean.anterior}">Anterior</h:commandLink>
+                                                    &#160;|&#160;#{pagareBean.facade.desde + 1}..#{pagareBean.facade.ultimo} de #{pagareBean.facade.contador}&#160;|&#160;
+                                                    <h:commandLink action="#{pagareBean.siguiente}">Siguiente</h:commandLink>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </h:panelGroup>
+                                <div class="botonera">
+                                    <h:commandButton id="btnNuevo" value="Nuevo" action="#{pagareBean.nuevo}" styleClass="submit"/>
+                                    <h:commandButton id="btnModificar" value="Modificar" action="#{pagareBean.modificar}" styleClass="submit" rendered="#{not empty pagareBean.lista }"/>
+                                    <h:commandButton id="btnVerDetalle" value="Ver Detalle" action="#{pagareBean.verDetalle}" styleClass="submit" rendered="#{not empty pagareBean.lista }"/>
+                                </div>
+                            </h:panelGroup>
+                        </fieldset>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

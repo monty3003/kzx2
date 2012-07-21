@@ -73,14 +73,14 @@
                                 <thead>
                                     <tr>
                                         <th width="2%"></th>
-                                        <th width="15%"><p>
+                                        <th width="5%"><p>
                                                 <a id="lnkId"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Nº
                                                     <f:setPropertyActionListener value="id" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
                                                 </a>
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'id'}"/></p></th>
-                                        <th width="20%"><p>
+                                        <th width="10%"><p>
                                                 <a id="lnkNumero"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Factura
                                                     <f:setPropertyActionListener value="factura.numero" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -88,7 +88,7 @@
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'comprobante'}"/></p>
                                         </th>
-                                        <th width="20%"><p>
+                                        <th width="25%"><p>
                                                 <a id="lnkCategoria"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Categoría
                                                     <f:setPropertyActionListener value="codigo" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -105,7 +105,7 @@
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'comprador'}"/></p>
                                         </th>
-                                        <th width="10%"><p>
+                                        <th width="15%"><p>
                                                 <a id="lnkFechaOperacion"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Fecha
                                                     <f:setPropertyActionListener value="fechaOperacion" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -113,7 +113,7 @@
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'fechaOperacion'}"/></p>
                                         </th>
-                                        <th width="15%"><p>
+                                        <th width="10%"><p>
                                                 <a id="lnkMontoTotal"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Monto Total
                                                     <f:setPropertyActionListener value="totalPagado" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -121,7 +121,7 @@
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'totalPagado'}"/></p>
                                         </th>
-                                        <th width="10%"><p>
+                                        <th width="4%"><p>
                                                 <a id="lnkSaldado"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Saldado
                                                     <f:setPropertyActionListener value="saldado" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -129,7 +129,7 @@
                                                 <h:outputText value="#{(ventaMotosBean.facade.orden.asc) ? '▲' : '▼'}"
                                                               rendered="#{ventaMotosBean.facade.orden.columna eq 'saldado'}"/></p>                                            
                                         </th>
-                                        <th width="10%"><p>
+                                        <th width="4%"><p>
                                                 <a id="lnkAnulado"  jsfc="h:commandLink" action="#{ventaMotosBean.listar}">Anulado
                                                     <f:setPropertyActionListener value="anulado" target="#{ventaMotosBean.facade.orden.columna}"/>
                                                     <f:setPropertyActionListener value="x" target="#{ventaMotosBean.facade.orden.asc}"/>
@@ -154,8 +154,14 @@
                                             <td><h:outputText value="#{row.totalPagado}">
                                                     <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                 </h:outputText></td>
-                                            <td><h:outputText value="#{row.saldado eq 'S'?'Si':'No'}"/></td>
-                                            <td><h:outputText value="#{row.anulado eq 'S'?'Si':'No'}"/></td>
+                                            <td>
+                                                <h:panelGroup rendered="#{row.saldado eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                <h:panelGroup rendered="#{row.saldado eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                            </td>
+                                            <td>
+                                                <h:panelGroup rendered="#{row.anulado eq 'S'}"><img src="../../resources/images/onebit_06.png" width="15"/></h:panelGroup>
+                                                <h:panelGroup rendered="#{row.anulado eq 'N'}"><img src="../../resources/images/onebit_10.png" width="15"/></h:panelGroup>
+                                            </td>
                                         </tr>
                                     </ui:repeat>
                                 </tbody>

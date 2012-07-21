@@ -22,126 +22,127 @@ and open the template in the editor.
                     <h:panelGroup rendered="#{planBean.agregar eq true or planBean.modificar eq true}">
                         <fieldset>
                             <h3><h:outputText value="#{loginBean.ubicacion}"/></h3>
-                            <div class="tablaForm">
-                                <div class="fila">
-                                    <div class="etiq"><label for="categoria">Categoría: </label></div>
-                                    <div class="cont"><h:selectOneMenu id="categoria" value="#{planBean.plan.categoria.id}">
-                                            <f:selectItems value="#{planBean.listaCategoria}"/>
-                                            <rich:validator/>
-                                        </h:selectOneMenu>&#160;<rich:messages for="frm:categoria"/></div>
-                                </div>
-                                <div class="fila">
-                                    <label for="nombre">Nombre: </label>
-                                    <div class="cont"><h:inputText id="nombre" value="#{planBean.plan.nombre}" size="50"/> &#160;<rich:messages for="frm:nombre"/></div>
-                                </div>
-                                <hr/>
-                                <h3>Entrega Inicial</h3>
-                                <div class="fila">
-                                    <div class="etiq"><label for="porcentajeEntrega">Porcentaje de Entrega Mínima</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="porcentajeEntrega" minValue="0" maxValue="100" value="#{planBean.porcentajeEntregaMinima}"
-                                                                              showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true"> 
-                                            <rich:validator/> 
-                                        </rich:inputNumberSlider>&#160;<rich:messages for="frm:porcentajeEntrega"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="entregaMinima">Entrega Mínima</label></div>
-                                    <div class="cont">
-                                        <h:inputText id="entregaMinima" styleClass="d_num" value="#{planBean.plan.montoEntregaMinimo}">
-                                            <f:ajax event="blur" render="@this"/>
-                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
-                                        </h:inputText>
-                                        &#160;<rich:messages for="frm:entregaMinima"/></div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="entregaMaxima">Entrega Máxima</label></div>
-                                    <div class="cont">
-                                        <h:inputText id="entregaMaxima" styleClass="d_num" value="#{planBean.plan.montoEntregaMaximo}">
-                                            <f:ajax event="blur" render="@this"/>
-                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
-                                        </h:inputText>
-                                        &#160;<rich:messages for="frm:entregaMaxima"/></div>
-                                </div>
-                                <hr/>
-                                <h3>Financiación</h3>
-                                <div class="fila">
-                                    <div class="etiq"><label for="financiacionMinima">Cuota Mínima</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="financiacionMinima" minValue="0" maxValue="25" value="#{planBean.plan.financiacionMinima}"
-                                                                              step="1" showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                          
-                                            <rich:validator/>                    
-                                        </rich:inputNumberSlider>&#160;<rich:messages for="frm:financiacionMinima"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="financiacionMaxima">Cuota Máxima</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="financiacionMaxima" minValue="0" maxValue="25" value="#{planBean.plan.financiacionMaxima}"
-                                                                              step="1" showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:financiacionMaxima"/>
-                                    </div>
-                                </div>
-                                <hr/>
-                                <h3>Interés</h3>
-                                <div class="fila">
-                                    <div class="etiq"><label for="tasaAnual">Tasa Anual</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="tasaAnual" minValue="0" maxValue="100" value="#{planBean.tasaAnual}"
-                                                                              showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:tasaAnual"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="tasaEfectiva">Tasa Efectiva</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="tasaEfectiva" minValue="0" maxValue="100" value="#{planBean.tasaEfectiva}"
-                                                                              showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:tasaEfectiva"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="moratorio">Tasa Moratoria</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="moratorio" minValue="0" maxValue="4" value="#{planBean.tasaMoratoria}"
-                                                                              showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:moratorio"/>
-                                    </div>
-                                </div>
-                                <hr/>
-                                <div class="fila">
-                                    <div class="etiq"><label for="redondeo">Indice de Redondeo</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="redondeo" minValue="-5" maxValue="5" value="#{planBean.plan.indiceRedondeo}"
-                                                                              step="1" showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:redondeo"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="dias">Días a primer vencimiento</label></div>
-                                    <div class="cont"><rich:inputNumberSlider id="dias" minValue="0" maxValue="90" value="#{planBean.plan.diasAPrimerVencimiento}"
-                                                                              step="1" showInput="true" enableManualInput="true"
-                                                                              showBoundaryValues="true" showTooltip="true">                                             <rich:validator/>                                         </rich:inputNumberSlider>&#160;<rich:messages for="frm:dias"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="porcentajeDescuento">Porcentaje de Descuento</label></div>
-                                    <div class="cont">
-                                        <h:inputText id="porcentajeDescuento" styleClass="d_num" value="#{planBean.porcentajeDescuento}">
+                            <table class="tablaPlan">
+                                <!--                                <tr>
+                                                                    <th>Categoría</th>
+                                                                    <td>Seleccione una categoría del plan.</td>
+                                                                    <th><h:selectOneMenu id="categoria" value="#{planBean.plan.categoria.id}">
+                                                                            <f:selectItems value="#{planBean.listaCategoria}"/>
+                                                                            <rich:validator/>
+                                                                        </h:selectOneMenu>&#160;<rich:messages for="frm:categoria"/>
+                                                                    </th>
+                                                                </tr>-->
+                                <tr>
+                                    <th>Nombre</th>
+                                    <td>Póngale un nombre distintivo al plan.</td>
+                                    <th><h:inputText id="nombre" value="#{planBean.plan.nombre}" size="25" maxlength="50"/> &#160;<rich:messages for="frm:nombre"/></th>
+                                </tr>
+                            </table>
+                            <table class="tablaPlan">
+                                <thead><h3>Entrega Inicial</h3></thead>
+                                <tr>
+                                    <th>Porcentaje de Entrega Mínima</th>
+                                    <td>El porcentaje mínimo del precio de la moto que el comprador debe entregar.
+                                        Este valor es opcional si decide fijarlo con un monto abajo.</td>
+                                    <th><h:inputText id="porcentajeEntrega"  value="#{planBean.porcentajeEntregaMinima}" size="4" maxlength="3"/>&#160;%<rich:messages for="frm:porcentajeEntrega"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Monto Entrega Mínima</th>
+                                    <td>El importe mínimo del precio de la moto que el comprador debe entregar.
+                                        Este valor es opcional si decide fijarlo con un porcentaje arriba.</td>
+                                    <th><h:inputText id="entregaMinima"  value="#{planBean.plan.montoEntregaMinimo}" size="10" maxlength="7">
                                             <f:ajax event="blur" render="@this"/>
                                             <f:convertNumber pattern="#{planBean.monedaPattern}"/>
                                             <rich:validator/>    
-                                        </h:inputText>
-                                        %&#160;<rich:messages for="frm:porcentajeDescuento"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
-                                    <div class="etiq"><label for="montoDescuento">Monto del Descuento</label></div>
-                                    <div class="cont"><h:inputText id="montoDescuento" styleClass="d_num" value="#{planBean.plan.montoDescuento}">
+                                        </h:inputText>&#160;<rich:messages for="frm:entregaMinima"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Monto Entrega Máxima</th>
+                                    <td>El importe máximo del precio de la moto que el comprador debe entregar.
+                                        Este valor no debe acercarse mucho al precio total de la moto.</td>
+                                    <th><h:inputText id="entregaMaxima"  value="#{planBean.plan.montoEntregaMaximo}" size="10" maxlength="7">
                                             <f:ajax event="blur" render="@this"/>
                                             <f:convertNumber pattern="#{planBean.monedaPattern}"/>
                                             <rich:validator/>    
-                                        </h:inputText>
-                                        &#160;<rich:messages for="frm:montoDescuento"/>
-                                    </div>
-                                </div>
-                                <hr/>
-                            </div>
+                                        </h:inputText>&#160;<rich:messages for="frm:entregaMaxima"/></th>
+                                </tr>
+                            </table>
+                            <table class="tablaPlan">
+                                <thead><h3>Financiación</h3></thead>
+                                <tr>
+                                    <th>Cuota Mínima</th>
+                                    <td>El número de cuotas mínimo con que una financiación puede comenzar.</td>
+                                    <th><h:inputText id="financiacionMinima"  value="#{planBean.plan.financiacionMinima}" size="2" maxlength="2"/>&#160;<rich:messages for="frm:financiacionMinima"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Cuota Máxima</th>
+                                    <td>El número de cuotas máximo con que una financiación puede comenzar.</td>
+                                    <th><h:inputText id="financiacionMaxima"  value="#{planBean.plan.financiacionMaxima}" size="2" maxlength="2"/>&#160;<rich:messages for="frm:financiacionMaxima"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Cuotas Corridas Desde</th>
+                                    <td>El número de cuotas mínimo que se puede utilizar para generar un plan de cuotas corridas.</td>
+                                    <th><h:inputText id="cuotasCorridasDesde"  value="#{planBean.plan.cuotaCorridaDesde}" size="2" maxlength="2"/>&#160;<rich:messages for="frm:cuotasCorridasDesde"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Cuotas Corridas Hasta</th>
+                                    <td>El número de cuotas máximo que se puede utilizar para generar un plan de cuotas corridas.</td>
+                                    <th><h:inputText id="cuotasCorridasHasta"  value="#{planBean.plan.cuotaCorridaHasta}" size="2" maxlength="2"/>&#160;<rich:messages for="frm:cuotasCorridasHasta"/></th>
+                                </tr>
+                            </table>
+                            <table class="tablaPlan">
+                                <thead><h3>Interés</h3></thead>
+                                <tr>
+                                    <th>Tasa Anual</th>
+                                    <td>Tasa de interés anual que se utilizará para la financiación. Valor fijado en porcentaje.</td>
+                                    <th><h:inputText id="tasaAnual"  value="#{planBean.tasaAnual}" size="4" maxlength="4"/>&#160;%<rich:messages for="frm:tasaAnual"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Tasa Efectiva</th>
+                                    <td>Tasa de interés efectiva que se utilizará para la financiación. Valor fijado en porcentaje.</td>
+                                    <th><h:inputText id="tasaEfectiva"  value="#{planBean.tasaEfectiva}" size="4" maxlength="4"/>&#160;%<rich:messages for="frm:tasaEfectiva"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Tasa Moratoria</th>
+                                    <td>Tasa de interés moratoria que se utilizará para el cálculo de cuotas vencidas. Valor fijado en porcentaje.</td>
+                                    <th><h:inputText id="moratorio"  value="#{planBean.tasaMoratoria}" size="4" maxlength="4"/>&#160;%<rich:messages for="frm:moratorio"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Tasa Punitoria</th>
+                                    <td>Tasa de interés para el cálculo del monto cuando la deuda pasa a un proceso judicial. Valor fijado en porcentaje.</td>
+                                    <th><h:inputText id="punitorio"  value="#{planBean.tasaPunitoria}" size="4" maxlength="4"/>&#160;%<rich:messages for="frm:punitorio"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Indice de Redondeo</th>
+                                    <td>El índice para redondear valores. Recuerde poner un número negativo para acercar a valores mas redondeados</td>
+                                    <th><h:inputText id="redondeo"  value="#{planBean.plan.indiceRedondeo}" size="4" maxlength="3"/>&#160;<rich:messages for="frm:redondeo"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Días a primer vencimiento</th>
+                                    <td>La cantidad de días después de la venta donde se generará la primera cuota.</td>
+                                    <th><h:inputText id="dias"  value="#{planBean.plan.diasAPrimerVencimiento}" size="2" maxlength="2"/>&#160;<rich:messages for="frm:dias"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Rango de Negociación</th>
+                                    <td>Monto que el vendedor tiene habilitado para negociar un último precio cuando la venta es al contado.</td>
+                                    <th><h:inputText id="rangoNegociacionMaximo"  value="#{planBean.plan.rangoNegociacionMaximo}" size="11" maxlength="7"/>&#160;<rich:messages for="frm:rangoNegociacionMaximo"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Porcentaje de Descuento</th>
+                                    <td>Porcentaje del total de la venta como descuento concedido. Este valor se omite si define un descuento en importe. Valor fijado en porcentaje.</td>
+                                    <th><h:inputText id="porcentajeDescuento"  value="#{planBean.plan.porcentajeDescuento}" size="4" maxlength="3"/>&#160;%<rich:messages for="frm:porcentajeDescuento"/></th>
+                                </tr>
+                                <tr>
+                                    <th>Monto del Descuento</th>
+                                    <td>Importe del descuento concedido. Este valor se omite si define un porcentaje de descuento.</td>
+                                    <th><h:inputText id="montoDescuento"  value="#{planBean.plan.montoDescuento}" size="11" maxlength="7">
+                                            <f:ajax event="blur" render="@this"/>
+                                            <f:convertNumber pattern="#{planBean.monedaPattern}"/>
+                                            <rich:validator/>    
+                                        </h:inputText>&#160;<rich:messages for="frm:porcentajeDescuento"/></th>
+                                </tr>
+                            </table>
+
                             <div class="botonera">
                                 <input class="submit" type="submit" jsfc="h:commandButton" value="Guardar" action="#{planBean.guardar}"/>
                                 <h:commandButton value="Cancelar" action="#{planBean.todos}" immediate="true"/>
@@ -155,7 +156,7 @@ and open the template in the editor.
                                 <tr>
                                     <td>
                                         <label for="idFiltro">Nº:</label>
-                                        <h:inputText id="idFiltro" styleClass="d_num" value="#{planBean.idFiltro}" size="5" maxlength="14"/>
+                                        <h:inputText id="idFiltro"  value="#{planBean.idFiltro}" size="5" maxlength="14"/>
                                     </td>
                                     <td>
                                         <label for="categoriaFiltro">Categoria: </label>

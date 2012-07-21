@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <title>Stock - Recepcionar Documentos</title>
+    </h:head> 
+
+    <ui:composition template="./../../resources/template/facesTemplate.xhtml">
+
+        <ui:define name="content">
+            <h:body>
+                <h:form id="frm">
+                    <div>
+                        <fieldset>
+                            <h3>Recepción de Documentos</h3>
+                            <h:panelGroup rendered="#{not empty motostockBean.lista}">
+                                <h4>Seleccione las motos del stock que ya tienen documentos disponibles para la venta.</h4>
+                                <div class="centrado">
+                                    <table class="tablaDatos">
+                                        <thead>
+                                            <tr>
+                                                <th width="2%">&nbsp;</th>
+                                                <th width="10%">Nº</th>
+                                                <th width="15%">Marca</th>
+                                                <th width="20%">Modelo</th>
+                                                <th width="15%">Color</th>
+                                                <th width="10%">Ubicación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat value="#{motostockBean.lista}" var="m">
+                                                <tr>
+                                                    <td><h:selectBooleanCheckbox value="#{m.selected}"/></td>
+                                                    <td><h:outputText value="#{m.id}"/></td>
+                                                    <td><h:outputText value="#{m.moto.marca}"/></td>
+                                                    <td><h:outputText value="#{m.moto.modelo}"/></td>
+                                                    <td><h:outputText value="#{m.moto.color}"/></td>
+                                                    <td><h:outputText value="#{m.ubicacion.descripcion}"/></td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{empty motostockBean.lista}">
+                                <div class="centrado">
+                                    <h4>No hay motos con estado Comprado.</h4>
+                                </div>
+                            </h:panelGroup>
+                            <div class="botonera">
+                                <h:commandButton disabled="#{empty motostockBean.lista}" action="#{motostockBean.cambiarDeEstadoPorRecepcionDeDocumentos()}" value="Aceptar"/>
+                                <h:commandButton action="main" value="Cancelar" immediate="true"/>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </h:form>
+            </h:body>
+        </ui:define>
+    </ui:composition>
+</html>

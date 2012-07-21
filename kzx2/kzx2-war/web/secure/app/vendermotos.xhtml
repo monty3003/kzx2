@@ -33,14 +33,6 @@
                                     <rich:messages for="fechaOperacion"/>
                                 </div>
                             </div>
-                            <div class="fila">
-                                <div class="etiq"><label for="categoria">Categoria: </label></div>
-                                <div class="cont"><h:selectOneMenu id="categoria" value="#{ventaMotosBean.venta.codigo.id}" converter="selectItemConverter">
-                                        <f:selectItems value="#{ventaMotosBean.listaCategoria}"/>
-                                        <f:ajax event="change" listener="#{ventaMotosBean.prepararPlanDePago()}" render="panelCredito"/>
-                                    </h:selectOneMenu>&#160; <rich:messages for="frm:categoria"/>
-                                </div>
-                            </div>
                             <hr/>
                             <div class="fila">
                                 <h3>Datos del Cliente</h3>
@@ -147,15 +139,15 @@
                                             </h:inputText>&#160;<rich:messages for="frm:telefonoMovil"/>
                                         </div>
                                     </div>
-                                    <div class="fila">
-                                        <label for="email">E-mail: </label>
-                                        <div class="cont">
-                                            <h:inputText id="email" size="20" maxlength="25" value="#{ventaMotosBean.venta.comprador.email}" >
-                                                <rich:validator/>
-                                                <f:ajax render="@this"/>
-                                            </h:inputText>&#160;<rich:messages for="frm:email"/>
-                                        </div>
-                                    </div>
+                                    <!--                                    <div class="fila">
+                                                                            <label for="email">E-mail: </label>
+                                                                            <div class="cont">
+                                                                                <h:inputText id="email" size="20" maxlength="25" value="#{ventaMotosBean.venta.comprador.email}" >
+                                                                                    <rich:validator/>
+                                                                                    <f:ajax render="@this"/>
+                                                                                </h:inputText>&#160;<rich:messages for="frm:email"/>
+                                                                            </div>
+                                                                        </div>-->
                                     <h:panelGroup rendered="#{ventaMotosBean.venta.comprador.fisica eq 'S'}">
                                         <div class="fila">
                                             <label for="ruc">RUC: </label>
@@ -205,12 +197,12 @@
                                                 <h:inputText id="profesion"  size="20" maxlength="40" value="#{ventaMotosBean.venta.comprador.profesion}" />&#160;<rich:messages for="frm:profesion"/>
                                             </div>
                                         </div>
-                                        <div class="fila">
-                                            <label for="hijos">Hijos: </label>
-                                            <div class="cont">
-                                                <h:inputText id="hijos" size="10"  value="#{ventaMotosBean.venta.comprador.hijos}" />&#160;<rich:messages for="frm:hijos"/>
-                                            </div>
-                                        </div>
+                                        <!--                                        <div class="fila">
+                                                                                    <label for="hijos">Hijos: </label>
+                                                                                    <div class="cont">
+                                                                                        <h:inputText id="hijos" size="10"  value="#{ventaMotosBean.venta.comprador.hijos}" />&#160;<rich:messages for="frm:hijos"/>
+                                                                                    </div>
+                                                                                </div>-->
                                     </h:panelGroup>
                                 </h:panelGroup>                
                             </h:panelGroup>
@@ -224,27 +216,16 @@
                                 <div class="etiq"><label for="moto">Moto Nº: </label></div>
                                 <div class="cont">                                            
                                     <h:inputText id="nMoto" styleClass="d_num" value="#{ventaMotosBean.idMotoVendida}">
-                                        <rich:validator/>
                                         <f:ajax event="blur" 
                                                 listener="#{ventaMotosBean.buscarMotoVendida()}" 
-                                                render="@this panelMoto panelPrecios panelCredito"/>
-                                    </h:inputText>&#160;<rich:message for="frm:nMoto"/>
+                                                render="@this planDeVenta panelMoto panelPrecios panelCredito motor"/>
+                                    </h:inputText>
                                 </div>
                             </div>
                             <h:panelGroup id="panelMoto">
                                 <div class="fila">
-                                    <div class="etiq"><label for="motor">Motor: </label></div>
-                                    <div class="cont">
-                                        <h:inputText id="motor" styleClass="textMayus" value="#{ventaMotosBean.motoVendida.motor}" 
-                                                     disabled="#{ventaMotosBean.motoVendida.motor ne null and ventaMotosBean.motoVendida.motor ne ''}">
-                                            <f:ajax event="blur" render="@this"/>
-                                        </h:inputText>
-                                        <rich:messages for="frm:motor"/>
-                                    </div>
-                                </div>
-                                <div class="fila">
                                     <div class="etiq"><label for="codigoFabrica">Código Fábrica: </label></div>
-                                    <div class="cont"><h:outputText id="codigoFabrica" value="#{ventaMotosBean.motoVendida.moto.codigoFabrica}"/></div>
+                                    <div class="cont"><h:outputText id="codigoFabrica" value="#{ventaMotosBean.motoVendida.moto.codigoFabrica}"/>&#160;<rich:messages for="frm:nMoto"/></div>
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="marca">Marca: </label></div>
@@ -267,19 +248,36 @@
                                     <div class="cont"><h:outputText id="categoriaMoto" value="#{ventaMotosBean.motoVendida.moto.categoria.descripcion}"/></div>
                                 </div>
                             </h:panelGroup>
+                            <div class="fila">
+                                <div class="etiq"><label for="motor">Motor: </label></div>
+                                <div class="cont">
+                                    <h:inputText id="motor" styleClass="textMayus" size="25" maxlength="25" value="#{ventaMotosBean.motoVendida.motor}" 
+                                                 disabled="#{ventaMotosBean.motoVendida.motor ne null and ventaMotosBean.motoVendida.motor ne ''}">
+                                        <f:ajax event="blur" render="@this"/>
+                                    </h:inputText>
+                                    <rich:messages for="frm:motor"/>
+                                </div>
+                            </div>
                             <br/>
+                            <hr/>
+                            <div class="fila">
+                                <h3>Datos del Plan de Pago</h3>
+                            </div>
+                            <div class="fila">
+                                <div class="etiq"><label for="planDeVenta">Plan de Venta:</label></div>
+                                <div class="cont"><h:selectOneMenu id="planDeVenta" value="#{ventaMotosBean.plan}">
+                                        <f:selectItems value="#{ventaMotosBean.listaDePlanDeVenta}"/>
+                                        <f:ajax listener="#{ventaMotosBean.calcularPlanDeVenta()}" render="panelCredito panelPrecios"/>
+                                    </h:selectOneMenu></div>
+                            </div>
                             <h:panelGroup id="panelCredito">
-                                <h:panelGroup rendered="#{ventaMotosBean.venta.codigo.id eq '55'}">
-                                    <hr/>
-                                    <div class="fila">
-                                        <h3>Datos del Plan de Pago</h3>
-                                    </div>
+                                <h:panelGroup rendered="#{ventaMotosBean.plan gt 0}">
                                     <div class="tablaForm">
                                         <h:panelGroup id="panelPlan">
                                             <div class="fila">
                                                 <div class="etiq"><label for="entregaInicial">Entrega Inicial: </label></div>
                                                 <div class="cont">
-                                                    <h:inputText id="entregaInicial" size="20" styleClass="d_num" maxlength="13" value="#{ventaMotosBean.venta.entregaInicial}">
+                                                    <h:inputText id="entregaInicial" size="20" styleClass="d_num" maxlength="13" value="#{ventaMotosBean.venta.entregaInicial}" disabled="#{ventaMotosBean.plan gt 1}">
                                                         <rich:validator/>
                                                         <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                         <f:ajax event="blur" render="@this"/>
@@ -289,13 +287,13 @@
                                             <div class="fila">
                                                 <div class="etiq"><label for="cuotas">Cuotas: </label></div>
                                                 <div class="cont">
-                                                    <h:inputText id="cuotas" styleClass="d_num" size="5" maxlength="2" value="#{ventaMotosBean.venta.cuotas}">
+                                                    <h:inputText id="cuotas" styleClass="d_num" size="5" maxlength="2" value="#{ventaMotosBean.venta.cuotas}" disabled="#{ventaMotosBean.plan gt 1}">
                                                         <rich:validator/>
                                                         <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                         <f:ajax event="blur" render="@this"/>
                                                     </h:inputText>
-                                                    <h:commandButton type="button" value="Calcular" action="#{ventaMotosBean.calcularPlanDeVenta()}">
-                                                        <f:ajax render="panelPlan"/>
+                                                    <h:commandButton type="button" value="Calcular" action="#{ventaMotosBean.calcularPlanDeVenta()}"  disabled="#{ventaMotosBean.plan gt 1}">
+                                                        <f:ajax render="panelPlan panelGarante"/>
                                                     </h:commandButton>
                                                     <rich:message for="frm:cuotas"/>
                                                 </div>
@@ -303,7 +301,7 @@
                                             <div class="fila">
                                                 <div class="etiq"><label for="montoCuotaIgual">Monto Cuota: </label></div>
                                                 <div class="cont">
-                                                    <h:inputText id="montoCuotaIgual" size="20" styleClass="d_num" maxlength="13" value="#{ventaMotosBean.venta.montoCuotaIgual}">
+                                                    <h:inputText id="montoCuotaIgual" size="20" styleClass="d_num" maxlength="13" value="#{ventaMotosBean.venta.montoCuotaIgual}" disabled="#{ventaMotosBean.plan gt 0}">
                                                         <rich:validator/>
                                                         <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
                                                         <f:ajax event="blur" render="@this"/>
@@ -332,131 +330,144 @@
                                                 </div>
                                             </div>
                                             <br/>
+                                            <div class="fila">
+                                                <div class="etiq">
+                                                    <label for="incluirGarante">Incluir Garante</label>
+                                                </div>
+                                                <div class="cont">
+                                                    <h:selectBooleanCheckbox id="incluirGarante" value="#{ventaMotosBean.conGarante}" disabled="#{ventaMotosBean.conGarante}">
+                                                        <f:ajax render="panelGarante"/>
+                                                    </h:selectBooleanCheckbox>
+                                                    &#160;<rich:message for="frm:incluirGarante"/>
+                                                </div>
+                                            </div>
                                         </h:panelGroup>
                                         <h:panelGroup id="panelGarante">
-                                            <div class="fila">
-                                                <h3>Datos del Garante</h3>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteDocumento">Documento: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteDocumento" size="20" maxlength="11" value="#{ventaMotosBean.credito.garante.documento}" >
-                                                        <rich:validator/>
-                                                        <f:ajax event="blur" listener="#{ventaMotosBean.buscarGarante()}" render="panelGarante"/>
-                                                    </h:inputText>&#160;<rich:message for="frm:garanteDocumento"/>
+                                            <h:panelGroup rendered="#{ventaMotosBean.conGarante}">
+                                                <div class="fila">
+                                                    <h3>Datos del Garante</h3>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteTratamiento">Tratamiento: </label></div>
-                                                <div class="cont">
-                                                    <select id="garanteTratamiento" name="garanteTratamiento" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.tratamiento}">
-                                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
-                                                        <f:selectItem itemLabel="Señor" itemValue="Señor"/>
-                                                        <f:selectItem itemLabel="Señora" itemValue="Señora"/>
-                                                        <f:selectItem itemLabel="Señorita" itemValue="Señorita"/>
-                                                    </select>&#160;<rich:message for="frm:tratamiento"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteDocumento">Documento: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteDocumento" size="20" maxlength="11" value="#{ventaMotosBean.credito.garante.documento}" >
+                                                            <rich:validator/>
+                                                            <f:ajax event="blur" listener="#{ventaMotosBean.buscarGarante()}" render="panelGarante"/>
+                                                        </h:inputText>&#160;<rich:message for="frm:garanteDocumento"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteNombre">Nombre Completo: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteNombre" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.nombre}" >
-                                                        <rich:validator/>
-                                                        <f:ajax render="@this"/>
-                                                    </h:inputText>&#160;<rich:message for="frm:garanteNombre"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteTratamiento">Tratamiento: </label></div>
+                                                    <div class="cont">
+                                                        <select id="garanteTratamiento" name="garanteTratamiento" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.tratamiento}">
+                                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                                            <f:selectItem itemLabel="Señor" itemValue="Señor"/>
+                                                            <f:selectItem itemLabel="Señora" itemValue="Señora"/>
+                                                            <f:selectItem itemLabel="Señorita" itemValue="Señorita"/>
+                                                        </select>&#160;<rich:message for="frm:tratamiento"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteDireccion1">Dirección 1: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteDireccion1" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.direccion1}" >
-                                                        <rich:validator/>
-                                                        <f:ajax render="@this"/>
-                                                    </h:inputText>&#160;<rich:message for="frm:garanteDireccion1"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteNombre">Nombre Completo: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteNombre" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.nombre}" >
+                                                            <rich:validator/>
+                                                            <f:ajax render="@this"/>
+                                                        </h:inputText>&#160;<rich:message for="frm:garanteNombre"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteDireccion2">Dirección 2: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteDireccion2" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.direccion2}" >
-                                                        <rich:validator/>
-                                                        <f:ajax render="@this"/>
-                                                    </h:inputText>&#160;<rich:message for="frm:garanteDireccion2"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteDireccion1">Dirección 1: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteDireccion1" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.direccion1}" >
+                                                            <rich:validator/>
+                                                            <f:ajax render="@this"/>
+                                                        </h:inputText>&#160;<rich:message for="frm:garanteDireccion1"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteTelefonoFijo">Teléfono Fijo: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteTelefonoFijo" size="20" maxlength="11" value="#{ventaMotosBean.credito.garante.telefonoFijo}" />&#160;<rich:message for="frm:garanteTelefonoFijo"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteDireccion2">Dirección 2: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteDireccion2" size="60" maxlength="50" value="#{ventaMotosBean.credito.garante.direccion2}" >
+                                                            <rich:validator/>
+                                                            <f:ajax render="@this"/>
+                                                        </h:inputText>&#160;<rich:message for="frm:garanteDireccion2"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteTelefonoMovil">Teléfono Movil: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteTelefonoMovil" size="20" maxlength="13" value="#{ventaMotosBean.credito.garante.telefonoMovil}" />&#160;<rich:message for="frm:garanteTelefonoMovil"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteTelefonoFijo">Teléfono Fijo: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteTelefonoFijo" size="20" maxlength="11" value="#{ventaMotosBean.credito.garante.telefonoFijo}" />&#160;<rich:message for="frm:garanteTelefonoFijo"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteEmail">E-mail: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteEmail" size="25" maxlength="25" value="#{ventaMotosBean.credito.garante.email}" >
-                                                        <rich:validator/>
-                                                        <f:ajax render="@this"/>
-                                                    </h:inputText>&#160;<rich:message for="frm:garanteEmail"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteTelefonoMovil">Teléfono Movil: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteTelefonoMovil" size="20" maxlength="13" value="#{ventaMotosBean.credito.garante.telefonoMovil}" />&#160;<rich:message for="frm:garanteTelefonoMovil"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteRuc">RUC: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteRuc" size="20" maxlength="10" value="#{ventaMotosBean.credito.garante.ruc}" />&#160;<rich:message for="frm:garanteRuc"/>
+                                                <!--                                                <div class="fila">
+                                                                                                    <div class="etiq"><label for="garanteEmail">E-mail: </label></div>
+                                                                                                    <div class="cont">
+                                                                                                        <h:inputText id="garanteEmail" size="25" maxlength="25" value="#{ventaMotosBean.credito.garante.email}" >
+                                                                                                            <rich:validator/>
+                                                                                                            <f:ajax render="@this"/>
+                                                                                                        </h:inputText>&#160;<rich:message for="frm:garanteEmail"/>
+                                                                                                    </div>
+                                                                                                </div>-->
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteRuc">RUC: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteRuc" size="20" maxlength="10" value="#{ventaMotosBean.credito.garante.ruc}" />&#160;<rich:message for="frm:garanteRuc"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteSexo">Sexo: </label></div>
-                                                <div class="cont">
-                                                    <select id="garanteSexo" name="garanteSexo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.sexo}"
-                                                            >
-                                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
-                                                        <f:selectItem itemLabel="Hombre" itemValue="H"/>
-                                                        <f:selectItem itemLabel="Mujer" itemValue="M"/>
-                                                    </select>&#160;<rich:message for="frm:garanteSexo"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteSexo">Sexo: </label></div>
+                                                    <div class="cont">
+                                                        <select id="garanteSexo" name="garanteSexo" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.sexo}"
+                                                                >
+                                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                                            <f:selectItem itemLabel="Hombre" itemValue="H"/>
+                                                            <f:selectItem itemLabel="Mujer" itemValue="M"/>
+                                                        </select>&#160;<rich:message for="frm:garanteSexo"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteEstadoCivil">Estado Civil: </label></div>
-                                                <div class="cont">
-                                                    <select id="garanteEstadoCivil" name="garanteEstadoCivil" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.estadoCivil}"
-                                                            >
-                                                        <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
-                                                        <f:selectItem itemLabel="Soltero" itemValue="S"/>
-                                                        <f:selectItem itemLabel="Casado" itemValue="C"/>
-                                                        <f:selectItem itemLabel="Viudo" itemValue="V"/>
-                                                    </select>&#160;<rich:message for="frm:garanteEstadoCivil"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteEstadoCivil">Estado Civil: </label></div>
+                                                    <div class="cont">
+                                                        <select id="garanteEstadoCivil" name="garanteEstadoCivil" jsfc="h:selectOneMenu" value="#{ventaMotosBean.credito.garante.estadoCivil}"
+                                                                >
+                                                            <f:selectItem itemLabel="-SELECCIONAR-" itemValue="X"/>
+                                                            <f:selectItem itemLabel="Soltero" itemValue="S"/>
+                                                            <f:selectItem itemLabel="Casado" itemValue="C"/>
+                                                            <f:selectItem itemLabel="Viudo" itemValue="V"/>
+                                                        </select>&#160;<rich:message for="frm:garanteEstadoCivil"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteFechaNacimiento">Fecha de Nacimiento: </label></div>
-                                                <div class="cont">
-                                                    <rich:calendar value="#{ventaMotosBean.credito.garante.fechaNacimiento}" id="garanteFechaNacimiento" enableManualInput="true" 
-                                                                   popup="true" datePattern="dd/MM/yyyy"
-                                                                   resetTimeOnDateSelect="true">
-                                                        <rich:validator/>
-                                                        <f:ajax render="@this"/>
-                                                    </rich:calendar>
-                                                    &#160;<rich:message for="frm:garanteFechaNacimiento"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteFechaNacimiento">Fecha de Nacimiento: </label></div>
+                                                    <div class="cont">
+                                                        <rich:calendar value="#{ventaMotosBean.credito.garante.fechaNacimiento}" id="garanteFechaNacimiento" enableManualInput="true" 
+                                                                       popup="true" datePattern="dd/MM/yyyy"
+                                                                       resetTimeOnDateSelect="true">
+                                                            <rich:validator/>
+                                                            <f:ajax render="@this"/>
+                                                        </rich:calendar>
+                                                        &#160;<rich:message for="frm:garanteFechaNacimiento"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteProfesion">Profesión: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteProfesion"  size="20" maxlength="40" value="#{ventaMotosBean.credito.garante.profesion}" />&#160;<rich:message for="frm:garanteProfesion"/>
+                                                <div class="fila">
+                                                    <div class="etiq"><label for="garanteProfesion">Profesión: </label></div>
+                                                    <div class="cont">
+                                                        <h:inputText id="garanteProfesion"  size="20" maxlength="40" value="#{ventaMotosBean.credito.garante.profesion}" />&#160;<rich:message for="frm:garanteProfesion"/>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="fila">
-                                                <div class="etiq"><label for="garanteHijos">Hijos: </label></div>
-                                                <div class="cont">
-                                                    <h:inputText id="garanteHijos" size="10"  value="#{ventaMotosBean.credito.garante.hijos}" />&#160;<rich:message for="frm:garanteHijos"/></div>
-                                            </div>
+                                                <!--                                                <div class="fila">
+                                                                                                    <div class="etiq"><label for="garanteHijos">Hijos: </label></div>
+                                                                                                    <div class="cont">
+                                                                                                        <h:inputText id="garanteHijos" size="10"  value="#{ventaMotosBean.credito.garante.hijos}" />&#160;<rich:message for="frm:garanteHijos"/></div>
+                                                                                                </div>-->
+                                            </h:panelGroup>
                                         </h:panelGroup>
                                     </div>
                                 </h:panelGroup>
@@ -497,10 +508,10 @@
                                 </div>
                                 <div class="fila">
                                     <div class="etiq"><label for="descuento">Descuento:</label></div>
-                                    <div class="cont"><h:inputText styleClass="d_num" size="20" maxlength="4" id="descuento" value="#{ventaMotosBean.venta.totalDescuento}">
+                                    <div class="cont"><h:inputText styleClass="d_num" size="20" maxlength="13" id="descuento" value="#{ventaMotosBean.venta.totalDescuento}">
                                             <rich:validator/>
                                             <f:convertNumber pattern="#{ventaMotosBean.monedaPattern}"/>
-                                            <f:ajax event="blur" render="@this subTotal ToTal"/>
+                                            <f:ajax event="blur" listener="#{ventaMotosBean.sumarResultados()}" render="@this subTotal ToTal"/>
                                         </h:inputText><rich:messages for="descuento"/>
                                     </div>
                                 </div>
