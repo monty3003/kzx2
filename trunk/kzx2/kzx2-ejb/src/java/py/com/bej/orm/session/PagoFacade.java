@@ -5,20 +5,30 @@
 package py.com.bej.orm.session;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.naming.OperationNotSupportedException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Categoria;
+import py.com.bej.orm.entities.Credito;
 import py.com.bej.orm.entities.DetallePago;
 import py.com.bej.orm.entities.Financiacion;
 import py.com.bej.orm.entities.Pago;
+import py.com.bej.orm.entities.Usuario;
 import py.com.bej.orm.utils.CategoriaEnum;
 import py.com.bej.orm.utils.ConfiguracionEnum;
 
@@ -29,235 +39,321 @@ import py.com.bej.orm.utils.ConfiguracionEnum;
 @Stateless
 public class PagoFacade extends AbstractFacade<Pago> {
 
+    @EJB
+    private FinanciacionFacade financiacionFacade;
+    private final static Logger LOGGER = Logger.getLogger(PagoFacade.class.getName());
+
     public PagoFacade() {
         super(Pago.class);
     }
 
-    public Pago generarPagoParaEstarAlDia(Integer cliente) {
+    public FinanciacionFacade getFinanciacionFacade() {
+        if (financiacionFacade == null) {
+            financiacionFacade = new FinanciacionFacade();
+        }
+        return financiacionFacade;
+    }
+
+    private Pago generarElDetalleDePago(List<Financiacion> cuotasPendientes, BigDecimal importeMaximo) throws Exception {
         Pago res = new Pago();
+        BigDecimal importeAcumulado = importeMaximo;
         List<DetallePago> detalle = new ArrayList<DetallePago>();
-        //Buscar Cuotas Pendientes
-        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
-        cuotasPendientes = new FinanciacionFacade().buscarCuotasPendientesPorCliente(cliente, new Date());
+        BigDecimal porcentajeDescuento = new BigDecimal(ConfiguracionEnum.DESCUENTO_CANCELACION.getSymbol());
         if (!cuotasPendientes.isEmpty()) {
-            //Hay cuotas vencidas. Generar Interes moratorio
             DetallePago d;
+            String colorEstado = null;
             BigDecimal importeCuota;
+            BigDecimal aux = BigDecimal.ZERO;
             BigDecimal interesMoratorio;
             BigDecimal porcentajeInteresMoratorio;
             BigDecimal porcentajeInteresMoratorioAcumulado;
             int mesesAtraso = 0;
-            int anhosAtraso = 0;
-            Calendar c = GregorianCalendar.getInstance();
-            Calendar fechaVencimiento = GregorianCalendar.getInstance();
+            boolean pagoParcial = false;
+            List<DetallePago> dp = null;
             for (Financiacion f : cuotasPendientes) {
-                importeCuota = BigDecimal.ZERO;
-                interesMoratorio = BigDecimal.ZERO;
-                //Fechas
-                fechaVencimiento.setTime(f.getFechaVencimiento());
-                anhosAtraso = c.get(Calendar.YEAR) - fechaVencimiento.get(Calendar.YEAR);
-                mesesAtraso = c.get(Calendar.MONTH) - fechaVencimiento.get(Calendar.MONTH);
-                if (anhosAtraso > 0) {
-                    //Ya pasaron anhos 
-                    mesesAtraso = mesesAtraso + (anhosAtraso * 12);
+                mesesAtraso = calcularEstadoCuota(f);
+                dp = new ArrayList<DetallePago>();
+                //Ponerle color al registro
+                if (mesesAtraso > 0) {
+                    colorEstado = "rojo";
+                } else if (mesesAtraso == 0) {
+                    colorEstado = "amarillo";
+                } else {
+                    colorEstado = "verde";
                 }
-                porcentajeInteresMoratorio = BigDecimal.valueOf(f.getCredito().getInteresMoratorio());
-                porcentajeInteresMoratorioAcumulado = porcentajeInteresMoratorio.multiply(BigDecimal.valueOf(mesesAtraso));
-                boolean pagoParcial = false;
                 if (f.getFechaPago() != null && f.getTotalPagado() != null) {
                     //ya tiene un pago parcial
                     pagoParcial = true;
                     importeCuota = f.getCuotaNeta().subtract(f.getTotalPagado());
                 } else {
                     importeCuota = f.getTotalAPagar();
+                    pagoParcial = false;
                 }
-                interesMoratorio = importeCuota.multiply(porcentajeInteresMoratorioAcumulado);
-                d = new DetallePago(new Categoria(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol()), res,
-                        f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                        interesMoratorio, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                detalle.add(d);
+                if (mesesAtraso > 0) {
+                    //Calcular Interes Moratorio
+                    porcentajeInteresMoratorio = BigDecimal.valueOf(f.getCredito().getInteresMoratorio());
+                    porcentajeInteresMoratorioAcumulado = porcentajeInteresMoratorio.multiply(BigDecimal.valueOf(mesesAtraso));
+                    interesMoratorio = importeCuota.multiply(porcentajeInteresMoratorioAcumulado);
+                    interesMoratorio = interesMoratorio.setScale(0, RoundingMode.HALF_DOWN);
+                    d = new DetallePago(new Categoria(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol()), res,
+                            CategoriaEnum.PAGO_INTERES_MORATORIO.getLabel() + " " + f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
+                            interesMoratorio, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE, f.getFechaVencimiento(), colorEstado);
+                    dp.add(d);
+                }
                 if (pagoParcial) {
                     d = new DetallePago(new Categoria(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol()), res,
-                            f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                            importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
+                            CategoriaEnum.PAGO_PARCIAL_CUOTA.getLabel() + " " + f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
+                            importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE, f.getFechaVencimiento(), colorEstado);
                 } else {
                     d = new DetallePago(new Categoria(CategoriaEnum.PAGO_CUOTA.getSymbol()), res,
-                            f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                            importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
+                            CategoriaEnum.PAGO_CUOTA.getLabel() + " " + f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
+                            importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE, f.getFechaVencimiento(), colorEstado);
                 }
-                detalle.add(d);
-            }
-        } else {
-            cuotasPendientes = new FinanciacionFacade().buscarProximaCuotaAVencer(cliente, new Date());
-            if (!cuotasPendientes.isEmpty()) {
-                for (Financiacion f : cuotasPendientes) {
-                    detalle.add(new DetallePago(new Categoria(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol()), res,
-                            f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                            f.getTotalAPagar(), f.getNumeroCuota(), 'S', new Date(), Boolean.FALSE));
-                }
-            }
-        }
-        res.setDetalle(detalle);
-        return res;
-    }
-
-    public Pago generarPagoParaCancelarCredito(Integer cliente) {
-        Pago res = new Pago();
-        List<DetallePago> detalle = new ArrayList<DetallePago>();
-        BigDecimal porcentajeDescuento = new BigDecimal(ConfiguracionEnum.DESCUENTO_CANCELACION.getSymbol());
-        //Buscar Cuotas Pendientes
-        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
-        cuotasPendientes = new FinanciacionFacade().buscarCuotasPendientesPorCliente(cliente);
-        if (!cuotasPendientes.isEmpty()) {
-            for (Financiacion cuotaPendiente : cuotasPendientes) {
-                if (cuotaPendiente.getFechaVencimiento().before(new Date())) {
-                    //Hay cuotas vencidas. Generar Interes moratorio
-                    DetallePago d;
-                    BigDecimal importeCuota;
-                    BigDecimal interesMoratorio;
-                    BigDecimal porcentajeInteresMoratorio;
-                    BigDecimal porcentajeInteresMoratorioAcumulado;
-                    int mesesAtraso = 0;
-                    int anhosAtraso = 0;
-                    Calendar c = GregorianCalendar.getInstance();
-                    Calendar fechaVencimiento = GregorianCalendar.getInstance();
-                    for (Financiacion f : cuotasPendientes) {
-                        importeCuota = BigDecimal.ZERO;
-                        interesMoratorio = BigDecimal.ZERO;
-                        //Fechas
-                        fechaVencimiento.setTime(f.getFechaVencimiento());
-                        anhosAtraso = c.get(Calendar.YEAR) - fechaVencimiento.get(Calendar.YEAR);
-                        mesesAtraso = c.get(Calendar.MONTH) - fechaVencimiento.get(Calendar.MONTH);
-                        if (anhosAtraso > 0) {
-                            //Ya pasaron anhos 
-                            mesesAtraso = mesesAtraso + (anhosAtraso * 12);
-                        }
-                        porcentajeInteresMoratorio = BigDecimal.valueOf(f.getCredito().getInteresMoratorio());
-                        porcentajeInteresMoratorioAcumulado = porcentajeInteresMoratorio.multiply(BigDecimal.valueOf(mesesAtraso));
-                        boolean pagoParcial = false;
-                        if (f.getFechaPago() != null && f.getTotalPagado() != null) {
-                            //ya tiene un pago parcial
-                            pagoParcial = true;
-                            importeCuota = f.getCuotaNeta().subtract(f.getTotalPagado());
-                        } else {
-                            importeCuota = f.getTotalAPagar();
-                        }
-                        interesMoratorio = importeCuota.multiply(porcentajeInteresMoratorioAcumulado);
-                        d = new DetallePago(new Categoria(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol()), res,
-                                f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                interesMoratorio, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        detalle.add(d);
-                        if (pagoParcial) {
-                            d = new DetallePago(new Categoria(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol()), res,
-                                    f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                    importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        } else {
-                            d = new DetallePago(new Categoria(CategoriaEnum.PAGO_CUOTA.getSymbol()), res,
-                                    f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                    importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        }
-                        detalle.add(d);
-                    }
-                } else {
+                dp.add(d);
+                DetallePago descuentoProcesado = null;
+                if (mesesAtraso < -1) {
                     //Proceder al Descuento
-                    cuotaPendiente.setTotalAPagar(cuotaPendiente.getTotalAPagar().subtract(cuotaPendiente.getTotalAPagar().multiply(porcentajeDescuento)));
-                    detalle.add(new DetallePago(new Categoria(CategoriaEnum.PAGO_CUOTA.getSymbol()), res,
-                            cuotaPendiente.getNumeroCuota() + "/" + cuotaPendiente.getCredito().getAmortizacion(),
-                            cuotaPendiente.getTotalAPagar(), cuotaPendiente.getNumeroCuota(), 'S', new Date(), Boolean.TRUE));
+                    //Calcular descuento
+                    BigDecimal descuento = BigDecimal.ZERO;
+                    descuento.setScale(-2, RoundingMode.HALF_DOWN);
+                    int mesesDescuento = -(mesesAtraso + 1);
+                    descuento = f.getTotalAPagar().multiply(porcentajeDescuento.multiply(BigDecimal.valueOf(mesesDescuento)));
+                    //Restarle al descuento el ajuste de redondeo
+                    descuento = descuento.add(f.getAjusteRedondeo());
+                    //Si el descuento es mayor al interes, descontar solo el interes.
+                    int pasaInteres = descuento.compareTo(f.getInteres());
+                    if (pasaInteres == 1) {
+                        descuento = f.getInteres();
+                    }
+                    descuento = descuento.negate();
+                    descuentoProcesado = new DetallePago(new Categoria(CategoriaEnum.DESCUENTO.getSymbol()), res,
+                            CategoriaEnum.DESCUENTO.getLabel(), descuento, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE, f.getFechaVencimiento(), colorEstado);
                 }
-            }
-        }
-        res.setDetalle(detalle);
-        return res;
-    }
+                if (!dp.isEmpty()) {
+                    for (DetallePago det : dp) {
+                        //Calculo Auxiliar para guardar el monto antes de ser restado
+                        aux = importeAcumulado;
+                        if (importeMaximo != null) {//Si el proceso esta definido por el monto maximo permitido
+                            if (descuentoProcesado != null) {
+                                importeAcumulado = importeAcumulado.subtract(det.getImporte().add(descuentoProcesado.getImporte()));
+                            } else {
+                                importeAcumulado = importeAcumulado.subtract(det.getImporte());
+                            }
 
-    public Pago generarPagoPorMontoSolicitado(Integer cliente, BigDecimal montoSolicitado) throws Exception {
-        Pago res = null;
-        List<DetallePago> detalle = new ArrayList<DetallePago>();
-        BigDecimal montoAcumulado = BigDecimal.ZERO;
-        BigDecimal montoSolicitadoSaldo = montoSolicitado;
-        //Buscar Cuotas Pendientes
-        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
-        cuotasPendientes = new FinanciacionFacade().buscarCuotasPendientesPorCliente(cliente);
-        if (!cuotasPendientes.isEmpty()) {
-            for (Financiacion cuotaPendiente : cuotasPendientes) {
-                if (cuotaPendiente.getFechaVencimiento().before(new Date())) {
-                    //Hay cuotas vencidas. Generar Interes moratorio
-                    DetallePago d;
-                    BigDecimal importeCuota;
-                    BigDecimal interesMoratorio;
-                    BigDecimal porcentajeInteresMoratorio;
-                    BigDecimal porcentajeInteresMoratorioAcumulado;
-                    int mesesAtraso = 0;
-                    int anhosAtraso = 0;
-                    Calendar c = GregorianCalendar.getInstance();
-                    Calendar fechaVencimiento = GregorianCalendar.getInstance();
-                    for (Financiacion f : cuotasPendientes) {
-                        importeCuota = BigDecimal.ZERO;
-                        interesMoratorio = BigDecimal.ZERO;
-                        //Fechas
-                        fechaVencimiento.setTime(f.getFechaVencimiento());
-                        anhosAtraso = c.get(Calendar.YEAR) - fechaVencimiento.get(Calendar.YEAR);
-                        mesesAtraso = c.get(Calendar.MONTH) - fechaVencimiento.get(Calendar.MONTH);
-                        if (anhosAtraso > 0) {
-                            //Ya pasaron anhos 
-                            mesesAtraso = mesesAtraso + (anhosAtraso * 12);
-                        }
-                        porcentajeInteresMoratorio = BigDecimal.valueOf(f.getCredito().getInteresMoratorio());
-                        porcentajeInteresMoratorioAcumulado = porcentajeInteresMoratorio.multiply(BigDecimal.valueOf(mesesAtraso));
-                        boolean pagoParcial = false;
-                        if (f.getFechaPago() != null && f.getTotalPagado() != null) {
-                            //ya tiene un pago parcial
-                            pagoParcial = true;
-                            importeCuota = f.getCuotaNeta().subtract(f.getTotalPagado());
-                        } else {
-                            importeCuota = f.getTotalAPagar();
-                        }
-                        interesMoratorio = importeCuota.multiply(porcentajeInteresMoratorioAcumulado);
-                        d = new DetallePago(new Categoria(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol()), res,
-                                f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                interesMoratorio, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        montoAcumulado = montoAcumulado.add(interesMoratorio);
-                        montoSolicitadoSaldo = montoSolicitadoSaldo.subtract(importeCuota);
-                        if (montoAcumulado.equals(montoAcumulado.min(montoSolicitado))) {
-                            detalle.add(d);
-                        } else {
-                            throw new OperationNotSupportedException("Para realizar un pago debe por lo menos cancelar el interes acumulado.");
-                        }
-                        if (pagoParcial) {
-                            d = new DetallePago(new Categoria(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol()), res,
-                                    f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                    importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        } else {
-                            d = new DetallePago(new Categoria(CategoriaEnum.PAGO_CUOTA.getSymbol()), res,
-                                    f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
-                                    importeCuota, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                        }
-                        montoAcumulado = montoAcumulado.add(importeCuota);
-                        if (montoAcumulado.equals(montoAcumulado.max(montoSolicitado))) {
-                            if (pagoParcial) {
-                                d.setImporte(importeCuota);
+                            if (importeAcumulado.compareTo(BigDecimal.ZERO) < 0) {
+                                if (det.getCodigo().getId().equals(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol())) {
+                                    if (detalle.isEmpty()) {
+                                        // Ni siquiera cubre el monto del primer interes moratorio.
+                                        throw new OperationNotSupportedException("Para realizar un pago debe por lo menos cancelar el interes acumulado.");
+                                    }
+                                } else if (det.getCodigo().getId().equals(CategoriaEnum.PAGO_CUOTA.getSymbol())) {
+                                    //Pago Parcial
+                                    d = new DetallePago(new Categoria(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol()), res,
+                                            CategoriaEnum.PAGO_PARCIAL_CUOTA.getLabel() + " " + f.getNumeroCuota() + "/" + f.getCredito().getAmortizacion(),
+                                            aux, f.getNumeroCuota(), 'S', new Date(), Boolean.TRUE, f.getFechaVencimiento(), colorEstado);
+                                    detalle.add(d);
+                                }
+                                res.setDetalle(detalle);
+                                return res;
                             }
                         }
-                        detalle.add(d);
+                        //Guardar el detalle
+                        detalle.add(det);
+                        if (descuentoProcesado != null) {
+                            detalle.add(descuentoProcesado);
+                        }
+                        if (importeMaximo != null) {//Si el proceso esta definido por el monto maximo permitido
+                            if (importeAcumulado.compareTo(BigDecimal.ZERO) == 0) {
+                                break;
+                            }
+                        }
                     }
-                } else {
-                    //Proceder al Descuento
-                    DetallePago d = new DetallePago(new Categoria(CategoriaEnum.PAGO_CUOTA.getSymbol()), res,
-                            cuotaPendiente.getNumeroCuota() + "/" + cuotaPendiente.getCredito().getAmortizacion(),
-                            cuotaPendiente.getTotalAPagar(), cuotaPendiente.getNumeroCuota(), 'S', new Date(), Boolean.TRUE);
-                    montoAcumulado.add(cuotaPendiente.getTotalAPagar());
-                    if (montoAcumulado.equals(montoAcumulado.min(montoSolicitado))) {
-                        detalle.add(d);
+                }
+                if (importeMaximo != null) {//Si el proceso esta definido por el monto maximo permitido
+                    if (importeAcumulado.compareTo(BigDecimal.ZERO) == 0) {
+                        break;
                     }
                 }
             }
+            res.setDetalle(detalle);
         }
-        if (res != null) {
+        return res;
+    }
+
+    public Pago generarElDetalleDelPago(Financiacion f) throws Exception {
+        return this.generarElDetalleDePago(Arrays.asList(f), null);
+    }
+
+    public static int calcularEstadoCuota(Financiacion f) {
+        /*Estado de la cuota
+        [-1] - Cuota Atrasada
+        [ 0] - Hoy es el dia de vencimiento
+        [ 1] - Cuota Adelantada
+        [ 2] - Cuota adelantada con descuento
+         */
+        Calendar c = GregorianCalendar.getInstance();
+        Calendar fechaVencimiento = GregorianCalendar.getInstance();
+        int mesesAtraso = 0;
+        int diasDeGracia = Integer.valueOf(ConfiguracionEnum.DIAS_DE_GRACIA.getSymbol());
+        fechaVencimiento.setTime(f.getFechaVencimiento());
+        //Fechas
+        int anhoHoy = c.get(Calendar.YEAR);
+        int mesHoy = c.get(Calendar.MONTH);
+        int diaHoy = c.get(Calendar.DAY_OF_MONTH);
+        int anhoVencimiento = fechaVencimiento.get(Calendar.YEAR);
+        int mesVencimiento = fechaVencimiento.get(Calendar.MONTH);
+        int diaVencimiento = fechaVencimiento.get(Calendar.DAY_OF_MONTH);
+        //Ubicar el anho
+        int diferenciaDeAnho = anhoHoy - anhoVencimiento;
+        //Ubicar el mes
+        int diferenciaDeMes = mesHoy - mesVencimiento;
+        //Ubicar el dia
+        int diferenciaDelDia = diaHoy - diaVencimiento;
+        //Agregar o sacar meses
+        if (diferenciaDeAnho != 0) {
+            //calcular la diferencia en meses
+            mesesAtraso = diferenciaDeAnho * 12;
+        }
+        if (diferenciaDelDia > diasDeGracia) {
+            if (mesesAtraso == 0 && diferenciaDeMes == 0) {
+                mesesAtraso++;
+            }
+        }
+        mesesAtraso = mesesAtraso + diferenciaDeMes;
+        LOGGER.log(Level.FINE, "La cuota {0} tiene {1} anhos de diferencia, {2} meses de diferencia, {3} dias de diferencia. TOTAL: {4}", new Object[]{f.getNumeroCuota(), diferenciaDeAnho, diferenciaDeMes, diferenciaDelDia, mesesAtraso});
+
+        return mesesAtraso;
+    }
+
+    public Pago generarPagoParaEstarAlDia(Credito credito) {
+        Pago res = new Pago();
+        Calendar c = new GregorianCalendar();
+        c.add(Calendar.MONTH, 1);
+        //Buscar Cuotas Pendientes
+        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
+        try {
+            cuotasPendientes = getFinanciacionFacade().buscarCuotasPendientesPorCliente(credito.getId(), c.getTime());
+            res = generarElDetalleDePago(cuotasPendientes, null);
+            res.setCredito(credito);
+        } catch (Exception ex) {
+            Logger.getLogger(PagoFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return res;
+    }
+
+    public Pago generarPagoParaCancelarCredito(Credito credito) {
+        Pago res = new Pago();
+        //Buscar Cuotas Pendientes
+        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
+        cuotasPendientes = new FinanciacionFacade().buscarCuotasPendientesPorClienteyCredito(
+                credito.getTransaccion().getComprador().getId(),
+                credito.getId());
+        try {
+            res = generarElDetalleDePago(cuotasPendientes, null);
+            res.setCredito(credito);
+        } catch (Exception ex) {
+            Logger.getLogger(PagoFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return res;
+    }
+
+    public Pago generarPagoPorMontoSolicitado(Credito credito, BigDecimal montoSolicitado) throws Exception {
+        Pago res = null;
+        //Buscar Cuotas Pendientes
+        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
+        cuotasPendientes = new FinanciacionFacade().buscarCuotasPendientesPorCredito(credito.getId());
+        try {
+            res = generarElDetalleDePago(cuotasPendientes, montoSolicitado);
+            res.setCredito(credito);
+        } catch (Exception ex) {
+            Logger.getLogger(PagoFacade.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return res;
 
+    }
+
+    public Pago realizarPago(Credito credito, Usuario usuario, BigDecimal importe) {
+        Pago res = null;
+        //Buscar Cuotas Pendientes
+        FinanciacionFacade ff = new FinanciacionFacade();
+        List<Financiacion> cuotasPendientes = new ArrayList<Financiacion>();
+        cuotasPendientes = ff.buscarCuotasPendientesPorCredito(credito.getId());
+        try {
+            res = generarElDetalleDePago(cuotasPendientes, importe);
+            res.setCredito(credito);
+            res.setTotalPagado(importe);
+            res.setFecha(new Date());
+            res.setActivo('S');
+            for (DetallePago dp : res.getDetalle()) {
+                if (dp.getSeleccion()) {
+                    for (Financiacion f : cuotasPendientes) {
+                        if (dp.getNumeroCuota() == f.getNumeroCuota()) {
+                            if (dp.getCodigo().getId().equals(CategoriaEnum.PAGO_CUOTA.getSymbol())) {
+                                //Pago total de la cuota.
+                                f.setTotalPagado(dp.getImporte());
+                                f.setCancelado('S');
+                                f.setFechaPago(res.getFecha());
+                                ff.setEntity(f);
+                                ff.guardar();
+                                break;
+                            } else if (dp.getCodigo().getId().equals(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol())) {
+                                //Pago PARCIAL de la cuota.
+                                if (f.getTotalPagado() != null) {
+                                    f.setTotalPagado(f.getTotalPagado().add(dp.getImporte()));
+                                } else {
+                                    f.setTotalPagado(dp.getImporte());
+                                }
+                                if (f.getTotalPagado().compareTo(f.getTotalAPagar()) >= 0) {
+                                    f.setCancelado('S');
+                                } else {
+                                    f.setCancelado('N');
+                                }
+                                f.setFechaPago(res.getFecha());
+                                ff.setEntity(f);
+                                ff.guardar();
+                                break;
+                            } else if (dp.getCodigo().getId().equals(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol())) {
+                                //Pago INTERES MORATORIO de la cuota.
+                                f.setInteresMora(dp.getImporte());
+                                if (f.getInteresMora() != null) {
+                                    f.setInteresMora(f.getInteresMora().add(dp.getImporte()));
+                                } else {
+                                    f.setInteresMora(dp.getImporte());
+                                }
+                                f.setTotalPagado(f.getTotalAPagar().add(dp.getImporte()));
+                                ff.setEntity(f);
+                                ff.guardar();
+                                break;
+                            } else if (dp.getCodigo().getId().equals(CategoriaEnum.DESCUENTO.getSymbol())) {
+                                //Pago DESCUENTO de la cuota.
+                                f.setDescuento(f.getDescuento().add(dp.getImporte()));
+                                f.setTotalPagado(f.getTotalAPagar().add(dp.getImporte()));
+                                ff.setEntity(f);
+                                ff.guardar();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            //Guardar
+            res.setUsuarioCreacion(usuario);
+            res.setUsuarioModificacion(usuario);
+            res.setFechaCreacion(new Date());
+            res.setUltimaModificacion(new Date());
+            res.setNumeroDocumento("");
+            setEntity(res);
+            create();
+            getEm().flush();
+            res.setNumeroDocumento(String.valueOf(res.getId()));
+            setEntity(res);
+            guardar();
+        } catch (Exception ex) {
+            Logger.getLogger(PagoFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return res;
     }
 
     public List<Pago> buscarPagosDesdeHasta(Date desde, Date hasta) {
@@ -266,6 +362,16 @@ public class PagoFacade extends AbstractFacade<Pago> {
         cq.where(cb.between(r.get("fecha"), desde, hasta));
         cq.orderBy(cb.asc(r.get("fecha")));
         TypedQuery q = getEm().createQuery(cq);
+        res = q.getResultList();
+        return res;
+    }
+
+    public List<Pago> findPagoByCredito(Integer credito) {
+        List<Pago> res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("credito").get("id"), credito), cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.asc(r.get("fecha")));
+        TypedQuery<Pago> q = getEm().createQuery(cq);
         res = q.getResultList();
         return res;
     }
@@ -328,7 +434,20 @@ public class PagoFacade extends AbstractFacade<Pago> {
 
     @Override
     public void guardar() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            getEm().merge(getEntity());
+        } catch (ConstraintViolationException cve) {
+            Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
+            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            for (ConstraintViolation cv : lista) {
+                LOGGER.log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
+                LOGGER.log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
+                LOGGER.log(Level.SEVERE, "Root Bean :", cv.getRootBean());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Ocurrio una excepcion al intentar guardar el registro", ex);
+
+        }
     }
 
     @Override
@@ -353,6 +472,10 @@ public class PagoFacade extends AbstractFacade<Pago> {
             criteria.add(cb.like(cb.lower(
                     r.get("credito").get("transaccion").get("comprador").get("nombre")), "%"
                     + getEntity().getCliente() + "%"));
+        }
+        if (getEntity().getCredito().getTransaccion().getId() != null) {
+            criteria.add(cb.equal(
+                    r.get("credito").get("transaccion").get("id"), getEntity().getCredito().getTransaccion().getId()));
         }
         if (getEntity().getActivo() != null) {
             ParameterExpression<Character> p =

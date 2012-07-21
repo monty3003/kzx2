@@ -96,7 +96,7 @@ public class MotoFacade extends AbstractFacade<Moto> {
             getEm().merge(getEntity());
         } catch (ConstraintViolationException cve) {
             Set<ConstraintViolation<?>> lista = cve.getConstraintViolations();
-            Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
+            Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Excepcion de tipo Constraint Violation.", cve);
             for (ConstraintViolation cv : lista) {
                 Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Constraint Descriptor :", cv.getConstraintDescriptor());
                 Logger.getLogger(MotoFacade.class.getName()).log(Level.SEVERE, "Invalid Value :", cv.getInvalidValue());
@@ -178,7 +178,17 @@ public class MotoFacade extends AbstractFacade<Moto> {
 
     public List<Moto> findGrupoByModelo() {
         List<Moto> res = null;
-        List<Object[]> resultado = getEm().createQuery("select m.codigo,m.marca,m.modelo,m.activo,count(m.codigo) from Moto m where m.activo = 'S' group by m.modelo order by m.marca desc, m.modelo asc").getResultList();
+        List<Object[]> resultado = getEm().createQuery(
+                "select m.codigo,"
+                + "m.marca,"
+                + "m.modelo,"
+                + "m.activo,"
+                + "count(m.codigo)"
+                + " from Moto m"
+                + " where m.activo = 'S'"
+                + " group by m.modelo"
+                + " order by m.marca"
+                + " desc, m.modelo asc").getResultList();
         if (!resultado.isEmpty()) {
             res = new ArrayList<Moto>();
             Moto m;

@@ -4,6 +4,7 @@
  */
 package py.com.bej.orm.session;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import py.com.bej.orm.entities.Transaccion;
+import py.com.bej.orm.utils.CategoriaEnum;
 
 /**
  *
@@ -50,6 +52,43 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
             creditoFacade = new CreditoFacade();
         }
         return creditoFacade;
+    }
+
+    public List<Transaccion> findByFechaYCodigo(Integer codigoDesde, Integer codigoHasta, Date fechaDesde, Date fechaaHasta) throws Exception {
+        List<Transaccion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.greaterThanOrEqualTo(r.get("codigo").get("id"), codigoDesde),
+                cb.lessThanOrEqualTo(r.get("codigo").get("id"), codigoHasta),
+                cb.between(r.get("fechaOperacion"), fechaDesde, fechaaHasta),
+                cb.equal(r.get("activo"), 'S')));
+        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+        res = q.getResultList();
+        if (res != null && !res.isEmpty()) {
+            for (Transaccion t : res) {
+                t.setMotoVendida(t.getMotostocksVenta().get(0));
+                if (t.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
+                    t.setPrecioTotal(t.getTotalPagado());
+                } else {
+                    t.setPrecioTotal(t.getEntregaInicial().add(BigDecimal.valueOf(t.getCuotas() * t.getMontoCuotaIgual().doubleValue())));
+                }
+            }
+        }
+        return res;
+    }
+
+    public List<Transaccion> findUltimasVentas() {
+        List<Transaccion> res = null;
+        inicio();
+        cq.where(cb.and(
+                cb.greaterThanOrEqualTo(r.get("codigo").get("id"), CategoriaEnum.VENTA_DESDE.getSymbol()),
+                cb.lessThanOrEqualTo(r.get("codigo").get("id"), CategoriaEnum.VENTA_HASTA.getSymbol()),
+                cb.equal(r.get("activo"), 'S')));
+        cq.orderBy(cb.desc(r.get("fechaOperacion")));
+        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+        q.setMaxResults(4);
+        res = q.getResultList();
+        return res;
     }
 
     public MotostockFacade getMotostockFacade() {
@@ -286,6 +325,16 @@ public class TransaccionFacade extends AbstractFacade<Transaccion> {
                 cb.equal(r.get("idAnterior"), idAnterior),
                 cb.greaterThanOrEqualTo(r.get("codigo").get("id"), categoriaDesde),
                 cb.lessThanOrEqualTo(r.get("codigo").get("id"), categoriaHasta)));
+        TypedQuery<Transaccion> q = getEm().createQuery(cq);
+        res = q.getSingleResult();
+        return res;
+    }
+
+    public Transaccion findByNumeroAnterior(Integer idAnterior, Integer categoria) throws Exception {
+        Transaccion res = null;
+        inicio();
+        cq.where(cb.and(cb.equal(r.get("idAnterior"), idAnterior),
+                cb.notEqual(r.get("codigo").get("id"), categoria)));
         TypedQuery<Transaccion> q = getEm().createQuery(cq);
         res = q.getSingleResult();
         return res;
