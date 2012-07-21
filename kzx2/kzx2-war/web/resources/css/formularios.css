@@ -55,7 +55,7 @@ div.buttonsdiv input{ /* style for INPUT fields within 'buttonsdiv'. Assumed to 
     width: 70%;
     display: block;
     position: relative;
-    margin: 10px auto 80px auto;
+    margin: 10px auto;
     clear: both;
 }
 
@@ -72,7 +72,6 @@ div.buttonsdiv input{ /* style for INPUT fields within 'buttonsdiv'. Assumed to 
     width: 100%;
     vertical-align: middle;
     border: 2px solid #000099;
-    margin: 10px;
 }
 .resumen table thead{
     padding: 4px;
@@ -80,38 +79,45 @@ div.buttonsdiv input{ /* style for INPUT fields within 'buttonsdiv'. Assumed to 
     background-color: #9999ff;
 }
 .resumen table th{
-    width: 20%;
     padding: 4px;
     border: 1px solid #000099;
     background-color: #9999ff;
 }
 .resumen table td{
-/*    padding: 4px;*/
+    /*    padding: 4px;*/
     border: 1px solid #000099;
     background-color: #e1dfe0;
 }
+.resumen table td a{
+    padding: 4px;
+}
 
-/*.dosTablas{
+.dosTablas{
     text-align: center;
-    width: 80%;
+    width: 70%;
     display: block;
-    position: relative;
     margin: 10px auto 80px auto;
     clear: both;
-    padding: 4px;
-}*/
-.resumen .tablaCompartida{
+}
+.tablaCompartida{
     margin: 5px auto;
     width: 45%;
     height: auto;
-    float: left;
     display: block;
-/*    overflow: scroll;*/
+    /*    overflow: scroll;*/
     position: relative;
     padding: 4px;
 }
-.tablaCompartida .tablaDetallePago{
-    margin: 0px auto;
-    padding: 0px;
+.izquierda{float: left;}
+.derecha{float: right;}
+
+.linkRojo{
+    font-size: larger;
+    font-weight: bolder;
+    color: red;
+}
+
+#chasis, #motor{
+    text-align: left;
 }
 

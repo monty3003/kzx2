@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="recibo" pageWidth="612" pageHeight="936" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2100000000000002"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
 	<parameter name="EMPRESA_DIRECCION" class="java.lang.String"/>
 	<parameter name="N_VENTA" class="java.lang.String"/>
@@ -15,6 +15,7 @@
 		<defaultValueExpression><![CDATA["C:\\kzx2\\kzx2\\kzx2-war\\web\\resources\\images\\logo_bej.gif"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="FECHA" class="java.lang.String"/>
+	<parameter name="FACTURA" class="java.lang.String"/>
 	<field name="nombre" class="java.lang.String"/>
 	<field name="documento" class="java.lang.String"/>
 	<background>
@@ -62,17 +63,14 @@
 				<textFieldExpression><![CDATA[$P{TOTAL_NUMERO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="339" y="16" width="83" height="20"/>
+				<reportElement x="465" y="105" width="106" height="26"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$P{N_VENTA}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="290" y="16" width="49" height="20"/>
+				<reportElement x="415" y="105" width="50" height="26"/>
 				<textElement verticalAlignment="Middle"/>
-				<text><![CDATA[Id. Venta:
-                
-                
-                ]]></text>
+				<text><![CDATA[Id. Venta:]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="290" y="152" width="281" height="20"/>
@@ -157,6 +155,16 @@
 					<pen lineStyle="Dashed"/>
 				</graphicElement>
 			</line>
+			<textField>
+				<reportElement x="465" y="131" width="106" height="21"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{FACTURA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="415" y="131" width="50" height="21"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Factura:]]></text>
+			</staticText>
 		</band>
 	</detail>
 </jasperReport>
