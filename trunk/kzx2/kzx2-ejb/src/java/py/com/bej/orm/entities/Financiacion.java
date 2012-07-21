@@ -19,6 +19,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
+import py.com.bej.orm.utils.ConfiguracionEnum;
 import py.com.bej.orm.utils.Conversor;
 import py.com.bej.orm.utils.ConversorDeNumeroALetra;
 
@@ -61,6 +62,8 @@ public class Financiacion extends WithId<Integer> {
     private Character cancelado;
     @Column(name = "interes_mora", precision = 11, scale = 2)
     private BigDecimal interesMora;
+    @Column(name = "descuento", precision = 11, scale = 2)
+    private BigDecimal descuento;
     @Column(name = "total_pagado", precision = 11, scale = 2, nullable = true)
     private BigDecimal totalPagado;
     @Column(name = "activo", length = 1, nullable = false)
@@ -92,11 +95,13 @@ public class Financiacion extends WithId<Integer> {
     private String condicionesPagare;
     @Transient
     private Integer pagoAsignado;
+    @Transient
+    private String fechaPagoString;
 
     public Financiacion() {
     }
 
-    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal cuotaNeta, BigDecimal totalAPagar, BigDecimal ajusteRedondeo, Date fechaPago, Character cancelado, Date fechaVencimiento, BigDecimal interesMora, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
+    public Financiacion(Integer id, Credito credito, short numeroCuota, BigDecimal capital, BigDecimal interes, BigDecimal cuotaNeta, BigDecimal totalAPagar, BigDecimal ajusteRedondeo, Date fechaPago, Character cancelado, Date fechaVencimiento, BigDecimal interesMora, BigDecimal descuento, BigDecimal totalPagado, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.credito = credito;
         this.numeroCuota = numeroCuota;
@@ -109,6 +114,7 @@ public class Financiacion extends WithId<Integer> {
         this.cancelado = cancelado;
         this.fechaVencimiento = fechaVencimiento;
         this.interesMora = interesMora;
+        this.descuento = descuento;
         this.totalPagado = totalPagado;
         this.activo = activo;
         this.ultimaModificacion = ultimaModificacion;
@@ -425,5 +431,20 @@ public class Financiacion extends WithId<Integer> {
 
     public void setPagoAsignado(Integer pagoAsignado) {
         this.pagoAsignado = pagoAsignado;
+    }
+
+    public BigDecimal getDescuento() {
+        return descuento;
+    }
+
+    public void setDescuento(BigDecimal descuento) {
+        this.descuento = descuento;
+    }
+
+    public String getFechaPagoString() {
+        if (fechaPago != null) {
+            fechaPagoString = Conversor.deDateToString(fechaPago, ConfiguracionEnum.DATE_PATTERN_CORTO.getSymbol());
+        }
+        return fechaPagoString;
     }
 }

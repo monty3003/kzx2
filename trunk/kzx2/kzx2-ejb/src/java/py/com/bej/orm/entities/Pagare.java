@@ -70,6 +70,8 @@ public class Pagare extends WithId<Integer> {
     private Date ultimaModificacion;
     @Transient
     private String fechaVencimientoString;
+    @Transient
+    private String cliente;
 
     public Pagare() {
     }
@@ -268,5 +270,13 @@ public class Pagare extends WithId<Integer> {
             }
         }
         return fechaVencimientoString;
+    }
+
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
     }
 }

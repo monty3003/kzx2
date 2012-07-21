@@ -52,11 +52,15 @@ public class DetallePago extends WithId<Integer> {
     private Date ultimaModificacion;
     @Transient
     private Boolean seleccion;
+    @Transient
+    private Date vencimiento;
+    @Transient
+    private String claseColor;
 
     public DetallePago() {
     }
 
-    public DetallePago(Categoria codigo, Pago pago, String concepto, BigDecimal importe, Short numeroCuota, Character activo, Date ultimaModificacion, Boolean seleccion) {
+    public DetallePago(Categoria codigo, Pago pago, String concepto, BigDecimal importe, Short numeroCuota, Character activo, Date ultimaModificacion, Boolean seleccion, Date vencimiento, String claseColor) {
         this.codigo = codigo;
         this.pago = pago;
         this.concepto = concepto;
@@ -65,6 +69,8 @@ public class DetallePago extends WithId<Integer> {
         this.activo = activo;
         this.ultimaModificacion = ultimaModificacion;
         this.seleccion = seleccion;
+        this.vencimiento = vencimiento;
+        this.claseColor = claseColor;
     }
 
     @Override
@@ -172,5 +178,21 @@ public class DetallePago extends WithId<Integer> {
 
     public void setNumeroCuota(Short numeroCuota) {
         this.numeroCuota = numeroCuota;
+    }
+
+    public Date getVencimiento() {
+        return vencimiento;
+    }
+
+    public void setVencimiento(Date vencimiento) {
+        this.vencimiento = vencimiento;
+    }
+
+    public String getClaseColor() {
+        return claseColor;
+    }
+
+    public void setClaseColor(String claseColor) {
+        this.claseColor = claseColor;
     }
 }

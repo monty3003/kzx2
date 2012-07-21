@@ -23,6 +23,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import py.com.bej.orm.interfaces.WithId;
 import py.com.bej.orm.utils.Conversor;
+import py.com.bej.orm.utils.GrillaCreditoCuotasWrapper;
 
 /**
  *
@@ -37,9 +38,6 @@ public class Credito extends WithId<Integer> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @JoinColumn(name = "categoria", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private Categoria categoria;
     @JoinColumn(name = "transaccion", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private Transaccion transaccion;
@@ -49,9 +47,6 @@ public class Credito extends WithId<Integer> {
     @Column(name = "fecha_fin", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fechaFin;
-    @JoinColumn(name = "sistema_credito", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private Categoria sistemaCredito;
     @Column(name = "tan", nullable = false)
     private float tan;
     @Column(name = "tae", nullable = false)
@@ -74,6 +69,8 @@ public class Credito extends WithId<Integer> {
     private BigDecimal totalInteresesPagado;
     @Column(name = "total_intereses_pagado_multa", precision = 11, scale = 2)
     private BigDecimal totalInteresesPagadoMulta;
+    @Column(name = "total_descuento", precision = 11, scale = 2)
+    private BigDecimal totalDescuento;
     @Column(name = "fecha_ultimo_pago")
     @Temporal(TemporalType.DATE)
     private Date fechaUltimoPago;
@@ -89,6 +86,10 @@ public class Credito extends WithId<Integer> {
     private Date ultimaModificacion;
     @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL)
     private List<Financiacion> financiacions;
+    @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL)
+    private List<Pago> pagos;
+    @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL)
+    private List<Pagare> pagares;
     @Transient
     private BigDecimal saldoActual;
     @Transient
@@ -101,11 +102,15 @@ public class Credito extends WithId<Integer> {
     private String interesMoratorioString;
     @Transient
     private Boolean selected;
+    @Transient
+    private List<GrillaCreditoCuotasWrapper> listaGrilla;
+    @Transient
+    private String cliente;
+    @Transient
+    private Boolean incluirCreditoDeCompras;
 
     public Credito() {
-        this.categoria = new Categoria();
         this.estado = new Categoria();
-        this.sistemaCredito = new Categoria();
         this.transaccion = new Transaccion();
         this.garante = new Persona();
     }
@@ -114,13 +119,11 @@ public class Credito extends WithId<Integer> {
         this.id = id;
     }
 
-    public Credito(Integer id, Categoria categoria, Transaccion transaccion, Date fechaInicio, Date fechaFin, Categoria sistemaCredito, float tan, float tae, float interesMoratorio, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, BigDecimal totalInteresesPagadoMulta, Date fechaUltimoPago, Short cuotasAtrasadas, Categoria estado, Character activo, Date ultimaModificacion) {
+    public Credito(Integer id, Transaccion transaccion, Date fechaInicio, Date fechaFin, float tan, float tae, float interesMoratorio, BigDecimal capital, short amortizacion, BigDecimal creditoTotal, BigDecimal totalAmortizadoPagado, BigDecimal totalInteresesPagado, BigDecimal totalInteresesPagadoMulta, BigDecimal totalDescuento, Date fechaUltimoPago, Short cuotasAtrasadas, Categoria estado, Character activo, Date ultimaModificacion) {
         this.id = id;
-        this.categoria = categoria;
         this.transaccion = transaccion;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
-        this.sistemaCredito = sistemaCredito;
         this.tan = tan;
         this.tae = tae;
         this.interesMoratorio = interesMoratorio;
@@ -130,6 +133,7 @@ public class Credito extends WithId<Integer> {
         this.totalAmortizadoPagado = totalAmortizadoPagado;
         this.totalInteresesPagado = totalInteresesPagado;
         this.totalInteresesPagadoMulta = totalInteresesPagadoMulta;
+        this.totalDescuento = totalDescuento;
         this.fechaUltimoPago = fechaUltimoPago;
         this.cuotasAtrasadas = cuotasAtrasadas;
         this.estado = estado;
@@ -145,14 +149,6 @@ public class Credito extends WithId<Integer> {
     @Override
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Categoria getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
     }
 
     public Transaccion getTransaccion() {
@@ -177,14 +173,6 @@ public class Credito extends WithId<Integer> {
 
     public void setFechaFin(Date fechaFin) {
         this.fechaFin = fechaFin;
-    }
-
-    public Categoria getSistemaCredito() {
-        return sistemaCredito;
-    }
-
-    public void setSistemaCredito(Categoria sistemaCredito) {
-        this.sistemaCredito = sistemaCredito;
     }
 
     public float getTan() {
@@ -314,7 +302,7 @@ public class Credito extends WithId<Integer> {
 
     @Override
     public String getlabel() {
-        return this.id + " " + this.categoria.getDescripcion();
+        return String.valueOf(this.id);
     }
 
     /**
@@ -420,6 +408,54 @@ public class Credito extends WithId<Integer> {
 
     public void setSelected(Boolean selected) {
         this.selected = selected;
+    }
+
+    public List<Pago> getPagos() {
+        return pagos;
+    }
+
+    public void setPagos(List<Pago> pagos) {
+        this.pagos = pagos;
+    }
+
+    public List<GrillaCreditoCuotasWrapper> getListaGrilla() {
+        return listaGrilla;
+    }
+
+    public void setListaGrilla(List<GrillaCreditoCuotasWrapper> listaGrilla) {
+        this.listaGrilla = listaGrilla;
+    }
+
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
+    }
+
+    public BigDecimal getTotalDescuento() {
+        return totalDescuento;
+    }
+
+    public void setTotalDescuento(BigDecimal totalDescuento) {
+        this.totalDescuento = totalDescuento;
+    }
+
+    public Boolean getIncluirCreditoDeCompras() {
+        return incluirCreditoDeCompras;
+    }
+
+    public void setIncluirCreditoDeCompras(Boolean incluirCreditoDeCompras) {
+        this.incluirCreditoDeCompras = incluirCreditoDeCompras;
+    }
+
+    public List<Pagare> getPagares() {
+        return pagares;
+    }
+
+    public void setPagares(List<Pagare> pagares) {
+        this.pagares = pagares;
     }
     
 }

@@ -146,6 +146,10 @@ public class Transaccion extends WithId<Integer> {
     private Categoria codigoMax;
     @OneToMany(mappedBy = "transaccion", cascade = CascadeType.PERSIST)
     private List<Credito> creditosTransaccion;
+    @Transient
+    private Motostock motoVendida;
+    @Transient
+    private BigDecimal precioTotal;
 
     public Transaccion() {
         this.codigo = new Categoria();
@@ -637,5 +641,21 @@ public class Transaccion extends WithId<Integer> {
             cr.setTransaccion(this);
         }
         this.creditosTransaccion = creditosTransaccion;
+    }
+
+    public Motostock getMotoVendida() {
+        return motoVendida;
+    }
+
+    public void setMotoVendida(Motostock motoVendida) {
+        this.motoVendida = motoVendida;
+    }
+
+    public BigDecimal getPrecioTotal() {
+        return precioTotal;
+    }
+
+    public void setPrecioTotal(BigDecimal precioTotal) {
+        this.precioTotal = precioTotal;
     }
 }

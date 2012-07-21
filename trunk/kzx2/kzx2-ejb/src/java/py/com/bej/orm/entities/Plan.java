@@ -59,6 +59,15 @@ public class Plan extends WithId<Integer> {
     @Column(name = "financiacion_maxima", nullable = false)
     private Short financiacionMaxima;
     @Min(value = 0, message = "Ingrese un valor positivo")
+    @Column(name = "cuota_corrida_desde", nullable = false)
+    private Short cuotaCorridaDesde;
+    @Min(value = 2, message = "Ingrese un valor positivo")
+    @Column(name = "cuota_corrida_hasta", nullable = false)
+    private Short cuotaCorridaHasta;
+    @Min(value = 0, message = "Ingrese un valor positivo")
+    @Column(name = "rango_negociacion_maximo", length = 11, nullable = false)
+    private BigDecimal rangoNegociacionMaximo;
+    @Min(value = 0, message = "Ingrese un valor positivo")
     @Column(name = "tan", nullable = false)
     private Float tan;
     @Min(value = 0, message = "Ingrese un valor positivo")
@@ -67,6 +76,9 @@ public class Plan extends WithId<Integer> {
     @Min(value = 0, message = "Ingrese un valor positivo")
     @Column(name = "tasa_interes_moratorio", nullable = false)
     private Float tasaInteresMoratorio;
+    @Min(value = 0, message = "Ingrese un valor positivo")
+    @Column(name = "tasa_interes_punitorio", nullable = false)
+    private Float tasaInteresPunitorio;
     @Min(value = 0, message = "Ingrese un valor positivo")
     @Max(value = 90, message = "Valor fuera de rango")
     @Column(name = "dias_a_primer_vencimiento", length = 2, nullable = false)
@@ -104,7 +116,7 @@ public class Plan extends WithId<Integer> {
         this.activo = activo;
     }
 
-    public Plan(Integer id, Categoria categoria, String nombre, BigDecimal montoEntregaMinimo, BigDecimal montoEntregaMaximo, Float porcentajeMontoEntrega, Short financiacionMinima, Short financiacionMaxima, Float tan, Float tae, Float tasaInteresMoratorio, Short diasAPrimerVencimiento, Short indiceRedondeo, Float porcentajeDescuento, BigDecimal montoDescuento, Character activo, Date ultimaModificacion) {
+    public Plan(Integer id, Categoria categoria, String nombre, BigDecimal montoEntregaMinimo, BigDecimal montoEntregaMaximo, Float porcentajeMontoEntrega, Short financiacionMinima, Short financiacionMaxima, Short cuotaCorridaDesde, Short cuotaCorridahHasta, BigDecimal rangoNegociacionMaximo, Float tan, Float tae, Float tasaInteresMoratorio, Float tasaInteresPunitorio, Short diasAPrimerVencimiento, Short indiceRedondeo, Float porcentajeDescuento, BigDecimal montoDescuento, Character activo, Date ultimaModificacion) {
         this.id = id;
         this.categoria = categoria;
         this.nombre = nombre;
@@ -113,9 +125,13 @@ public class Plan extends WithId<Integer> {
         this.porcentajeMontoEntrega = porcentajeMontoEntrega;
         this.financiacionMinima = financiacionMinima;
         this.financiacionMaxima = financiacionMaxima;
+        this.cuotaCorridaDesde = cuotaCorridaDesde;
+        this.cuotaCorridaHasta = cuotaCorridahHasta;
+        this.rangoNegociacionMaximo = rangoNegociacionMaximo;
         this.tan = tan;
         this.tae = tae;
         this.tasaInteresMoratorio = tasaInteresMoratorio;
+        this.tasaInteresPunitorio = tasaInteresPunitorio;
         this.diasAPrimerVencimiento = diasAPrimerVencimiento;
         this.indiceRedondeo = indiceRedondeo;
         this.porcentajeDescuento = porcentajeDescuento;
@@ -277,5 +293,37 @@ public class Plan extends WithId<Integer> {
     @Override
     public String getlabel() {
         return this.getNombre();
+    }
+
+    public Short getCuotaCorridaDesde() {
+        return cuotaCorridaDesde;
+    }
+
+    public void setCuotaCorridaDesde(Short cuotaCorridaDesde) {
+        this.cuotaCorridaDesde = cuotaCorridaDesde;
+    }
+
+    public Short getCuotaCorridaHasta() {
+        return cuotaCorridaHasta;
+    }
+
+    public void setCuotaCorridaHasta(Short cuotaCorridaHasta) {
+        this.cuotaCorridaHasta = cuotaCorridaHasta;
+    }
+
+    public BigDecimal getRangoNegociacionMaximo() {
+        return rangoNegociacionMaximo;
+    }
+
+    public void setRangoNegociacionMaximo(BigDecimal rangoNegociacionMaximo) {
+        this.rangoNegociacionMaximo = rangoNegociacionMaximo;
+    }
+
+    public Float getTasaInteresPunitorio() {
+        return tasaInteresPunitorio;
+    }
+
+    public void setTasaInteresPunitorio(Float tasaInteresPunitorio) {
+        this.tasaInteresPunitorio = tasaInteresPunitorio;
     }
 }

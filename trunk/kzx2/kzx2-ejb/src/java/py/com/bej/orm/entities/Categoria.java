@@ -48,10 +48,10 @@ public class Categoria extends WithId<Integer> {
     private List<Transaccion> transaccions;
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Factura> facturas;
-    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
-    private List<Credito> creditos;
-    @OneToMany(mappedBy = "sistemaCredito", cascade = CascadeType.ALL)
-    private List<Credito> creditosSitemaCredito;
+    @OneToMany(mappedBy = "estado", cascade = CascadeType.ALL)
+    private List<Credito> estadosCredito;
+    @OneToMany(mappedBy = "estado", cascade = CascadeType.ALL)
+    private List<Motostock> motostocks;
 
     public Categoria() {
     }
@@ -175,17 +175,19 @@ public class Categoria extends WithId<Integer> {
         return facturas;
     }
 
-    /**
-     * @return the creditos
-     */
-    public List<Credito> getCreditos() {
-        return creditos;
+    public List<Credito> getEstadosCredito() {
+        return estadosCredito;
     }
 
-    /**
-     * @return the creditosSitemaCredito
-     */
-    public List<Credito> getCreditosSitemaCredito() {
-        return creditosSitemaCredito;
+    public void setEstadosCredito(List<Credito> estadosCredito) {
+        this.estadosCredito = estadosCredito;
+    }
+
+    public List<Motostock> getMotostocks() {
+        return motostocks;
+    }
+
+    public void setMotostocks(List<Motostock> motostocks) {
+        this.motostocks = motostocks;
     }
 }
