@@ -30,11 +30,11 @@ import py.com.bej.orm.entities.Factura;
 import py.com.bej.orm.entities.Financiacion;
 import py.com.bej.orm.entities.Motostock;
 import py.com.bej.orm.entities.Pagare;
+import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.Transaccion;
 import py.com.bej.orm.session.CategoriaFacade;
 import py.com.bej.orm.session.CreditoFacade;
-import py.com.bej.orm.session.FacturaFacade;
 import py.com.bej.orm.session.FinanciacionFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.MotostockFacade;
@@ -67,8 +67,6 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private CreditoFacade creditoFacade;
     @EJB
     private PagoFacade pagoFacade;
-    @EJB
-    private FacturaFacade facturaFacade;
     @EJB
     private MotoFacade motoFacade;
     @EJB
@@ -113,6 +111,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private Boolean usarFechaAhora = false;
     private Boolean usarFechaEntregaAhora = false;
     //Garante
+    private Boolean conGarante;
     private Integer garanteId;
     private String garanteDocumento;
     private String garanteRuc;
@@ -122,7 +121,6 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private String garanteTelefonoFijo;
     private String garanteTelefonoMovil;
     private String garanteEmail;
-    private String garanteFechaIngreso;
     private String garanteContacto;
     private String garanteProfesion;
     private Character garanteEstadoCivil;
@@ -130,13 +128,20 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     private String garanteTratamiento;
     private Character garanteSexo;
     private Short garanteHijos;
-    private Character garanteHabilitado;
-    private Integer garanteCategoria;
     //Pagares
     private Boolean imprimirVencimientoEnPagare;
     private List<Pagare> pagares;
     private List<SelectItem> listaOpcionesPagare;
     private String opcionPagare;
+    //Plan de Ventas
+    private Short plan;
+    private List<SelectItem> listaDePlanDeVenta;
+    //Informe
+    private List<Transaccion> listaInforme;
+    private Date fechaDesde;
+    private Date fechaHasta;
+    private Boolean usarFechaDesdeAhora;
+    private Boolean usarFechaHastaAhora;
 
     /** Creates a new instance of VentaMotosBean */
     public VentaMotosBean() {
@@ -147,6 +152,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         venta = null;
         credito = null;
         motoVendida = null;
+        idMotoVendida = null;
         setAgregar(Boolean.FALSE);
         setModificar(Boolean.FALSE);
         setDesde(Long.parseLong(ConfiguracionEnum.PAG_DESDE.getSymbol()));
@@ -167,6 +173,13 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         motoVendida = null;
         imprimirVencimientoEnPagare = null;
         opcionPagare = null;
+        plan = -2;
+        listaDePlanDeVenta = null;
+        listaInforme = null;
+        fechaDesde = null;
+        fechaHasta = null;
+        usarFechaDesdeAhora = null;
+        usarFechaHastaAhora = null;
     }
 
     /**
@@ -382,11 +395,30 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         boolean validado = validar();
         if (validado) {
             guardarVenta();
-            setNav("listaventamotos");
+            if (credito.getTransaccion().getCodigo().getId().equals(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol())) {
+                //Pagar la primera cuota
+                Pago p = null;
+                p = getPagoFacade().realizarPago(credito, LoginBean.getInstance().getUsuario(), venta.getMontoCuotaIgual());
+                //Actualizar Cabecera
+                credito = getCreditoFacade().consolidarCreditoPorPago(p.getCredito().getId());
+            }
             return "resumenVenta";
         } else {
             return null;
         }
+    }
+
+    public String resumenVenta(Integer ventaId) {
+        try {
+            venta = facade.find(ventaId);
+            motoVendida = getMotostockFacade().findByVenta(venta.getId());
+            if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
+                credito = getCreditoFacade().findByTransaccion(venta.getId());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(VentaMotosBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "resumenVenta";
     }
 
     public String resumenVenta() {
@@ -398,7 +430,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             if (idFiltro != null) {
                 venta = facade.find(new Integer(idFiltro));
                 motoVendida = getMotostockFacade().findByVenta(venta.getId());
-                if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+                if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
                     credito = getCreditoFacade().findByTransaccion(venta.getId());
                 }
             } else {
@@ -412,6 +444,9 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
     }
 
     public String entregarMoto() {
+        motoVendida.setEstado(new Categoria(CategoriaEnum.VENDIDO_ENTREGADO.getSymbol()));
+        getMotostockFacade().setEntity(motoVendida);
+        getMotostockFacade().guardar();
         venta.setFechaEntrega(new Date());
         getFacade().setEntity(venta);
         getFacade().guardar();
@@ -442,16 +477,18 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             listaOpcionesPagare.add(new SelectItem("0", venta.getCuotas() + " x " + Conversor.numberToStringPattern(venta.getMontoCuotaIgual())));
             BigDecimal limiteMinimo = new BigDecimal(ConfiguracionEnum.LIMITE_MINIMO_PAGARE.getSymbol());
             BigDecimal limiteMaximo = new BigDecimal(ConfiguracionEnum.LIMITE_MAXIMO_PAGARE.getSymbol());
-            if (credito.getCreditoTotal().equals(credito.getCreditoTotal().max(limiteMaximo))) {
-                BigDecimal xmonto = credito.getCreditoTotal();
-                int numero = 2;
-                do {
-                    xmonto = credito.getCreditoTotal().divide(BigDecimal.valueOf(numero), RoundingMode.DOWN);
-                    listaOpcionesPagare.add(new SelectItem("" + numero, numero + " x " + Conversor.numberToStringPattern(xmonto)));
-                    numero++;
-                } while (xmonto.equals(xmonto.max(limiteMinimo)) && numero <= credito.getAmortizacion());
-            } else {
-                listaOpcionesPagare.add(new SelectItem("1", "1 x " + Conversor.numberToStringPattern(credito.getCreditoTotal())));
+            if (credito.getCreditoTotal() != null) {
+                if (credito.getCreditoTotal().equals(credito.getCreditoTotal().max(limiteMaximo))) {
+                    BigDecimal xmonto = credito.getCreditoTotal();
+                    int numero = 2;
+                    do {
+                        xmonto = credito.getCreditoTotal().divide(BigDecimal.valueOf(numero), motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_DOWN);
+                        listaOpcionesPagare.add(new SelectItem("" + numero, numero + " x " + Conversor.numberToStringPattern(xmonto)));
+                        numero++;
+                    } while (xmonto.equals(xmonto.max(limiteMinimo)) && numero <= credito.getAmortizacion());
+                } else {
+                    listaOpcionesPagare.add(new SelectItem("1", "1 x " + Conversor.numberToStringPattern(credito.getCreditoTotal())));
+                }
             }
         }
     }
@@ -480,7 +517,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             setErrorMessage("frm:fechaNacimiento", "El comprador debe tener 18 años cumplidos");
             res = false;
         }
-        if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+        if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
             nacimiento.setTime(credito.getGarante().getFechaNacimiento());
             nacimiento.add(Calendar.YEAR, 18);
             if (nacimiento.after(ahora)) {
@@ -494,6 +531,19 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             if (opcionPagare == null || opcionPagare.equals("X")) {
                 setErrorMessage("frm:opcionPagare", "Seleccione un valor");
                 res = false;
+            }
+        } else {
+            BigDecimal descuentoX = motoVendida.getPlan().getMontoDescuento().add(motoVendida.getPlan().getRangoNegociacionMaximo());
+            if (venta.getTotalDescuento().compareTo(BigDecimal.ZERO) < 0) {
+                if (venta.getTotalDescuento().compareTo(motoVendida.getPlan().getMontoDescuento()) > 0) {
+                    setErrorMessage("frm:descuento", "Valor fuera del rango establecido");
+                    res = false;
+                }
+            } else {
+                if (venta.getTotalDescuento().compareTo(descuentoX) > 0) {
+                    setErrorMessage("frm:descuento", "Valor fuera del rango establecido");
+                    res = false;
+                }
             }
         }
         return res;
@@ -509,7 +559,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         //Factura
         venta.setCodigo(getCategoriaFacade().find(venta.getCodigo().getId()));
         venta.getFactura().setCategoria(venta.getCodigo());
-        if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+        if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
             venta.getFactura().setSaldado('N');
         } else {
             venta.getFactura().setSaldado('S');
@@ -529,7 +579,7 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         venta.setCantidadItems((short) 1);
         venta.setActivo('N');
         venta.setAnulado('N');
-        if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+        if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
             venta.setSaldado('N');
         } else {
             venta.setSaldado('S');
@@ -544,20 +594,30 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         venta.getFactura().setUltimaModificacion(venta.getUltimaModificacion());
         venta.getFactura().setTransaccion(venta);
         getFacade().guardarVenta(venta);
+        motoVendida.setEstado(new Categoria(CategoriaEnum.VENDIDO_SIN_ENTREGAR.getSymbol()));
         motoVendida.setVenta(venta);
         getMotostockFacade().setEntity(motoVendida);
         getMotostockFacade().guardar();
-        if (venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCR.getSymbol())) {
+        if (!venta.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
             try {
                 //Credito
-                credito.getGarante().setCategoria(categoriaFacade.find(CategoriaEnum.CLIENTE_PF.getSymbol()));
-                credito.setCategoria(motoVendida.getPlan().getCategoria());
-                credito.setSistemaCredito(motoVendida.getPlan().getCategoria());
+                if (conGarante) {
+                    if (credito.getGarante().getId() == null) {
+                        //Garante Nuevo
+                        credito.getGarante().setFechaIngreso(new Date());
+                        credito.getGarante().setEmail("mail@mail.com");
+                        credito.getGarante().setHijos(Short.valueOf("0"));
+                        credito.getGarante().setHabilitado('S');
+                        credito.getGarante().setActivo('S');
+                        credito.getGarante().setUltimaModificacion(new Date());
+                        credito.getGarante().setFisica('S');
+                    }
+                    credito.getGarante().setCategoria(categoriaFacade.find(CategoriaEnum.CLIENTE_PF.getSymbol()));
+                }
                 getCreditoFacade().abrirCredito(venta, credito);
                 venta.setTotal(credito.getCreditoTotal().add(venta.getEntregaInicial()));
                 //Pagares
                 List<Financiacion> cuotasFijas = getFinanciacionFacade().findByTransaccion(venta.getId());
-                Financiacion hastaEste = null;
                 pagares = new ArrayList<Pagare>();
                 short cantidadPagares = 0;
                 if (opcionPagare.equals("0")) {
@@ -577,19 +637,23 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
                 } else {
                     montoPorPagare = credito.getCreditoTotal().divide(BigDecimal.valueOf(cantidadPagares), RoundingMode.UP);
                     short c = 1;
-                    short h = 0;
+                    short h = 1;
                     for (int x = 1; x <= cantidadPagares; x++) {
                         Date vencimiento = null;
                         BigDecimal conjunto = BigDecimal.ZERO;
                         for (Financiacion f : cuotasFijas) {
-                            h++;
                             if (f.getNumeroCuota() == h) {
-                                conjunto.add(f.getTotalAPagar());
+                                conjunto = conjunto.add(f.getTotalAPagar());
+                                h++;
                             }
-                            if (conjunto.equals(montoPorPagare.min(conjunto))) {
+                            if (conjunto.compareTo(montoPorPagare) >= 0
+                                    || f.getNumeroCuota() == credito.getAmortizacion()) {
                                 vencimiento = f.getFechaVencimiento();
                                 break;
                             }
+                        }
+                        if (vencimiento == null) {
+                            vencimiento = credito.getFechaFin();
                         }
                         pagares.add(new Pagare(null, credito, c, vencimiento, montoPorPagare,
                                 Boolean.FALSE, imprimirVencimientoEnPagare, null,
@@ -640,9 +704,19 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
             if (motoVendida != null && motoVendida.getVenta() != null) {
                 setErrorMessage("frm:nMoto", "Esta Moto ya está vendida.");
                 motoVendida = null;
+            } else if (motoVendida.getActivo().equals('N') || motoVendida.getEstado().getId() > 4) {
+                setErrorMessage("frm:nMoto", "Esta Moto no está disponible.");
+                motoVendida = null;
             } else {
                 if (motoVendida != null) {
-                    calcularPlanDeVenta();
+                    if (motoVendida.getEstado().getId() < 2) {
+                        setInfoMessage("frm:nMoto", "Esta Moto no tiene documentos guardados.");
+                    }
+                    venta.setEntregaInicial(null);
+                    venta.setCuotas(Short.MIN_VALUE);
+                    venta.setSubTotal(null);
+                    venta.setCodigo(null);
+                    obtenerListaDeTiposDeVenta();
                 }
             }
         }
@@ -681,25 +755,56 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
         return getNav();
     }
 
-    public void prepararPlanDePago() {
-        if (venta.getCodigo().getId() == CategoriaEnum.VENTA_MCR.getSymbol()) {
-            //Venta a Credito
-            credito = new Credito();
-        } else {
-            credito = null;
+    private void obtenerListaDeTiposDeVenta() {
+        BigDecimal interesMensual;
+        BigDecimal capitalMensual;
+        listaDePlanDeVenta = new ArrayList<SelectItem>();
+        listaDePlanDeVenta.add(new SelectItem(-1, "-SELECCIONAR-"));
+        listaDePlanDeVenta.add(new SelectItem(0, "Al Contado"));
+        listaDePlanDeVenta.add(new SelectItem(1, "Con Entrega Inicial"));
+        for (short c = motoVendida.getPlan().getCuotaCorridaDesde(); c <= motoVendida.getPlan().getCuotaCorridaHasta(); c++) {
+            interesMensual = BigDecimal.valueOf((motoVendida.getPlan().getTan() * c) / (c >= 12 ? 12 : 1)).setScale(4, RoundingMode.HALF_DOWN);
+            capitalMensual = motoVendida.getPrecioBase().divide(BigDecimal.valueOf(c), 4, RoundingMode.HALF_DOWN);
+            BigDecimal netoConInteres = capitalMensual.multiply(interesMensual.add(BigDecimal.ONE));
+            BigDecimal cuotaX = netoConInteres.setScale(motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_UP);
+            LOGGER.log(Level.INFO, "Plan {0} meses: El interes mensual es {1}, el Neto con interes es {2} y la cuota es {3}",
+                    new Object[]{c, interesMensual, netoConInteres, cuotaX});
+            listaDePlanDeVenta.add(new SelectItem(c, c + " Cuotas de " + Conversor.numberToStringPattern(cuotaX)));
         }
+
+    }
+
+    public void calcularPlanDeVentaCuotaCorrida() {
+        venta.setEntregaInicial(null);
+        venta.setMontoCuotaIgual(null);
+        venta.setCuotas(null);
+        calcularPlanDeVenta();
     }
 
     public void calcularPlanDeVenta() {
+        conGarante = Boolean.TRUE;
         //Validar datos
-        if (venta.getCodigo().getId() == CategoriaEnum.VENTA_MCR.getSymbol()) {
+        if (plan < 0) {
+            //Error de seleccion
+            setErrorMessage("frm:planDeVenta", "Seleccione un valor");
+        } else if (plan == 0) {
+            //Venta Contado
+            venta.setCodigo(new Categoria(CategoriaEnum.VENTA_MCO.getSymbol()));
+            venta.setCuotas(plan);
+            venta.setEntregaInicial(motoVendida.getPrecioContado());
+            venta.setDescuento(motoVendida.getPlan().getPorcentajeDescuento());
+            venta.setTotalPagado(venta.getEntregaInicial());
+        } else if (plan == 1) {
+            //Venta con Entrega Inicial
+            credito = new Credito();
+            venta.setCodigo(new Categoria(CategoriaEnum.VENTA_MCR_ENTREGA.getSymbol()));
             if (venta.getEntregaInicial() == null) {
                 venta.setEntregaInicial(motoVendida.getPlan().getMontoEntregaMinimo());
                 venta.setDescuento(motoVendida.getPlan().getPorcentajeDescuento());
                 venta.setTotalPagado(venta.getEntregaInicial());
             }
             if (venta.getCuotas() == null || venta.getCuotas() < 1) {
-                venta.setCuotas(motoVendida.getPlan().getFinanciacionMinima());
+                venta.setCuotas(motoVendida.getPlan().getFinanciacionMaxima());
                 credito.setAmortizacion(venta.getCuotas());
             }
             boolean esParaCalculoValido = true;
@@ -714,51 +819,99 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
                         continue;
                     }
                 }
+                if (venta.getEntregaInicial().compareTo(motoVendida.getPlan().getMontoEntregaMaximo()) == 0) {
+                    //No hace falta Garante.
+                    conGarante = Boolean.FALSE;
+                    setInfoMessage("frm:incluirGarante", "Este plan no obliga a tener garante. De todas formas puede incluir uno.");
+                }
+
                 if (venta.getCuotas() < motoVendida.getPlan().getFinanciacionMinima()
                         || (venta.getCuotas() > motoVendida.getPlan().getFinanciacionMaxima())) {
-                    setErrorMessage("frm:montoCuotaIgual", "Cuota fuera del rango permitido");
+                    setErrorMessage("frm:cuotas", "valor fuera del rango permitido");
                     esParaCalculoValido = false;
                     continue;
                 } else {
-                    BigDecimal tasaEfectiva = BigDecimal.valueOf(motoVendida.getPlan().getTan() * 12).divide(BigDecimal.valueOf(360), 8, RoundingMode.UP);
                     credito.setTan(motoVendida.getPlan().getTan());
-                    credito.setTae(tasaEfectiva.floatValue());
+                    credito.setTae(motoVendida.getPlan().getTae());
                     credito.setCapital(motoVendida.getPrecioBase().subtract(venta.getEntregaInicial()));
-                    BigDecimal netoSinInteres = credito.getCapital().divide(BigDecimal.valueOf(venta.getCuotas()), motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_DOWN);
-                    venta.setMontoCuotaIgual(netoSinInteres.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(credito.getTan()))).setScale(motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_DOWN));
+                    BigDecimal interesAcumulado = BigDecimal.valueOf((credito.getTan() * venta.getCuotas()) / (venta.getCuotas() >= 12 ? 12 : 1)).setScale(4, RoundingMode.HALF_DOWN);
+                    BigDecimal capitalMensual = credito.getCapital().divide(BigDecimal.valueOf(venta.getCuotas()), 4, RoundingMode.HALF_DOWN);
+                    BigDecimal netoConInteres = capitalMensual.multiply(interesAcumulado.add(BigDecimal.ONE).setScale(4, RoundingMode.HALF_DOWN));
+                    BigDecimal cuotaX = netoConInteres.setScale(motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_UP);
+                    venta.setMontoCuotaIgual(cuotaX);
                     credito.setCreditoTotal(venta.getMontoCuotaIgual().multiply(BigDecimal.valueOf(venta.getCuotas())));
-
+                    if (venta.getMontoCuotaIgual().compareTo(new BigDecimal(ConfiguracionEnum.MONTO_MINIMO_CUOTA.getSymbol())) < 0) {
+                        setErrorMessage("frm:montoCuotaIgual", "Cuota fuera del rango permitido");
+                    }
                     break;
                 }
-            } while (esParaCalculoValido);
 
+            } while (esParaCalculoValido);
+            calcularOpcionesPagare();
         } else {
-            venta.setTotalPagado(venta.getTotal());
+            //Venta con cuotas corridas
+            venta.setCodigo(new Categoria(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol()));
+            venta.setCuotas(plan);
+            credito = new Credito();
+            credito.setTan(motoVendida.getPlan().getTan());
+            credito.setTae(motoVendida.getPlan().getTae());
+            credito.setCapital(motoVendida.getPrecioBase());
+            BigDecimal interesAcumulado = BigDecimal.valueOf((credito.getTan() * venta.getCuotas()) / (venta.getCuotas() >= 12 ? 12 : 1)).setScale(4, RoundingMode.HALF_DOWN);
+            BigDecimal capitalMensual = credito.getCapital().divide(BigDecimal.valueOf(venta.getCuotas()), 4, RoundingMode.HALF_DOWN);
+            BigDecimal netoConInteres = capitalMensual.multiply(interesAcumulado.add(BigDecimal.ONE).setScale(4, RoundingMode.HALF_DOWN));
+            BigDecimal cuotaX = netoConInteres.setScale(motoVendida.getPlan().getIndiceRedondeo(), RoundingMode.HALF_UP);
+            venta.setMontoCuotaIgual(cuotaX);
+            credito.setCreditoTotal(cuotaX.multiply(BigDecimal.valueOf(venta.getCuotas())));
+            credito.setAmortizacion(plan);
+            venta.setCuotas(plan);
+            venta.setEntregaInicial(BigDecimal.ZERO);
+            venta.setDescuento(motoVendida.getPlan().getPorcentajeDescuento());
+            venta.setTotalPagado(venta.getEntregaInicial());
+            LOGGER.log(Level.INFO, "Plan {0} meses: El interes acumulado es {1}, el Neto con interes es {2} y la cuota es {3}",
+                    new Object[]{plan, interesAcumulado, netoConInteres, cuotaX});
+
+            calcularOpcionesPagare();
         }
-        calcularOpcionesPagare();
         sumarResultados();
     }
 
     public void sumarResultados() {
         try {
             BigDecimal precioTotalDeLaVenta = null;
-            BigDecimal cien = new BigDecimal("100");
-            BigDecimal cientoDiez = new BigDecimal("110");
-            BigDecimal cientoDos = new BigDecimal("102");
-            BigDecimal ochentaPorCiento = new BigDecimal("0.8");
-
+            BigDecimal gravamen = BigDecimal.valueOf(motoVendida.getGravamen());
             precioTotalDeLaVenta = motoVendida.getPrecioContado();
-            precioUnitario = precioTotalDeLaVenta.multiply((cien.divide(cientoDos, 10, RoundingMode.HALF_UP)));
-            venta.setSubTotalExentas(precioUnitario.multiply(ochentaPorCiento).setScale(0, RoundingMode.HALF_UP));
-            venta.getFactura().setNetoSinIva10(precioUnitario.subtract(venta.getSubTotalExentas()));
-            venta.setTotalIva10(venta.getFactura().getNetoSinIva10().multiply((BigDecimal.TEN.divide(cien, 1, RoundingMode.HALF_DOWN))).setScale(0, RoundingMode.HALF_UP));
-            venta.setSubTotalGravadas10(venta.getFactura().getNetoSinIva10().add(venta.getTotalIva10()));
+            venta.setTotalIva10(precioTotalDeLaVenta.multiply(gravamen).setScale(0, RoundingMode.HALF_UP));
+            venta.setSubTotalGravadas10(venta.getTotalIva10().multiply(BigDecimal.TEN));
+            venta.getFactura().setNetoSinIva10(venta.getSubTotalGravadas10().subtract(venta.getTotalIva10()));
+            venta.setSubTotalExentas(precioTotalDeLaVenta.subtract(venta.getSubTotalGravadas10()));
+            precioUnitario = precioTotalDeLaVenta.subtract(venta.getTotalIva10());
             venta.setSubTotal(precioTotalDeLaVenta);
             venta.setTotalDescuento(motoVendida.getPlan().getMontoDescuento());
             venta.setTotal(venta.getSubTotal().subtract(venta.getTotalDescuento()));
         } catch (Exception e) {
             Logger.getLogger(VentaMotosBean.class.getName()).log(Level.SEVERE, null, e);
         }
+    }
+
+    public String buscarVentasPorFecha() {
+        Calendar calFechaDesde = GregorianCalendar.getInstance();
+        Calendar calFechaHasta = GregorianCalendar.getInstance();
+        Calendar xfechaDesde = null;
+        Calendar xfechaHasta = null;
+        calFechaDesde.setTime(fechaDesde);
+        calFechaHasta.setTime(fechaHasta);
+        xfechaDesde = new GregorianCalendar(calFechaDesde.get(Calendar.YEAR), calFechaDesde.get(Calendar.MONTH), calFechaDesde.get(Calendar.DAY_OF_MONTH), 00, 01);
+        xfechaHasta = new GregorianCalendar(calFechaHasta.get(Calendar.YEAR), calFechaHasta.get(Calendar.MONTH), calFechaHasta.get(Calendar.DAY_OF_MONTH), 00, 01);
+        try {
+            listaInforme = getFacade().findByFechaYCodigo(CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol(), xfechaDesde.getTime(), xfechaHasta.getTime());
+        } catch (Exception ex) {
+            Logger.getLogger(VentaMotosBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public void imprimirInformeVentas() {
+        new GeneradorReporte().generarInformeVentas(listaInforme, fechaDesde, fechaHasta);
     }
 
     @Override
@@ -1261,5 +1414,75 @@ public class VentaMotosBean extends AbstractPageBean<Transaccion> {
      */
     public void setOpcionPagare(String opcionPagare) {
         this.opcionPagare = opcionPagare;
+    }
+
+    public List<SelectItem> getListaDePlanDeVenta() {
+        return listaDePlanDeVenta;
+    }
+
+    public void setListaDePlanDeVenta(List<SelectItem> listaDePlanDeVenta) {
+        this.listaDePlanDeVenta = listaDePlanDeVenta;
+    }
+
+    public Short getPlan() {
+        return plan;
+    }
+
+    public void setPlan(Short plan) {
+        this.plan = plan;
+    }
+
+    public Boolean getConGarante() {
+        return conGarante;
+    }
+
+    public void setConGarante(Boolean conGarante) {
+        this.conGarante = conGarante;
+    }
+
+    public List<Transaccion> getListaInforme() {
+        return listaInforme;
+    }
+
+    public void setListaInforme(List<Transaccion> listaInforme) {
+        this.listaInforme = listaInforme;
+    }
+
+    public Date getFechaDesde() {
+        return fechaDesde;
+    }
+
+    public void setFechaDesde(Date fechaDesde) {
+        this.fechaDesde = fechaDesde;
+    }
+
+    public Date getFechaHasta() {
+        return fechaHasta;
+    }
+
+    public void setFechaHasta(Date fechaHasta) {
+        this.fechaHasta = fechaHasta;
+    }
+
+    public Boolean getUsarFechaDesdeAhora() {
+        return usarFechaDesdeAhora;
+    }
+
+    public void setUsarFechaDesdeAhora(Boolean usarFechaDesdeAhora) {
+        if (usarFechaDesdeAhora) {
+            fechaDesde = new Date();
+        }
+        this.usarFechaDesdeAhora = usarFechaDesdeAhora;
+    }
+
+    public Boolean getUsarFechaHastaAhora() {
+        return usarFechaHastaAhora;
+    }
+
+    public void setUsarFechaHastaAhora(Boolean usarFechaHastaAhora) {
+        if (usarFechaHastaAhora) {
+            fechaHasta = new Date();
+        }
+        this.usarFechaHastaAhora = usarFechaHastaAhora;
     }
 }

@@ -18,6 +18,7 @@ public class PlanWrapper {
 
     private Short numeroCuota;
     private List<BigDecimal> listaMontoCuotas;
+    private String cuotaCorrida;
     private String entrega1;
     private String entrega2;
     private String entrega3;
@@ -44,64 +45,67 @@ public class PlanWrapper {
         this.listaMontoCuotas = listaMontoCuotas;
         try {
             if (listaMontoCuotas.get(0) != null) {
-                entrega1 = Conversor.numberToStringPattern(listaMontoCuotas.get(0));
+                cuotaCorrida = Conversor.numberToStringPattern(listaMontoCuotas.get(0));
             }
             if (listaMontoCuotas.get(1) != null) {
-                entrega2 = Conversor.numberToStringPattern(listaMontoCuotas.get(1));
+                entrega1 = Conversor.numberToStringPattern(listaMontoCuotas.get(1));
             }
             if (listaMontoCuotas.get(2) != null) {
-                entrega3 = Conversor.numberToStringPattern(listaMontoCuotas.get(2));
+                entrega2 = Conversor.numberToStringPattern(listaMontoCuotas.get(2));
             }
             if (listaMontoCuotas.get(3) != null) {
-                entrega4 = Conversor.numberToStringPattern(listaMontoCuotas.get(3));
+                entrega3 = Conversor.numberToStringPattern(listaMontoCuotas.get(3));
             }
             if (listaMontoCuotas.get(4) != null) {
-                entrega5 = Conversor.numberToStringPattern(listaMontoCuotas.get(4));
+                entrega4 = Conversor.numberToStringPattern(listaMontoCuotas.get(4));
             }
             if (listaMontoCuotas.get(5) != null) {
-                entrega6 = Conversor.numberToStringPattern(listaMontoCuotas.get(5));
+                entrega5 = Conversor.numberToStringPattern(listaMontoCuotas.get(5));
             }
             if (listaMontoCuotas.get(6) != null) {
-                entrega7 = Conversor.numberToStringPattern(listaMontoCuotas.get(6));
+                entrega6 = Conversor.numberToStringPattern(listaMontoCuotas.get(6));
             }
             if (listaMontoCuotas.get(7) != null) {
-                entrega8 = Conversor.numberToStringPattern(listaMontoCuotas.get(7));
+                entrega7 = Conversor.numberToStringPattern(listaMontoCuotas.get(7));
             }
             if (listaMontoCuotas.get(8) != null) {
-                entrega9 = Conversor.numberToStringPattern(listaMontoCuotas.get(8));
+                entrega8 = Conversor.numberToStringPattern(listaMontoCuotas.get(8));
             }
             if (listaMontoCuotas.get(9) != null) {
-                entrega10 = Conversor.numberToStringPattern(listaMontoCuotas.get(9));
+                entrega9 = Conversor.numberToStringPattern(listaMontoCuotas.get(9));
             }
             if (listaMontoCuotas.get(10) != null) {
-                entrega11 = Conversor.numberToStringPattern(listaMontoCuotas.get(10));
+                entrega10 = Conversor.numberToStringPattern(listaMontoCuotas.get(10));
             }
             if (listaMontoCuotas.get(11) != null) {
-                entrega12 = Conversor.numberToStringPattern(listaMontoCuotas.get(11));
+                entrega11 = Conversor.numberToStringPattern(listaMontoCuotas.get(11));
             }
             if (listaMontoCuotas.get(12) != null) {
-                entrega13 = Conversor.numberToStringPattern(listaMontoCuotas.get(12));
+                entrega12 = Conversor.numberToStringPattern(listaMontoCuotas.get(12));
             }
             if (listaMontoCuotas.get(13) != null) {
-                entrega14 = Conversor.numberToStringPattern(listaMontoCuotas.get(13));
+                entrega13 = Conversor.numberToStringPattern(listaMontoCuotas.get(13));
             }
             if (listaMontoCuotas.get(14) != null) {
-                entrega15 = Conversor.numberToStringPattern(listaMontoCuotas.get(14));
+                entrega14 = Conversor.numberToStringPattern(listaMontoCuotas.get(14));
             }
             if (listaMontoCuotas.get(15) != null) {
-                entrega16 = Conversor.numberToStringPattern(listaMontoCuotas.get(15));
+                entrega15 = Conversor.numberToStringPattern(listaMontoCuotas.get(15));
             }
             if (listaMontoCuotas.get(16) != null) {
-                entrega17 = Conversor.numberToStringPattern(listaMontoCuotas.get(16));
+                entrega16 = Conversor.numberToStringPattern(listaMontoCuotas.get(16));
             }
             if (listaMontoCuotas.get(17) != null) {
-                entrega18 = Conversor.numberToStringPattern(listaMontoCuotas.get(17));
+                entrega17 = Conversor.numberToStringPattern(listaMontoCuotas.get(17));
             }
             if (listaMontoCuotas.get(18) != null) {
-                entrega19 = Conversor.numberToStringPattern(listaMontoCuotas.get(18));
+                entrega18 = Conversor.numberToStringPattern(listaMontoCuotas.get(18));
             }
             if (listaMontoCuotas.get(19) != null) {
-                entrega20 = Conversor.numberToStringPattern(listaMontoCuotas.get(19));
+                entrega19 = Conversor.numberToStringPattern(listaMontoCuotas.get(19));
+            }
+            if (listaMontoCuotas.get(20) != null) {
+                entrega20 = Conversor.numberToStringPattern(listaMontoCuotas.get(20));
             }
         } catch (Exception e) {
             Logger.getLogger(PlanWrapper.class.getName()).log(Level.INFO, "Fin del plan", e);
@@ -120,6 +124,14 @@ public class PlanWrapper {
      */
     public void setNumeroCuota(Short numeroCuota) {
         this.numeroCuota = numeroCuota;
+    }
+
+    public String getCuotaCorrida() {
+        return cuotaCorrida;
+    }
+
+    public void setCuotaCorrida(String cuotaCorrida) {
+        this.cuotaCorrida = cuotaCorrida;
     }
 
     public String getEntrega1() {

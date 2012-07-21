@@ -12,20 +12,17 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import py.com.bej.base.prod.entity.Vmcompras;
+import py.com.bej.base.prod.entity.Vmintereses;
 import py.com.bej.base.prod.entity.Vmmotostock;
 import py.com.bej.base.prod.entity.Vmpagomotos;
 import py.com.bej.base.prod.entity.Vmplanmoto;
@@ -35,6 +32,7 @@ import py.com.bej.base.prod.session.ComprasProduccionFacade;
 import py.com.bej.base.prod.session.PagoMotosProduccionFacade;
 import py.com.bej.base.prod.session.PlanMotosProduccionFacade;
 import py.com.bej.base.prod.session.VentaMotosProduccionFacade;
+import py.com.bej.base.prod.session.VminteresesProduccionFacade;
 import py.com.bej.orm.entities.Categoria;
 import py.com.bej.orm.entities.Credito;
 import py.com.bej.orm.entities.DetallePago;
@@ -42,6 +40,7 @@ import py.com.bej.orm.entities.Factura;
 import py.com.bej.orm.entities.Financiacion;
 import py.com.bej.orm.entities.Moto;
 import py.com.bej.orm.entities.Motostock;
+import py.com.bej.orm.entities.Pagare;
 import py.com.bej.orm.entities.Pago;
 import py.com.bej.orm.entities.Persona;
 import py.com.bej.orm.entities.Transaccion;
@@ -51,6 +50,7 @@ import py.com.bej.orm.session.FacturaFacade;
 import py.com.bej.orm.session.FinanciacionFacade;
 import py.com.bej.orm.session.MotoFacade;
 import py.com.bej.orm.session.MotostockFacade;
+import py.com.bej.orm.session.PagareFacade;
 import py.com.bej.orm.session.PagoFacade;
 import py.com.bej.orm.session.PersonaFacade;
 import py.com.bej.orm.session.TransaccionFacade;
@@ -64,9 +64,13 @@ import py.com.bej.web.servlets.security.LoginBean;
  * @author Diego_M
  */
 @ManagedBean
-@SessionScoped
+@ViewScoped
 public class MigrarTransaccionesBean implements Serializable {
 
+    @EJB
+    private PagareFacade pagareFacade;
+    @EJB
+    private VminteresesProduccionFacade vminteresesProduccionFacade;
     @EJB
     private FinanciacionFacade financiacionFacade;
     @EJB
@@ -97,10 +101,16 @@ public class MigrarTransaccionesBean implements Serializable {
     private TransaccionFacade facade;
     private static final long serialVersionUID = 1L;
     public final static Logger LOGGER = Logger.getLogger(MigrarTransaccionesBean.class.getName());
-    private Map<Short, BigDecimal> map;
 
     /** Creates a new instance of MigrarTransaccionesBean */
     public MigrarTransaccionesBean() {
+    }
+
+    public PagareFacade getPagareFacade() {
+        if (pagareFacade == null) {
+            pagareFacade = new PagareFacade();
+        }
+        return pagareFacade;
     }
 
     /**
@@ -270,8 +280,8 @@ public class MigrarTransaccionesBean implements Serializable {
         if (!listaComprasProduccion.isEmpty()) {
             for (Vmcompras c : listaComprasProduccion) {
                 id = c.getIdCompras();
-                LOGGER.log(Level.INFO, "==============================================================");
-                LOGGER.log(Level.INFO, "La venta Nro. {0}", id);
+                LOGGER.log(Level.FINE, "==============================================================");
+                LOGGER.log(Level.FINE, "La venta Nro. {0}", id);
                 fechaOperacionProduccion = c.getFecha() == null ? new Date() : c.getFecha();
                 fechaEntregaProduccion = c.getFecha() == null ? new Date() : c.getFecha();
                 //Buscar Proveedor con RUC nuevo
@@ -396,8 +406,6 @@ public class MigrarTransaccionesBean implements Serializable {
         Character anuladoFiltro;
         //Venta
         Transaccion t;
-        Integer idProduccion;
-        Categoria codigoDesarrollo = null;
         Factura facturaDesarrollo = null;
         String numero;
         Categoria categoriaFactura = null;
@@ -405,7 +413,6 @@ public class MigrarTransaccionesBean implements Serializable {
         Date fechaEntregaProduccion;
         Persona compradorProduccion;
         Persona vendedorProduccion = getPersonaFacade().findByDocumento(ConfiguracionEnum.PROPIETARIO.getSymbol());
-        Character anuladoProduccion;
         BigDecimal subTotalExentasProduccion = BigDecimal.ZERO;
         BigDecimal subTotalGravadas10Produccion = BigDecimal.ZERO;
         BigDecimal subTotalGravadas5Produccion = BigDecimal.ZERO;
@@ -420,22 +427,24 @@ public class MigrarTransaccionesBean implements Serializable {
         Short cuotasProduccion = null;
         Short cantidadItemsProduccion = 1;
         Character activo;
+        Categoria estado;
+        Character cancelado;
         Character saldadoProduccion;
         Date fechaUltimoPagoProduccion = null;
         Date ultimaModificacion = new Date();
         //Desarrollo
         List<Financiacion> listaCuotasDesarrollo = new ArrayList<Financiacion>();
         Credito credito = null;
+        Pagare pagare = null;
         List<Pago> listaPagosDesarrollo;
         BigDecimal montoCuota;
         Short cuotaNumero;
         Integer cantidadCuotas;
-        BigDecimal interesTotal;
-        BigDecimal interesMensual;
-        BigDecimal factor;
         BigDecimal cien = BigDecimal.valueOf(100);
+        BigDecimal cientoVeinte = BigDecimal.valueOf(120);
         BigDecimal montoCapital;
         BigDecimal montoInteres;
+        BigDecimal ajusteRedondeo;
         //Produccion
         List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
         ventaMotosProduccionFacade = new VentaMotosProduccionFacade();
@@ -444,13 +453,22 @@ public class MigrarTransaccionesBean implements Serializable {
         Financiacion financiacionDesarrollo;
         if (!listaVentasProduccion.isEmpty()) {
             for (Vmventamotos c : listaVentasProduccion) {
-                if (c.getIdVenta() == 389) {
-                    int pararAqui = 0;
+                credito = null;
+                if (c.getAnulado()) {
+                    activo = 'N';
+                    estado = new Categoria(CategoriaEnum.CERRADO.getSymbol());
+                } else {
+                    activo = 'S';
+                    estado = new Categoria(CategoriaEnum.ABIERTO.getSymbol());
                 }
-                activo = 'S';
-                idProduccion = c.getIdVenta();
-                LOGGER.log(Level.INFO, "==============================================================");
-                LOGGER.log(Level.INFO, "La venta Nro. {0}", c.getIdVenta());
+                if (c.getCancelado()) {
+                    cancelado = 'S';
+                    estado = new Categoria(CategoriaEnum.CANCELADO.getSymbol());
+                } else {
+                    cancelado = 'N';
+                }
+                LOGGER.log(Level.FINE, "==============================================================");
+                LOGGER.log(Level.FINE, "La venta en produccion es Nro. {0}", c.getIdVenta());
                 fechaOperacionProduccion = c.getFechaVenta() == null ? new Date() : c.getFechaVenta();
                 fechaEntregaProduccion = c.getFechaEntrega() == null ? fechaOperacionProduccion : c.getFechaEntrega();
                 listaPagosDesarrollo = new ArrayList<Pago>();
@@ -458,6 +476,7 @@ public class MigrarTransaccionesBean implements Serializable {
                 String codCliente = null;
                 if (c.getCedulaRuc() == null) {
                     codCliente = ConfiguracionEnum.PROPIETARIO.getSymbol();
+                    activo = 'N';
                 } else {
                     codCliente = c.getCedulaRuc().trim();
                 }
@@ -466,6 +485,7 @@ public class MigrarTransaccionesBean implements Serializable {
                     totalPagadoProduccion = BigDecimal.valueOf(c.getPrecioMoto());
                 } else {
                     totalPagadoProduccion = BigDecimal.TEN;
+                    activo = 'N';
                 }
                 BigDecimal entregaInicialProduccion = BigDecimal.ZERO;
                 if (c.getEntregaMoto() != null) {
@@ -484,10 +504,10 @@ public class MigrarTransaccionesBean implements Serializable {
                 }
                 //Entrega Inicial con refuerzo incluido
                 if (c.getVmresfuerzosCollection() != null && !c.getVmresfuerzosCollection().isEmpty()) {
-                    LOGGER.log(Level.INFO, "La venta {0} tiene {1} registros de Refuerzos", new Object[]{c.getIdVenta(), c.getVmresfuerzosCollection().size()});
+                    LOGGER.log(Level.FINE, "La venta {0} tiene {1} registros de Refuerzos", new Object[]{c.getIdVenta(), c.getVmresfuerzosCollection().size()});
                     for (Vmresfuerzos r : c.getVmresfuerzosCollection()) {
                         if (!r.getAnulado() && r.getGuardado()) {
-                            LOGGER.log(Level.INFO, "Se va a sumar al monto total el refuerzo con el monto :{0}", r.getMontoResfuerzo());
+                            LOGGER.log(Level.FINE, "Se va a sumar al monto total el refuerzo con el monto :{0}", r.getMontoResfuerzo());
                             totalPagadoProduccion.add(BigDecimal.valueOf(r.getMontoResfuerzo()));
                         }
                     }
@@ -507,7 +527,7 @@ public class MigrarTransaccionesBean implements Serializable {
                 facturaDesarrollo.setTotalPagado(totalPagadoProduccion);
                 facturaDesarrollo.setDescuento(descuentoProduccion);
                 facturaDesarrollo.setValidoHasta(ultimaModificacion);
-                facturaDesarrollo.setActivo('S');
+                facturaDesarrollo.setActivo(activo);
                 facturaDesarrollo.setUltimaModificacion(ultimaModificacion);
                 //Contado o Credito
                 if (c.getIdTransaccion() == 1 || c.getIdTransaccion() == 2) {
@@ -522,8 +542,9 @@ public class MigrarTransaccionesBean implements Serializable {
                         facturaDesarrollo.setCategoria(categoriaFactura);
                         cuotasProduccion = 0;
                         listaPagosDesarrollo.add(new Pago(null, fechaOperacionProduccion, null, String.valueOf(c.getIdTransaccion()), totalPagadoProduccion, 'S', new Date()));
-                        LOGGER.info("Es Venta CONTADO");
+                        LOGGER.fine("Es Venta CONTADO");
                     } else {
+                        LOGGER.fine("Es Venta CREDITO");
                         //Venta Credito
                         List<Vmplanmoto> listaCuotasProduccion = new ArrayList<Vmplanmoto>();
                         if (c.getNumeroCuotas() != null && c.getNumeroCuotas() > 0) {
@@ -543,13 +564,19 @@ public class MigrarTransaccionesBean implements Serializable {
                         BigDecimal capitalProduccion = BigDecimal.valueOf(c.getSaldoMoto());
                         BigDecimal creditoTotalProduccion = BigDecimal.valueOf(montoCuotaIgualProduccion.intValue() * cuotasProduccion);
                         listaCuotasDesarrollo = new ArrayList<Financiacion>();
-                        categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR.getSymbol());
+                        if (c.getEntregaMoto().equals(c.getMontoCuotas())) {
+                            //Cuota Corrida
+                            LOGGER.fine("LA VENTA ES CON CUOTAS CORRIDAS");
+                            categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR_CORRIDAS.getSymbol());
+                        } else {
+                            //Con Entrega Inicial
+                            categoriaFactura = new Categoria(CategoriaEnum.VENTA_MCR_ENTREGA.getSymbol());
+                        }
                         facturaDesarrollo.setCategoria(categoriaFactura);
-                        credito = new Credito(null, new Categoria(CategoriaEnum.S_PER.getSymbol()), null,
-                                c.getFechaVenta(), c.getFechaVenta(), new Categoria(CategoriaEnum.S_ESP.getSymbol()), 0.0F, 0.0F, 2.5F,
+                        credito = new Credito(null, null, c.getFechaVenta(), c.getFechaVenta(), 0.26F, 8.9F, 0.02F,
                                 capitalProduccion, cuotasProduccion, creditoTotalProduccion, BigDecimal.ZERO,
-                                BigDecimal.ZERO, BigDecimal.ZERO, fechaUltimoPagoProduccion, new Short("0"),
-                                new Categoria(CategoriaEnum.ABIERTO.getSymbol()), 'S', new Date());
+                                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, fechaUltimoPagoProduccion, new Short("0"),
+                                estado, activo, new Date());
                         if (c.getIdCodeudor() != null && c.getIdCodeudor() > 0) {
                             credito.setGarante(getPersonaFacade().findByDocumento(String.valueOf(c.getIdCodeudor())));
                         }
@@ -565,24 +592,20 @@ public class MigrarTransaccionesBean implements Serializable {
                             activo = 'N';
                         }
                         montoCuota = montoCuotaIgualProduccion;
-                        interesTotal = BigDecimal.valueOf(((c.getPrecioMoto() - c.getPrecioContado()) * 100) / c.getPrecioContado());
-                        interesMensual = interesTotal.divide(BigDecimal.valueOf(cantidadCuotas), 4, RoundingMode.UP);
-                        factor = cien.divide((interesMensual.add(cien)), 4, RoundingMode.UP);
-                        montoCapital = montoCuota.multiply(factor);
+                        montoCapital = montoCuota.multiply(cien.divide(cientoVeinte, 6, RoundingMode.UP));
                         montoInteres = montoCuota.subtract(montoCapital);
                         //FINANCIACION
                         //Buscar Cuotas
                         listaCuotasProduccion = getPlanMotosProduccionFacade().findByIdVenta(c.getIdVenta());
                         if (!listaCuotasProduccion.isEmpty()) {
-                            LOGGER.log(Level.INFO, "Es Venta CREDITO y tiene {0} Cuotas", listaCuotasProduccion.size());
+                            LOGGER.log(Level.FINE, "Es Venta CREDITO y tiene {0} Cuotas", listaCuotasProduccion.size());
                             BigDecimal totalPagadoHastaAhora = BigDecimal.ZERO;
 
                             Date fechaVencimiento;
                             Character activoX;
-                            Character cancelado = 'N';
                             for (int x = 0; x < listaCuotasProduccion.size(); x++) {
                                 Vmplanmoto p = listaCuotasProduccion.get(x);
-                                activoX = 'S';
+                                activoX = credito.getActivo();
                                 if (p.getFechaVencimiento() != null) {
                                     fechaVencimiento = p.getFechaVencimiento();
                                 } else {
@@ -606,8 +629,8 @@ public class MigrarTransaccionesBean implements Serializable {
                                 financiacionDesarrollo = new Financiacion(null, credito, cuotaNumero,
                                         montoCapital, montoInteres,
                                         montoCuota, montoCuota,
-                                        BigDecimal.ZERO, null, cancelado, fechaVencimiento, BigDecimal.valueOf(p.getMontoInteresMensual()),
-                                        p.getFechaPago() != null ? BigDecimal.valueOf(p.getMontoCuota()) : null, activoX, new Date());
+                                        BigDecimal.ZERO, null, 'N', fechaVencimiento, BigDecimal.valueOf(p.getMontoInteresMensual()),
+                                        BigDecimal.ZERO, p.getFechaPago() != null ? BigDecimal.valueOf(p.getMontoCuota()) : null, activoX, new Date());
                                 totalPagadoHastaAhora = totalPagadoHastaAhora.add(montoCuotaIgualProduccion);
                                 if (credito.getFechaFin().before(fechaVencimiento)) {
                                     credito.setFechaFin(fechaVencimiento);
@@ -710,7 +733,7 @@ public class MigrarTransaccionesBean implements Serializable {
                         compradorProduccion, anuladoFiltro, subTotalExentasProduccion, subTotalGravadas10Produccion, subTotalGravadas5Produccion,
                         totalIva5Produccion, totalIva10Produccion, subTotal, totalIva5Produccion, totalIva10Produccion, totalIvaProduccion,
                         descuentoProduccion, totalProduccion, totalDescuentoProduccion, totalPagadoProduccion, entregaInicialProduccion,
-                        cuotasProduccion, montoCuotaIgualProduccion, saldadoProduccion, cantidadItemsProduccion, activo, new Date(), new Date(), LoginBean.getInstance().getUsuario(), LoginBean.getInstance().getUsuario());
+                        cuotasProduccion, montoCuotaIgualProduccion, cancelado, cantidadItemsProduccion, activo, new Date(), new Date(), LoginBean.getInstance().getUsuario(), LoginBean.getInstance().getUsuario());
                 if (credito != null) {
                     if (credito.getFechaFin() == null) {
                         credito.setFechaFin(fechaOperacionProduccion);
@@ -722,6 +745,18 @@ public class MigrarTransaccionesBean implements Serializable {
                     t.setCreditosTransaccion(Arrays.asList(credito));
                 }
                 getFacade().create(t);
+                if (!t.getCodigo().getId().equals(CategoriaEnum.VENTA_MCO.getSymbol())) {
+                    boolean vencido = false;
+                    Date fechaDeCancelacion = null;
+                    //Pagare
+                    pagare = new Pagare(null, credito, Short.valueOf("1"), credito.getFechaFin(), credito.getCreditoTotal(),
+                            vencido, Boolean.FALSE, fechaDeCancelacion,
+                            LoginBean.getInstance().getUsuario(), LoginBean.getInstance().getUsuario(), 'S', new Date(), new Date());
+                    getPagareFacade().setEntity(pagare);
+                    getPagareFacade().guardar();
+                }
+                totalMigrado++;
+                LOGGER.log(Level.FINE, "La venta Desarrollo queda con Nro. {0}.", t.getId());
             }
 //            try {
 //                totalMigrado = getFacade().cargaMasiva(lista);
@@ -732,52 +767,72 @@ public class MigrarTransaccionesBean implements Serializable {
             Motostock motoDesarrollo;
             Transaccion ventaParaMoto;
             try {
-                LOGGER.log(Level.INFO, "ASIGNACION DE VENTA A LAS MOTOS GUARDADAS");
-                LOGGER.log(Level.INFO, "=============================================================");
+                LOGGER.log(Level.FINE, "ASIGNACION DE VENTA A LAS MOTOS GUARDADAS");
+                LOGGER.log(Level.FINE, "=============================================================");
                 for (Vmventamotos ventaProduccion : listaVentasProduccion) {
-                    LOGGER.log(Level.INFO, "La Venta Anterior es la Nro. {0}", ventaProduccion.getIdVenta());
+                    LOGGER.log(Level.FINE, "La Venta Anterior es la Nro. {0}", ventaProduccion.getIdVenta());
                     ventaParaMoto = getFacade().findByNumeroAnterior(
                             ventaProduccion.getIdVenta(), CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol());
-                    LOGGER.log(Level.INFO, "La Venta Actual es la Nro. {0}", ventaParaMoto.getId());
-                    motoDesarrollo = getMotostockFacade().findByNumeroAnterior(ventaProduccion.getIdMoto().getIdMoto());
-                    LOGGER.log(Level.INFO, "La Moto es la Nro. {0}", motoDesarrollo.getId());
-                    motoDesarrollo.setVenta(ventaParaMoto);
-                    motoDesarrollo.setActivo('S');
-                    LOGGER.log(Level.INFO, "Se la va a asignar la venta Nro. {0}", motoDesarrollo.getVenta().getId());
-                    getMotostockFacade().setEntity(motoDesarrollo);
-                    getMotostockFacade().guardar();
+                    LOGGER.log(Level.FINE, "La Venta Actual es la Nro. {0}", ventaParaMoto.getId());
+                    LOGGER.log(Level.FINE, "El Nro. anterior de la moto es {0}", ventaProduccion.getIdMoto().getIdMoto());
+                    motoDesarrollo = getMotostockFacade().find(ventaProduccion.getIdMoto().getIdMoto());
+                    if (motoDesarrollo != null) {
+                        LOGGER.log(Level.FINE, "La Moto es la Nro. {0}", motoDesarrollo.getId());
+                        motoDesarrollo.setEstado(new Categoria(CategoriaEnum.VENDIDO_ENTREGADO.getSymbol()));
+                        motoDesarrollo.setVenta(ventaParaMoto);
+                        motoDesarrollo.setActivo('S');
+                        LOGGER.log(Level.FINE, "Se la va a asignar la venta Nro. {0}", motoDesarrollo.getVenta().getId());
+                        getMotostockFacade().setEntity(motoDesarrollo);
+                        getMotostockFacade().guardar();
+                    }
                 }
             } catch (Exception ex) {
                 Logger.getLogger(MigrarTransaccionesBean.class.getName()).log(Level.SEVERE, "Excepcion al intentar asignar ventas al stock", ex);
             }//Desactivar los modelos que no tienen stock
             List<Moto> listaCompleta = getMotoFacade().findAll();
             for (Moto m : listaCompleta) {
-                boolean hayStock = false;
-                List<Motostock> listaDeStock = new ArrayList<Motostock>();
-                if (m.getActivo() != null) {
-                    if (m.getActivo().equals('S')) {
-                        listaDeStock = m.getMotostocks();
-//                        LOGGER.log(Level.WARNING, "El modelo {0} tiene {1} motos.", new Object[]{m.getCodigo(), listaDeStock.size()});
-                        if (!listaDeStock.isEmpty()) {
-                            for (Motostock ms : listaDeStock) {
-                                if (ms.getVenta() == null) {
-                                    hayStock = true;
-                                    break;
+                if (m.getActivo() == null || m.getActivo().equals('N')) {
+                    LOGGER.log(Level.FINE, "La moto {0} tiene como valor ACTIVO = {1}. Se omite su modificacion.", new Object[]{m.getCodigo(), m.getActivo()});
+                    continue;
+                } else {
+                    boolean hayStock = false;
+                    List<Motostock> listaDeStock = new ArrayList<Motostock>();
+                    if (m.getActivo() != null) {
+                        if (m.getActivo().equals('S')) {
+                            listaDeStock = m.getMotostocks();
+                            LOGGER.log(Level.FINE, "El codigo {0} tiene {1} motos.", new Object[]{m.getCodigo(), listaDeStock.size()});
+                            if (!listaDeStock.isEmpty()) {
+                                for (Motostock ms : listaDeStock) {
+                                    LOGGER.log(Level.FINE, "El stock es el {0}", ms.getId());
+                                    if (ms.getVenta() == null) {
+                                        hayStock = true;
+                                        break;
+                                    }
                                 }
                             }
+                        } else {
+                            continue;
                         }
-                    } else {
-                        continue;
                     }
+                    if (hayStock) {
+                        m.setActivo('S');
+                    } else {
+                        m.setActivo('N');
+                    }
+                    LOGGER.log(Level.FINE, "CODIGO :{0}", m.getCodigo());
+                    LOGGER.log(Level.FINE, "CODIGO FABRICA:{0}", m.getCodigoFabrica());
+                    LOGGER.log(Level.FINE, "CATEGORIA:{0}", m.getCategoria());
+                    LOGGER.log(Level.FINE, "FABRICANTE:{0}", m.getFabricante());
+                    LOGGER.log(Level.FINE, "MARCA :{0}", m.getMarca());
+                    LOGGER.log(Level.FINE, "MODELO:{0}", m.getModelo());
+                    LOGGER.log(Level.FINE, "COLOR:{0}", m.getColor());
+                    LOGGER.log(Level.FINE, "ACTIVO:{0}", m.getActivo());
+                    LOGGER.log(Level.FINE, "ULTIMA MODIFICACION:{0}", m.getUltimaModificacion());
+
+                    getMotoFacade().setEntity(m);
+                    LOGGER.log(Level.FINE, "Se va a guardar la moto: {0}", m.getId());
+                    getMotoFacade().guardar();
                 }
-                if (hayStock) {
-                    m.setActivo('S');
-                } else {
-                    m.setActivo('N');
-                }
-                getMotoFacade().setEntity(m);
-                LOGGER.log(Level.INFO, "Se va a guardar la moto: {0}", m.getId());
-                getMotoFacade().guardar();
             }
 
             setInfoMessage(null, "Total de registros importados: " + totalMigrado);
@@ -787,293 +842,19 @@ public class MigrarTransaccionesBean implements Serializable {
         return "listaventamotos";
     }
 
-    private void poblarMapaDeCuotas(Object key, Object value) throws Exception {
-        Short k = null;
-        BigDecimal v = BigDecimal.ZERO;
-        k = new Short(String.valueOf(key));
-        v = new BigDecimal(String.valueOf(value));
-        map.put(k, v);
-    }
-
-    private String limpiarCadena(String valor) {
-        if (valor.equals("4+")) {
-            int r = 0;
-        }
-        String res = valor;
-        int letra = -2;
-        do {
-            if (valor.contains("y")) {
-                letra = valor.indexOf("y");
-            } else if (valor.contains("/")) {
-                letra = valor.indexOf("/");
-            } else if (valor.contains(",")) {
-                letra = valor.indexOf(",");
-            } else if (valor.contains("+")) {
-                letra = valor.indexOf("+");
-            } else if (valor.contains(" ")) {
-                letra = valor.indexOf(" ");
-            } else {
-                letra = -1;
-            }
-            switch (letra) {
-                case 0:
-                    valor = valor.substring(1, valor.length());
-                    break;
-                case 1:
-                    valor = valor.substring(0, 1);
-                    break;
-                case 2:
-                    valor = valor.substring(0, 2);
-                    break;
-                case 3:
-                    valor = valor.substring(0, valor.length() - 1);
-                    break;
-            }
-        } while (letra != -1);
-        res = valor.trim();
-        return res;
-    }
-
-    public String migrarPagosDeCuotas() {
-        String res = null;
-        int totalPagosImportados = 0;
-        Transaccion t;
-        List<Vmpagomotos> pagosProduccion;
-        List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
-        listaVentasProduccion = ventaMotosProduccionFacade.findByIdVentaOrdenado();
-        try {
-            if (!listaVentasProduccion.isEmpty()) {
-                boolean esPagoParcial;
-                for (Vmventamotos c : listaVentasProduccion) {
-
-                    //Buscar Transaccion
-                    t = getFacade().findByNumeroAnterior(c.getIdVenta(), CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol());
-                    Credito credito = null;
-                    credito = getCreditoFacade().findByTransaccion(t.getId());
-                    if (credito.getId() == 1732) {
-                        int pararAqui = 0;
-                    }
-                    //Fecha de ultimo Pago
-                    Date fechaUltimoPago = credito.getFechaInicio();
-                    //Monto total pagado
-                    BigDecimal montoTotalPagado = BigDecimal.ZERO;
-                    //Monto de la cuota fija
-                    Integer montoCuotaFija = c.getMontoCuotas();
-                    //Buscar Pagos
-                    pagosProduccion = getPagoMotosProduccionFacade().findByIdVenta(c.getIdVenta());
-                    //Registrar Pagos
-                    if (!pagosProduccion.isEmpty()) {
-                        List<Pago> pagosDesarrollo = new ArrayList<Pago>();
-                        String cadenaParcial = "parcial";
-                        String cadenaIniciar = "Iniciar";
-                        List<DetallePago> detalle = null;
-                        Categoria pagoParcial = getCategoriaFacade().find(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol());
-                        Categoria pagoTotal = getCategoriaFacade().find(CategoriaEnum.PAGO_CUOTA.getSymbol());
-                        Categoria categoriaPago = pagoTotal;
-                        for (Vmpagomotos pago : pagosProduccion) {
-                            esPagoParcial = false;
-                            if (pago.getGuardado() < 0) {
-                                if (pago.getConcepto() != null && pago.getConcepto().contains(cadenaParcial)) {
-                                    esPagoParcial = true;
-                                }
-                                if (pago.getMontoEntrega() == null || pago.getMontoEntrega() < 1
-                                        || pago.getConcepto() == null || pago.getConcepto().contains(cadenaIniciar)) {
-                                    continue;
-                                }
-                                Pago pg = new Pago(null, pago.getFechaPago(),
-                                        credito, String.valueOf(pago.getNumeroRecibo()), BigDecimal.valueOf(pago.getMontoEntrega()),
-                                        pago.getAnulado() ? 'N' : 'S', new Date());
-                                if (pg.getFecha() == null) {
-                                    pg.setFecha(new Date());
-                                    pg.setActivo('N');
-                                }
-                                detalle = new ArrayList<DetallePago>();
-                                if (pago.getNumCuotas() != null) {
-                                    map = new HashMap<Short, BigDecimal>();
-                                    //Es complejo
-                                    if (pago.getNumCuotas().contains("/")
-                                            || pago.getNumCuotas().contains("-")
-                                            || pago.getNumCuotas().contains("+")
-                                            || pago.getNumCuotas().contains(",")
-                                            || pago.getNumCuotas().contains("'")
-                                            || pago.getNumCuotas().contains(" ")) {
-                                        StringTokenizer stBarra = new StringTokenizer(pago.getNumCuotas(), "/");
-                                        String cuotas = null;
-                                        cuotas = stBarra.nextToken();
-                                        if (cuotas.contains("-")) {
-                                            //Tiene varias cuotas adentro o es un pago parcial
-                                            Integer montoDelPago = pago.getMontoEntrega();
-                                            StringTokenizer stGuion = new StringTokenizer(cuotas, "-");
-                                            if (stGuion.countTokens() > 1) {
-                                                do {
-                                                    esPagoParcial = Boolean.FALSE;
-                                                    String valor = null;
-                                                    try {
-                                                        valor = stGuion.nextToken();
-                                                        if (valor.contains("+")) {
-                                                            esPagoParcial = Boolean.TRUE;
-                                                            categoriaPago = pagoParcial;
-                                                        }
-                                                        valor = limpiarCadena(valor);
-                                                        if (!esPagoParcial) {
-                                                            poblarMapaDeCuotas(valor, montoCuotaFija);
-                                                            montoDelPago = montoDelPago - montoCuotaFija;
-                                                        } else {
-                                                            poblarMapaDeCuotas(valor, montoDelPago);
-                                                        }
-                                                    } catch (NumberFormatException nfe) {
-                                                        LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
-                                                        LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
-                                                        if (valor.contains("+")) {
-                                                            valor = valor.substring(1, valor.length() - 1);
-                                                            poblarMapaDeCuotas(valor, montoDelPago);
-                                                        }
-                                                    } catch (Exception ex) {
-                                                        LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
-                                                    }
-                                                } while (stGuion.hasMoreElements());
-                                            } else {
-                                                //Cuota Simple. Puede ser Parcial
-                                                String valor = stGuion.nextToken();
-                                                try {
-                                                    if (valor.contains("+")) {
-                                                        esPagoParcial = Boolean.TRUE;
-                                                        categoriaPago = pagoParcial;
-                                                    }
-                                                    valor = limpiarCadena(valor);
-                                                    if (!esPagoParcial) {
-                                                        poblarMapaDeCuotas(valor, montoCuotaFija);
-                                                        montoDelPago = montoDelPago - montoCuotaFija;
-                                                    } else {
-                                                        poblarMapaDeCuotas(valor, montoDelPago);
-                                                    }
-                                                } catch (NumberFormatException nfe) {
-                                                    LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
-                                                    LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
-                                                    if (valor.contains("+")) {
-                                                        valor = valor.substring(1, valor.length() - 1);
-                                                    }
-                                                } catch (Exception ex) {
-                                                    LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
-                                                }
-                                            }
-                                        } else {
-                                            //Cuota Simple Parcial
-                                            Integer montoDelPago = pago.getMontoEntrega();
-                                            String valor = cuotas;
-                                            try {
-                                                if (valor.contains("+")) {
-                                                    esPagoParcial = Boolean.TRUE;
-                                                    categoriaPago = pagoParcial;
-                                                }
-                                                valor = limpiarCadena(valor);
-                                                if (valor.equals("")) {
-                                                    int eee = 0;
-                                                }
-                                                if (!esPagoParcial) {
-                                                    poblarMapaDeCuotas(valor, montoCuotaFija);
-                                                    montoDelPago = montoDelPago - montoCuotaFija;
-                                                } else {
-                                                    poblarMapaDeCuotas(valor, montoDelPago);
-                                                }
-                                            } catch (NumberFormatException nfe) {
-                                                LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
-                                                LOGGER.log(Level.INFO, "La cadena es :{0}", valor);
-                                                if (valor.contains("+")) {
-                                                    valor = valor.substring(1, valor.length() - 1);
-                                                }
-                                            } catch (Exception ex) {
-                                                LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
-                                            }
-                                        }
-                                    } else {
-                                        //Cuota Simple y total
-                                        if (pago.getNumCuotas().equals("160000")) {
-                                            pago.setNumCuotas("13");
-                                        }
-                                        try {
-                                            poblarMapaDeCuotas(pago.getNumCuotas().trim(), pago.getMontoEntrega());
-                                        } catch (NumberFormatException nfe) {
-                                            LOGGER.log(Level.INFO, "Excepcion al intentar convertir a numero", nfe);
-                                            LOGGER.log(Level.INFO, "La cadena es :{0}", pago.getNumCuotas());
-                                        } catch (Exception ex) {
-                                            LOGGER.log(Level.SEVERE, "Excepcion al intentar convertir a numero", ex);
-                                        }
-                                    }
-                                }
-                                Iterator<Short> it = map.keySet().iterator();
-                                Short cuota;
-                                BigDecimal monto;
-                                do {
-                                    cuota = it.next();
-                                    monto = map.get(cuota);
-                                    if (monto.equals(BigDecimal.valueOf(montoCuotaFija))) {
-                                        categoriaPago = pagoTotal;
-                                    } else {
-                                        categoriaPago = pagoParcial;
-                                    }
-                                    detalle.add(new DetallePago(categoriaPago, pg, pagoTotal.getDescripcion() + " " + cuota, monto, cuota, 'S', new Date(), Boolean.FALSE));
-                                } while (it.hasNext());
-                                for (DetallePago dt : detalle) {
-                                    if (dt.getConcepto().length() > 50) {
-                                        LOGGER.log(Level.INFO, "====Detalle: {0} Concepto:{1}", new Object[]{pg.getNumeroDocumento(), dt.getConcepto()});
-                                    }
-                                }
-                                pg.setDetalle(detalle);
-                                if (pago.getFechaPago() != null && pago.getFechaPago().after(fechaUltimoPago)) {
-                                    fechaUltimoPago = pago.getFechaPago();
-                                }
-                                pagosDesarrollo.add(pg);
-                            }
-                        }
-                        for (Pago px : pagosDesarrollo) {
-                            montoTotalPagado = montoTotalPagado.add(px.getTotalPagado());
-                        }
-                        totalPagosImportados = getPagoFacade().cargaMasiva(pagosDesarrollo);
-                        //Actualizar el credito
-                        //Fecha ultimo Pago
-                        credito.setFechaUltimoPago(fechaUltimoPago);
-                        //Monto total pagado
-                        if (credito.getCreditoTotal().equals(montoTotalPagado) || credito.getCreditoTotal().equals(credito.getCreditoTotal().min(montoTotalPagado))) {
-                            BigDecimal totalAmortizacion = BigDecimal.ZERO;
-                            BigDecimal totalInteres = BigDecimal.ZERO;
-                            for (Financiacion f : credito.getFinanciacions()) {
-                                if (f.getActivo() == 'S') {
-                                    totalAmortizacion = totalAmortizacion.add(f.getCapital());
-                                    totalInteres = totalInteres.add(f.getInteres());
-                                    f.setCancelado('S');
-                                }
-                            }
-                            credito.setTotalAmortizadoPagado(totalAmortizacion);
-                            credito.setTotalInteresesPagado(totalInteres);
-                            credito.setEstado(new Categoria(CategoriaEnum.CERRADO.getSymbol()));
-                        } else {
-                            credito.setTotalAmortizadoPagado(montoTotalPagado);
-                        }
-                        getCreditoFacade().setEntity(credito);
-                        getCreditoFacade().guardar();
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        }
-        setInfoMessage(null, "Total de Pagos Importados : " + totalPagosImportados);
-        return "listaventamotos";
-    }
-
     public String migrarPagos() {
-        String res = null;
         int totalPagosImportados = 0;
+        int totalCreditosAbiertos = 0;
         Transaccion t;
         Credito credito = null;
         List<Vmpagomotos> pagosProduccion;
         List<Financiacion> listaCuotas;
         List<Vmventamotos> listaVentasProduccion = new ArrayList<Vmventamotos>();
-        listaVentasProduccion = ventaMotosProduccionFacade.findByIdVentaOrdenado();
+        listaVentasProduccion = ventaMotosProduccionFacade.findByIdVentaCreditoOrdenado();
         try {
             if (!listaVentasProduccion.isEmpty()) {
                 for (Vmventamotos c : listaVentasProduccion) {
+                    LOGGER.log(Level.FINE, "La venta es {0} y es de categoria {1} y es Anulado {2}.", new Object[]{c.getIdVenta(), c.getIdTransaccion(), c.getAnulado()});
                     //Buscar Transaccion
                     t = getFacade().findByNumeroAnterior(c.getIdVenta(), CategoriaEnum.VENTA_DESDE.getSymbol(), CategoriaEnum.VENTA_HASTA.getSymbol());
                     //Buscar Credito
@@ -1094,10 +875,25 @@ public class MigrarTransaccionesBean implements Serializable {
                         List<DetallePago> detalle = null;
                         Categoria pagoParcial = getCategoriaFacade().find(CategoriaEnum.PAGO_PARCIAL_CUOTA.getSymbol());
                         Categoria pagoTotal = getCategoriaFacade().find(CategoriaEnum.PAGO_CUOTA.getSymbol());
+                        Categoria pagoInteresMoratorio = getCategoriaFacade().find(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol());
+                        Categoria descuento = getCategoriaFacade().find(CategoriaEnum.DESCUENTO.getSymbol());
+                        Categoria pagoHonorariosProfesionales = getCategoriaFacade().find(CategoriaEnum.PAGO_HONORARIOS_PROFESIONALES.getSymbol());
+                        List<Vmintereses> listaDeOtrosPagos;
+                        vminteresesProduccionFacade = new VminteresesProduccionFacade();
                         Categoria categoriaPago = pagoTotal;
                         BigDecimal saldoParaSiguienteCuota = null;
                         for (Vmpagomotos pago : pagosProduccion) {
-                            LOGGER.log(Level.INFO, "El pago es Nro:{0}", pago.getNumeroRecibo());
+                            if (pago.getNumeroRecibo() == 17015) {
+                                int pararAquiAhora = 0;
+                            }
+                            LOGGER.log(Level.FINE, "El pago es Nro:{0}", pago.getNumeroRecibo());
+                            listaDeOtrosPagos = null;
+                            if (pago.getNumeroRecibo() != null && pago.getNumeroRecibo() > 0) {
+                                listaDeOtrosPagos = vminteresesProduccionFacade.findByNroRecibo(pago.getNumeroRecibo());
+                                if (listaDeOtrosPagos != null && !listaDeOtrosPagos.isEmpty()) {
+                                    LOGGER.log(Level.FINE, "El pago{0} tiene {1} registros en otros pagos", new Object[]{pago.getNumeroRecibo(), listaDeOtrosPagos.size()});
+                                }
+                            }
                             Short numeroCuota;
                             BigDecimal montoPagoDetalle;
                             BigDecimal faltaParaCancelarCuota;
@@ -1105,6 +901,9 @@ public class MigrarTransaccionesBean implements Serializable {
                             Pago pg = new Pago(null, pago.getFechaPago(),
                                     credito, String.valueOf(pago.getNumeroRecibo()), BigDecimal.valueOf(pago.getMontoEntrega()),
                                     pago.getAnulado() ? 'N' : 'S', new Date());
+                            pg.setUsuarioCreacion(LoginBean.getInstance().getUsuario());
+                            pg.setUsuarioModificacion(LoginBean.getInstance().getUsuario());
+                            pg.setFechaCreacion(new Date());
                             if (pg.getFecha() == null) {
                                 pg.setFecha(new Date());
                                 pg.setActivo('N');
@@ -1167,12 +966,68 @@ public class MigrarTransaccionesBean implements Serializable {
                             if (pago.getMontoEntrega().equals(montoCuotaFija)) {
                                 categoriaPago = pagoTotal;
                                 for (Financiacion f : listaCuotas) {
-                                    if (f.getFechaPago() == null) {
+                                    //CONTROLAR QUE NO HAYA UN PAGO PARCIAL
+                                    if (f.getTotalPagado() != null) {
+                                        if (f.getFechaPago() != null && f.getCancelado().equals('N')) {
+                                            //PAGO PARCIAL
+                                            faltaParaCancelarCuota = BigDecimal.valueOf(montoCuotaFija).subtract(f.getTotalPagado());
+                                            numeroCuota = f.getNumeroCuota();
+                                            montoPagoDetalle = BigDecimal.valueOf(pago.getMontoEntrega());
+                                            //Calcular si el pago salda la cuota
+                                            int diferenciaDeSaldo = montoPagoDetalle.compareTo(faltaParaCancelarCuota);
+                                            switch (diferenciaDeSaldo) {
+                                                case -1: {
+                                                    //El pago es insuficiente para saldar la cuota. Se registra un pago parcial.
+                                                    categoriaPago = pagoParcial;
+                                                    detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    f.setCancelado('N');
+                                                    f.setFechaPago(pago.getFechaPago());
+                                                    f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    pg.setDetalle(detalle);
+                                                    pagosDesarrollo.add(pg);
+                                                    break;
+                                                }
+                                                case 0: {
+                                                    //El pago salda la cuota. Se procede a cancelar la cuota.
+                                                    categoriaPago = pagoTotal;
+                                                    detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    f.setCancelado('S');
+                                                    f.setFechaPago(pago.getFechaPago());
+                                                    f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    pg.setDetalle(detalle);
+                                                    pagosDesarrollo.add(pg);
+                                                    break;
+                                                }
+                                                case 1: {
+                                                    //El pago supera el saldo de la cuota. Se procedera a cancelar la cuota y realizar un nuevo pago
+                                                    //parcial para la siguiente cuota.
+                                                    categoriaPago = pagoTotal;
+                                                    saldoParaSiguienteCuota = montoPagoDetalle.subtract(faltaParaCancelarCuota);
+                                                    fechaUltimoPago = pago.getFechaPago();
+                                                    detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    detalle.add(new DetallePago(pagoParcial, pg, pagoParcial.getDescripcion() + " " + (numeroCuota + 1), saldoParaSiguienteCuota, Short.valueOf("" + (numeroCuota + 1)), 'S', new Date(), Boolean.FALSE, null, null));
+                                                    f.setCancelado('S');
+                                                    f.setFechaPago(pago.getFechaPago());
+                                                    f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
+                                                    getFinanciacionFacade().setEntity(f);
+                                                    getFinanciacionFacade().guardar();
+                                                    pg.setDetalle(detalle);
+                                                    pagosDesarrollo.add(pg);
+                                                    break;
+                                                }
+                                            }
+                                            break;
+                                        }
+                                    } else if (f.getFechaPago() == null) {
                                         if (f.getCancelado().equals('N')) {
                                             // SE PROCEDE A CANCELAR LA CUOTA
                                             numeroCuota = f.getNumeroCuota();
                                             montoPagoDetalle = BigDecimal.valueOf(pago.getMontoEntrega());
-                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                             f.setCancelado('S');
                                             f.setFechaPago(pago.getFechaPago());
                                             f.setTotalPagado(montoPagoDetalle);
@@ -1203,7 +1058,7 @@ public class MigrarTransaccionesBean implements Serializable {
                                             case -1: {
                                                 //El pago es insuficiente para saldar la cuota. Se registra un pago parcial.
                                                 categoriaPago = pagoParcial;
-                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                                 f.setCancelado('N');
                                                 f.setFechaPago(pago.getFechaPago());
                                                 f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
@@ -1216,7 +1071,7 @@ public class MigrarTransaccionesBean implements Serializable {
                                             case 0: {
                                                 //El pago salda la cuota. Se procede a cancelar la cuota.
                                                 categoriaPago = pagoTotal;
-                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, montoPagoDetalle, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                                 f.setCancelado('S');
                                                 f.setFechaPago(pago.getFechaPago());
                                                 f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
@@ -1232,8 +1087,8 @@ public class MigrarTransaccionesBean implements Serializable {
                                                 categoriaPago = pagoTotal;
                                                 saldoParaSiguienteCuota = montoPagoDetalle.subtract(faltaParaCancelarCuota);
                                                 fechaUltimoPago = pago.getFechaPago();
-                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE));
-                                                detalle.add(new DetallePago(pagoParcial, pg, pagoParcial.getDescripcion() + " " + (numeroCuota + 1), saldoParaSiguienteCuota, Short.valueOf("" + (numeroCuota + 1)), 'S', new Date(), Boolean.FALSE));
+                                                detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                detalle.add(new DetallePago(pagoParcial, pg, pagoParcial.getDescripcion() + " " + (numeroCuota + 1), saldoParaSiguienteCuota, Short.valueOf("" + (numeroCuota + 1)), 'S', new Date(), Boolean.FALSE, null, null));
                                                 f.setCancelado('S');
                                                 f.setFechaPago(pago.getFechaPago());
                                                 f.setTotalPagado(f.getTotalPagado().add(montoPagoDetalle));
@@ -1260,7 +1115,7 @@ public class MigrarTransaccionesBean implements Serializable {
                                             // SE PROCEDE A PAGAR PARCIALMENTE LA CUOTA
                                             faltaParaCancelarCuota = BigDecimal.valueOf(montoCuotaFija).subtract(f.getTotalPagado());
                                             categoriaPago = pagoParcial;
-                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, faltaParaCancelarCuota, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                             f.setCancelado('S');
                                             f.setFechaPago(pago.getFechaPago());
                                             f.setTotalPagado(f.getTotalPagado().add(faltaParaCancelarCuota));
@@ -1272,7 +1127,7 @@ public class MigrarTransaccionesBean implements Serializable {
                                             // SE PROCEDE A CANCELAR LA CUOTA
                                             numeroCuota = f.getNumeroCuota();
                                             categoriaPago = pagoTotal;
-                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, f.getTotalAPagar(), numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, f.getTotalAPagar(), numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                             f.setCancelado('S');
                                             f.setFechaPago(pago.getFechaPago());
                                             f.setTotalPagado(f.getTotalAPagar());
@@ -1286,6 +1141,15 @@ public class MigrarTransaccionesBean implements Serializable {
                                         do {
                                             int saldoDisponible = saldoDelPago.compareTo(f.getTotalAPagar());
                                             numeroCuota++;
+                                            if (numeroCuota > credito.getAmortizacion()) {
+                                                //Ya no hay cuotas disponibles. Se guardara el pago como interes moratorio
+                                                LOGGER.log(Level.FINE, "El pago {0} para el credito {1} supera el monto de las cuotas. Se guardara como pago de interes moratorio.",
+                                                        new Object[]{pg.getNumeroDocumento(), credito.getId()});
+                                                detalle.add(new DetallePago(getCategoriaFacade().find(CategoriaEnum.PAGO_INTERES_MORATORIO.getSymbol()),
+                                                        pg, categoriaPago.getDescripcion(), saldoDelPago, Short.valueOf("" + (numeroCuota - 1)),
+                                                        'S', new Date(), Boolean.FALSE, null, null));
+                                                break;
+                                            }
                                             BigDecimal saldoParaUtilizar = BigDecimal.ZERO;
                                             switch (saldoDisponible) {
                                                 case -1: {
@@ -1308,11 +1172,29 @@ public class MigrarTransaccionesBean implements Serializable {
                                                     break;
                                                 }
                                             }
-                                            LOGGER.log(Level.INFO, "El numero de cuota es {0}", numeroCuota);
-                                            LOGGER.log(Level.INFO, "El monto de la cuota es {0}", saldoParaUtilizar);
-                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, saldoParaUtilizar, numeroCuota, 'S', new Date(), Boolean.FALSE));
+                                            LOGGER.log(Level.FINE, "El numero de cuota es {0}", numeroCuota);
+                                            LOGGER.log(Level.FINE, "El monto de la cuota es {0}", saldoParaUtilizar);
+                                            detalle.add(new DetallePago(categoriaPago, pg, categoriaPago.getDescripcion() + " " + numeroCuota, saldoParaUtilizar, numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
                                             saldoDelPago = saldoDelPago.subtract(saldoParaUtilizar);
                                         } while (saldoDelPago.compareTo(BigDecimal.ZERO) > 0);
+                                        //Registrar otros pagos
+                                        for (Vmintereses otros : listaDeOtrosPagos) {
+                                            if (otros.getMonto() != 0) {
+                                                if (otros.getTransaccion() != null) {
+                                                    if (otros.getTransaccion().trim().toLowerCase().contains("honorarios")) {
+                                                        detalle.add(new DetallePago(pagoHonorariosProfesionales, pg, pagoHonorariosProfesionales.getDescripcion(), BigDecimal.valueOf(200000), numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    } else if (otros.getTransaccion().trim().toLowerCase().contains("descuento")) {
+                                                        if (otros.getMonto() > 0) {
+                                                            otros.setMonto(-1 * otros.getMonto());
+                                                        }
+                                                        detalle.add(new DetallePago(descuento, pg, descuento.getDescripcion(), BigDecimal.valueOf(otros.getMonto()), numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    } else {
+                                                        detalle.add(new DetallePago(pagoInteresMoratorio, pg, pagoInteresMoratorio.getDescripcion(), BigDecimal.valueOf(otros.getMonto()), numeroCuota, 'S', new Date(), Boolean.FALSE, null, null));
+                                                    }
+                                                    pg.setTotalPagado(pg.getTotalPagado().add(BigDecimal.valueOf(otros.getMonto())));
+                                                }
+                                            }
+                                        }
                                         pg.setDetalle(detalle);
                                         pagosDesarrollo.add(pg);
                                         break;
@@ -1320,29 +1202,118 @@ public class MigrarTransaccionesBean implements Serializable {
                                 }
                             }
                         }
+                        //SI QUEDO ALGO EN SALDO: SALDAR LO QUE QUEDO DEL PAGO ANTERIOR
+                        if (saldoParaSiguienteCuota != null) {
+                            do {
+                                boolean faltaCancelar = false;
+                                for (Financiacion f : listaCuotas) {
+                                    if (saldoParaSiguienteCuota.compareTo(BigDecimal.ZERO) <= 0) {
+                                        break;
+                                    }
+                                    if (f.getCancelado().equals('N')) {
+                                        faltaCancelar = true;
+                                        int dimensionDelSaldo = saldoParaSiguienteCuota.compareTo(BigDecimal.valueOf(montoCuotaFija));
+                                        switch (dimensionDelSaldo) {
+                                            case -1: {
+                                                //Pago Parcial de la Cuota. Se suma al pago actual
+                                                if (f.getTotalPagado() == null) {
+                                                    f.setTotalPagado(saldoParaSiguienteCuota);
+                                                } else {
+                                                    f.setTotalPagado(f.getTotalPagado().add(saldoParaSiguienteCuota));
+                                                }
+                                                f.setFechaPago(fechaUltimoPago);
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(saldoParaSiguienteCuota);
+                                                break;
+                                            }
+                                            case 0: {
+                                                //Saldo da exacto para un pago total
+                                                f.setTotalPagado(saldoParaSiguienteCuota);
+                                                f.setFechaPago(fechaUltimoPago);
+                                                f.setCancelado('S');
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(saldoParaSiguienteCuota);
+                                                break;
+                                            }
+                                            case 1: {
+                                                //Saldo da para varios pagos. 
+                                                f.setTotalPagado(f.getTotalAPagar());
+                                                f.setFechaPago(fechaUltimoPago);
+                                                f.setCancelado('S');
+                                                getFinanciacionFacade().setEntity(f);
+                                                getFinanciacionFacade().guardar();
+                                                saldoParaSiguienteCuota = saldoParaSiguienteCuota.subtract(f.getTotalAPagar());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!faltaCancelar) {
+                                    break;
+                                }
+                            } while (saldoParaSiguienteCuota.compareTo(BigDecimal.ZERO) > 0);
+                        }
                         for (Pago px : pagosDesarrollo) {
                             montoTotalPagado = montoTotalPagado.add(px.getTotalPagado());
                         }
-                        totalPagosImportados = getPagoFacade().cargaMasiva(pagosDesarrollo);
+                        totalPagosImportados += getPagoFacade().cargaMasiva(pagosDesarrollo);
                         //Actualizar el credito
                         //Fecha ultimo Pago
                         credito.setFechaUltimoPago(fechaUltimoPago);
                         //Monto total pagado
-                        if (credito.getCreditoTotal().equals(montoTotalPagado) || credito.getCreditoTotal().equals(credito.getCreditoTotal().min(montoTotalPagado))) {
-                            BigDecimal totalAmortizacion = BigDecimal.ZERO;
-                            BigDecimal totalInteres = BigDecimal.ZERO;
-                            for (Financiacion f : credito.getFinanciacions()) {
-                                if (f.getActivo() == 'S') {
+                        BigDecimal totalAmortizacion = BigDecimal.ZERO;
+                        BigDecimal totalInteres = BigDecimal.ZERO;
+                        BigDecimal totalDescuento = BigDecimal.ZERO;
+                        BigDecimal totalInteresMoratorio = BigDecimal.ZERO;
+                        boolean todoCancelado = true;
+                        for (Financiacion f : credito.getFinanciacions()) {
+                            if (f.getActivo() == 'S') {
+                                f = getFinanciacionFacade().cancelarCuotaConPagoAsignado(f);
+                                if (f.getTotalPagado() != null) {
                                     totalAmortizacion = totalAmortizacion.add(f.getCapital());
                                     totalInteres = totalInteres.add(f.getInteres());
-                                    f.setCancelado('S');
+                                    totalDescuento = totalDescuento.add(f.getDescuento());
+                                    totalInteresMoratorio = totalInteresMoratorio.add(f.getInteresMora());
+                                    if (f.getFechaPago() != null && f.getFechaPago().after(credito.getFechaUltimoPago())) {
+                                        credito.setFechaUltimoPago(f.getFechaPago());
+                                    }
+                                }
+                                if (f.getCancelado() == 'N') {
+                                    todoCancelado = false;
                                 }
                             }
-                            credito.setTotalAmortizadoPagado(totalAmortizacion);
-                            credito.setTotalInteresesPagado(totalInteres);
-                            credito.setEstado(new Categoria(CategoriaEnum.CERRADO.getSymbol()));
+                        }
+                        credito.setTotalAmortizadoPagado(totalAmortizacion);
+                        credito.setTotalInteresesPagado(totalInteres);
+                        credito.setTotalDescuento(totalDescuento);
+                        credito.setTotalInteresesPagadoMulta(totalInteresMoratorio);
+                        if (todoCancelado) {
+                            credito.setEstado(new Categoria(CategoriaEnum.CANCELADO.getSymbol()));
                         } else {
-                            credito.setTotalAmortizadoPagado(montoTotalPagado);
+                            credito.setEstado(new Categoria(CategoriaEnum.ABIERTO.getSymbol()));
+                            LOGGER.log(Level.FINE, "El credito {0} no se ha cancelado.", credito.getId());
+                            totalCreditosAbiertos++;
+                        }
+
+                        boolean vencido = false;
+                        Date fechaDeCancelacion = null;
+                        for (Pagare p : credito.getPagares()) {
+                            if (p.getActivo().equals('S')) {
+                                if (credito.getFechaUltimoPago() != null) {
+                                    if (credito.getEstado().getId().equals(CategoriaEnum.CANCELADO.getSymbol())) {
+                                        if (credito.getFechaFin().before(credito.getFechaUltimoPago())) {
+                                            vencido = true;
+                                        }
+                                        fechaDeCancelacion = credito.getFechaUltimoPago();
+                                    } else if (credito.getFechaFin().before(credito.getUltimaModificacion())) {
+                                        vencido = true;
+                                    }
+                                    p.setFechaDeCancelacion(fechaDeCancelacion);
+                                    p.setVencido(vencido);
+                                }
+                            }
                         }
                         getCreditoFacade().setEntity(credito);
                         getCreditoFacade().guardar();
@@ -1352,7 +1323,7 @@ public class MigrarTransaccionesBean implements Serializable {
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
-        setInfoMessage(null, "Total de Pagos Importados : " + totalPagosImportados);
+        setInfoMessage(null, "Total de Pagos Importados : " + totalPagosImportados + " Total de creditos abiertos: " + totalCreditosAbiertos);
         return "listaventamotos";
     }
 
