@@ -143,11 +143,30 @@ public class ClienteMigraBean implements Serializable {
                 }
                 //Telefono Movil
                 if (c.getMovil() == null) {
-                    telefonoMovilProduccion = "000000";
+                    if (telefonoFijo.startsWith("098")
+                            || telefonoFijo.startsWith("097")
+                            || telefonoFijo.startsWith("096")
+                            || telefonoFijo.startsWith("099")) {
+                        c.setMovil(telefonoFijo);
+                    } else {
+                        telefonoMovilProduccion = "000000";
+                    }
                 } else if (c.getMovil().trim().length() > 13) {
                     telefonoMovilProduccion = c.getMovil().trim().substring(0, 12);
                 } else {
-                    telefonoMovilProduccion = c.getMovil().trim();
+                    if (c.getMovil().trim().contains(" ") || c.getMovil().trim().contains("-")) {
+                        String[] cadenaLimpia = c.getMovil().split(" ");
+                        telefonoMovilProduccion = "";
+                        for (String s : cadenaLimpia) {
+                            telefonoMovilProduccion = telefonoMovilProduccion + s;
+                        }
+                        if (telefonoMovilProduccion.contains("-")) {
+                            telefonoMovilProduccion = telefonoMovilProduccion.substring(telefonoMovilProduccion.indexOf("-", telefonoMovilProduccion.indexOf("-")));
+                        }
+                    } else {
+                        telefonoMovilProduccion = c.getMovil().trim();
+                    }
+                    LOGGER.log(Level.FINE, "{0};{1};{2}", new Object[]{c.getNombreApellido(), telefonoFijo, telefonoMovilProduccion});
                 }
                 //Email
                 if (c.getEmail() == null) {
@@ -163,14 +182,14 @@ public class ClienteMigraBean implements Serializable {
                 }
                 p = new Persona(c.getClientesPK().getCodigoCliente(), documentoProduccion, 'S', nombreProduccion, direccion1, null, telefonoFijo,
                         telefonoMovilProduccion, email, fechaIngreso, documentoProduccion, null, new Date(), 'S', null, "Sr.", 'H', Short.valueOf("0"), 'S', categoriaProduccion, 'S', new Date());
-                LOGGER.log(Level.INFO, "Se va a agregar en la lista el registro con Id {0}", p.getId());
+                LOGGER.log(Level.FINE, "Se va a agregar en la lista el registro con Id {0}", p.getId());
                 lista.add(p);
                 total++;
             }
             try {
                 total = getFacade().cargaMasiva(lista);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger.getLogger(ClienteMigraBean.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         setInfoMessage(null, "Total de registros importados: " + total);
@@ -204,14 +223,14 @@ public class ClienteMigraBean implements Serializable {
                     tratamientoProveedorProduccion = "S.A.";
                     nombreProveedorProduccion = "ALEX S.A.";
                     direccion1ProveedorProduccion = "America y Calle 2 Bo. Aeropuerto - Luque";
-                    telefonoProveedorProduccion = "021 645900";
+                    telefonoProveedorProduccion = "021645900";
                     emailProveedorProduccion = "alexa@alexsa.com.py";
                 } else if (pr.getCodProveedor().trim().equals("CHAA9583400")) {
                     codProveedorProduccion = "80013744-2";
                     tratamientoProveedorProduccion = "S.A.E.C.A";
                     nombreProveedorProduccion = "CHACOMER S.A.E.C.A.";
                     direccion1ProveedorProduccion = "Av. Eusebio Ayala 3321 c/ Av. Rca. Argentina - Asuncion";
-                    telefonoProveedorProduccion = "021 5180000";
+                    telefonoProveedorProduccion = "0215180000";
                     emailProveedorProduccion = "chacomer@chacomer.com.py";
                 } else if (pr.getCodProveedor().trim().equals("MFEB998270M")) {
                     codProveedorProduccion = "80020496-4";
@@ -225,7 +244,7 @@ public class ClienteMigraBean implements Serializable {
                     tratamientoProveedorProduccion = "S.R.L.";
                     nombreProveedorProduccion = "Reimpex S.R.L.";
                     direccion1ProveedorProduccion = "RI 4 Curupayty Nº 268 c/ Av. Boggiani - Asuncion";
-                    telefonoProveedorProduccion = "021 602460";
+                    telefonoProveedorProduccion = "021602460";
                     emailProveedorProduccion = "mail@mail.com";
                 } else {
                     codProveedorProduccion = pr.getCodProveedor().trim();
@@ -237,7 +256,7 @@ public class ClienteMigraBean implements Serializable {
                 }
                 p = new Persona(0, codProveedorProduccion, 'N', nombreProveedorProduccion, direccion1ProveedorProduccion, null, telefonoProveedorProduccion,
                         null, emailProveedorProduccion, new Date(), codProveedorProduccion, null, new Date(), 'X', null, tratamientoProveedorProduccion, null, null, 'S', categoriaProduccion, 'S', new Date());
-                LOGGER.log(Level.INFO, "Se va a agregar en la lista el proveedor con documento {0}", p.getDocumento());
+                LOGGER.log(Level.FINE, "Se va a agregar en la lista el proveedor con documento {0}", p.getDocumento());
                 lista.add(p);
             }
             try {
